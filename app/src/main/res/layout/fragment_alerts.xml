@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Profile -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="👤 My account (on this device)"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/profile_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Your name"
+                android:inputType="textPersonName"
+                android:maxLines="1" />
+
+            <Button
+                android:id="@+id/save_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save profile" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kyron 2.0 keeps your account, favorites and alert rules on your device. Cloud accounts that sync across devices arrive with the Play Store release (see Data sources below)."
+                android:textColor="@color/muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Rules -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔔 My alert rules"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Alert me on new scores for my ★ favorites" />
+
+                <Switch
+                    android:id="@+id/sw_fav_alerts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Alert me about bad scores in my areas" />
+
+                <Switch
+                    android:id="@+id/sw_area_alerts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/threshold_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/threshold_seek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="40"
+                android:progress="25" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Counties I watch"
+                android:textStyle="bold" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="210dp">
+
+                <LinearLayout
+                    android:id="@+id/county_box"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+            <TextView
+                android:id="@+id/home_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/preset_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <Button
+                android:id="@+id/use_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 Use my current location" />
+
+            <TextView
+                android:id="@+id/radius_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/radius_seek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="49"
+                android:progress="9" />
+        </LinearLayout>
+
+        <!-- Sync -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔄 Data sync"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/sync_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/muted"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/sync_now"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sync now" />
+
+            <TextView
+                android:id="@+id/sync_report"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kyron also checks for new inspections automatically about every 12 hours in the background."
+                android:textColor="@color/muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Sources -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🗂️ Data sources"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/sources_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="America has no single restaurant-inspection database — every state and county publishes its own. Kyron is built with one adapter per source, so new states plug into this list without changing the app. Alabama is covered statewide at launch: Jefferson County from its own health department (full violation detail), Mobile County from its own health department (scores + history), and the other 65 counties from the state."
+                android:textColor="@color/muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Alert inbox"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/inbox_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No alerts yet. Star some favorites, save your counties, and Sync now — new inspections that match your rules will land here and as notifications."
+            android:textColor="@color/muted"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:id="@+id/inbox_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>
