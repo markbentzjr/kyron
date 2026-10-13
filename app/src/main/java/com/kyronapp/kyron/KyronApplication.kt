@@ -15,7 +15,7 @@ import org.osmdroid.config.Configuration
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class KyronApplication : Application() {
+open class KyronApplication : Application() {
 
     lateinit var repository: PlaceRepository
         private set

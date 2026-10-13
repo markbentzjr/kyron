@@ -89,6 +89,16 @@ if ! $JAVA -Xmx640m -XX:+UseSerialGC -cp $KB/kotlinc/lib/kotlin-compiler.jar org
 fi
 grep -c "^warning:" $W/kotlin.log || true
 echo "compiled classes.jar"
+# CRITICAL: compile the generated R classes too. kotlinc reads R.java only for
+# symbol resolution and emits NO R bytecode, but library bytecode (AppCompat!)
+# references R fields at runtime via getstatic — without real R classes in the
+# dex the app dies with NoClassDefFoundError on the very first screen.
+echo "compile generated R classes with javac"
+find $W/gen -name 'R.java' > $W/r_sources.txt
+rm -rf $W/rclasses && mkdir -p $W/rclasses
+$JAVAC -encoding UTF-8 -nowarn -cp "$AJAR" -d $W/rclasses @$W/r_sources.txt
+$KB/jdk17/bin/jar uf $W/classes.jar -C $W/rclasses .
+echo "R classes compiled: $(find $W/rclasses -name 'R$*.class' | wc -l)"
 
 step "6/8 dex with d8"
 rm -rf $W/dex && mkdir -p $W/dex
