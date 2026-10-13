@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="kyron_dark">#123C26</color>
+    <color name="kyron_green">#2E9E4F</color>
+    <color name="kyron_lime">#7AB648</color>
+    <color name="kyron_amber">#E8A13A</color>
+    <color name="kyron_red">#A33A3A</color>
+    <color name="ink">#1D2733</color>
+    <color name="muted">#6B7885</color>
+    <color name="line">#E3E8EE</color>
+    <color name="bg">#F4F6F8</color>
+    <color name="card_green_bg">#F2F8F4</color>
+</resources>
