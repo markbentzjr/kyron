@@ -1,0 +1,41 @@
+# Kyron USA Expansion — Source Registry (verified via web research, Oct 13, 2026)
+
+## Claim check: "No single national restaurant-inspection database"
+**Confirmed for official data.** Inspections are run by state, county, and city health departments, each with its own system, scoring scale, and portal — there is no federal or unified national database. The closest things to national coverage are commercial/academic aggregators, not government sources:
+- **HDScores** — commercial aggregator; built a nationwide inspection database (1M+ establishments) and supplies hygiene scores to **Yelp's LIVES program**, which Yelp rolled out across ~42 states. This is the only realistic "one integration, national coverage" shortcut, but it's a third-party commercial data product, not an official feed.
+- **InspectionRepo** — a research database built by University of Maryland/UCLA academics by scraping local jurisdiction sites; proof that federation-by-scraping works, but academic, not a product API.
+- **catalog.data.gov** — only a catalog of links to local datasets, not unified data.
+
+## Statewide portals (verified)
+
+| Jurisdiction | Portal URL (verbatim) | Access format | Violation detail? | Notes |
+|---|---|---|---|---|
+| Florida (DBPR) | https://www2.myfloridalicense.com/hotels-restaurants/division-information/ (inspection detail pages at myfloridalicense.com/inspectionDetail.asp) | Web search **+ downloadable CSV extracts by district** | **Yes** — full violation list with codes + inspector observations, classed High Priority / Intermediate / Basic | No numeric score; results are dispositions (met standards, warning, closure, etc.) |
+| Georgia (DPH) | https://ga.healthinspections.us/stateofgeorgia/ (info: https://dph.georgia.gov/environmental-health-inspections) | Web search (HealthSpace platform) | **Yes** — full reports with inspector notes | 100-pt scale, A/B/C/U grades. Caveat: Gwinnett/Newton/Rockdale counties not in the statewide search |
+| Tennessee (TDH) | inspections.myhealthdepartment.com/tennessee | Web search (HealthSpace platform) | **Yes** — full observation text per violation | 100-pt scores statewide |
+| Mississippi (MSDH) | https://msdh.ms.gov/page/43,0,231,203.html (facility records: https://apps.msdh.ms.gov/food/FacilityRecord.aspx?PimsID=6201200) | Web search | **Partial** — full inspection history per facility with per-inspection detail pages | Letter grades A/B/C only, no numeric score |
+| North Carolina (DHHS) | https://epi.ncdhhs.gov/inspections/search | Web search (statewide front-end over county-run inspections) | **Yes** — violations as the inspector wrote them | 100-pt score → A/B/C grade cards; some counties also run their own portals |
+| South Carolina (Food Grades) | https://apps.dhec.sc.gov/Environment/FoodGrades/ and https://gis.dhec.sc.gov/foodgrades/ | Web + map search | **Yes** — complete inspection report as PDF | Points-based (A >87, B 78–87, C below); ~22,000 establishments |
+| Virginia (VDH) | inspections.myhealthdepartment.com/virginia/districts | Web search (HealthSpace platform) | **Yes** — violations with critical/non-critical flags and corrective actions | **No score or grade at all** — violations-only jurisdiction |
+| Arkansas (ADH) | https://foodserviceprod.adh.arkansas.gov/Web/inspection/publicinspectionsearch.aspx | Web search form | **Yes** — per-report "Observation(s)" detail, incl. past inspections | No score/grade; in/out-of-compliance model |
+| Louisiana (LDH "EatSafe") | eatsafe.la.gov (LDH info: https://ldh.la.gov/news/2190) | Web search, updated daily | **Yes** — violations (critical vs non-critical) + corrective actions | Ratings shown as pelican icons historically; detail is violation-based |
+| Pennsylvania (Dept. of Agriculture) | Search: https://www.pafoodsafety.pa.gov/Web/Inspection/PublicInspectionSearch.aspx · Info: https://www.agriculture.pa.gov/consumer_protection/FoodSafety/retail-food-inspection-reports/Pages/default.aspx | Web search (+ state "EatSafePA" app; BI dashboard) | **Yes** — violations + inspector comments, full report view | Covers state-inspected facilities; a few large jurisdictions (e.g., Philadelphia, Allegheny Co.) run their own programs |
+
+**Checked but NO single statewide portal verified:**
+- **Kentucky** — inspections are by local health districts; Louisville, Lexington, Northern Kentucky (https://nkyhealth.org/food-service-operators/), Jessamine Co. (https://www.jessaminehealth.org/restaurant-inspection-scores/) and others each publish their own scores/violations. Fragmented.
+- **Indiana** — decentralized by county; the state portal is essentially a directory. Counties use varied platforms (HealthSpace, GovQA, own sites); Marion County/Indianapolis publishes via https://hhcwebfood.hhcorp.org/. Fragmented.
+- **Ohio** — the Dept. of Health maintains a statewide database (since 2014), but public access is through ~local health districts, many on HealthSpace (e.g., Belmont Co.: https://healthspace.com/Clients/Ohio/Belmont/belmont_web_live.nsf) or their own systems (Columbus: https://www.columbus.gov/publichealth/programs/Food-Protection/Inspection-Reports---Signs/). Reports show violations; many Ohio jurisdictions give no overall score. Fragmented.
+
+## Major city/county open-data APIs (all include violation-level detail)
+
+| Jurisdiction | Dataset / API URL (verbatim) | Platform | Violation detail? | Score model |
+|---|---|---|---|---|
+| New York City | https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j · API: https://data.cityofnewyork.us/resource/43nn-pn8j.json | Socrata API + CSV | **Yes** — one row per violation citation, with description + critical flag | Numeric score + letter grade (A/B/C) |
+| Chicago | https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5 | Socrata (SODA) API + CSV | **Yes** — violations field with codes and inspector free-text comments | Pass / pass-with-conditions / fail (no numeric score) |
+| Los Angeles County | Inspections: https://data.lacounty.gov/Health/LOS-ANGELES-COUNTY-RESTAURANT-AND-MARKET-INSPECTIO/6ni6-h5kp · Violations: https://data.lacounty.gov/Health/LOS-ANGELES-COUNTY-RESTAURANT-AND-MARKET-VIOLATION/8jyd-4pv9 | County open-data portal (API/download) | **Yes** — separate violations dataset keyed to inspections | Numeric score + letter grade; excludes Pasadena, Long Beach, Vernon (own health depts) |
+| San Francisco | Scores: dataset pyih-qa8i (https://data.sfgov.org/resource/pyih-qa8i.json) · Violations: dataset f29f-c3np | Socrata API, no key required | **Yes** — dedicated violations dataset | Numeric score (0–100) |
+| Boston | https://data.boston.gov/dataset/food-establishment-inspections | CKAN (Analyze Boston), CSV + CKAN API, updated daily | **Yes** — violation level, description, and inspector comments per row | Pass/fail with violation severity levels |
+| Seattle / King County | Socrata: https://dev.socrata.com/foundry/data.kingcounty.gov/gkhn-e8mn (data.kingcounty.gov) | Socrata API + CSV | **Yes** — one row per violation, red (critical) / blue points | Inspection point totals + emoji-based rating from last 4 inspections |
+
+## Bottom line
+Nationwide coverage is feasible only as a **federation of per-jurisdiction adapters**, exactly as Kyron's pluggable-source design assumes — there is no official national feed to plug into, and the one near-national shortcut (HDScores/Yelp LIVES) is commercial third-party data. The good news is the top of the pyramid is efficient: a handful of Socrata APIs (NYC, Chicago, SF, King County, plus LA County and Boston downloads) covers a large share of US diners with full violation detail, and a second tier of consistent statewide portals (FL, GA, TN, NC, SC, PA, plus HealthSpace-platform states like TN/VA) is very buildable. The hard part is the long tail — KY, IN, OH and many individual counties are fragmented, PDF-based, or missing entirely — and the fact that "score" means different things per jurisdiction (100-point, letter grade, pass/fail, or violations-only like VA/AR), so Kyron's violation-driven "why" summaries generalize well, but score display and alert thresholds need per-source normalization.
