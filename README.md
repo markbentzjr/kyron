@@ -1,1 +1,74 @@
-# kyron
+# Kyron — Alabama Restaurant Health Scores
+
+Kyron is a free Android app that makes public restaurant health-inspection
+scores easy to browse and worth paying attention to. It covers **every county
+in Alabama (23,526 establishments)** and keeps itself current from the
+official sources:
+
+| Source | Coverage | What it publishes |
+|---|---|---|
+| **JCDH** — Jefferson County Dept. of Health | Jefferson County | Scores **plus full violation detail** and inspection history |
+| **ADPH** — Alabama Dept. of Public Health | 65 counties | Latest score + inspection date |
+| **MCHD** — Mobile County Health Dept. | Mobile County | Scores + up to 4 dated inspections per place |
+
+## Features
+
+- **Browse & search** the statewide catalog, filter by county and score band
+- **Map view** (OpenStreetMap, no API key) with score-colored pins
+- **"Why this score?"** — for Jefferson County, a plain-language summary of
+  the actual violations behind the number, with the inspector's own notes
+- **Favorites** — star places and get alerted whenever they receive a *new*
+  inspection score
+- **Area alerts** — pick counties (or a radius around a center point) and a
+  threshold; get alerted when a new score lands below it
+- **Background sync** about every 12 hours. Merging is failure-safe: if a
+  source is down, existing data is never wiped
+- Alerts land as **notifications** and in an in-app **alert inbox**
+
+Accounts, favorites and alert rules live on the device in this release;
+cloud-synced accounts are on the roadmap (see `docs/Kyron-2.0-Blueprint.md`).
+
+## Why one adapter per source?
+
+The US has **no national restaurant-inspection database** — every state and
+county publishes its own, in its own format, on its own scoring scale. Kyron
+is built as a federation of small per-jurisdiction adapters
+(`app/src/main/java/com/kyronapp/kyron/source/Sources.kt`): adding a state
+means adding one adapter, nothing else changes. Research on which
+jurisdictions to add next is in `docs/Kyron-USA-Source-Registry.md`.
+
+## Known data caveat
+
+ADPH's own search for **Tallapoosa County** currently returns a server error
+(HTTP 500) on the state's site, so only a couple of its establishments could
+be included in the bundled snapshot. The app re-checks counties during sync,
+so Tallapoosa backfills automatically once ADPH fixes their page.
+
+## Repository layout
+
+- `app/` — the Android app (Kotlin). Note on the build: Kyron is currently
+  built with a **manual single-process pipeline** (`app/build_manual.sh`):
+  `aapt2` + `kotlinc` + R8/D8 + `apksigner`, with library manifests merged by
+  `app/merge_manifest.py` and dependencies fetched by `app/fetch_deps.sh`.
+  It exists because the development sandbox blocks the inter-process TCP the
+  Gradle daemon needs; the source layout under `app/src/main` is a standard
+  Android project layout, and porting back to a Gradle build is
+  straightforward.
+- `harvest/` — Python tooling that builds the bundled statewide snapshot
+  (`app/src/main/assets/places_seed.json`): ADPH county harvester, JCDH
+  catalog enumerator, MCHD harvester, and the seed builder that merges them.
+- `tools/parser-harness/` — a JVM harness that runs the app's real Kotlin
+  parsers against live health-department pages (used to verify parsing
+  fixes, including the ADPH inspection-date fix).
+- `docs/` — the 1.x audit, the 2.0 product blueprint, and the Alabama /
+  USA source research.
+
+## Data
+
+All scores are public health-department records, republished as-is.
+Inspection data belongs to the publishing agencies; Kyron's code is what
+this repository licenses.
+
+## License
+
+License to be added by the project owner.

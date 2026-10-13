@@ -1,0 +1,17 @@
+# Build outputs and local toolchain (see app/fetch_deps.sh and docs)
+*.apk
+*.idsig
+*.keystore
+app/work/
+app/deps/
+build/
+.gradle/
+local.properties
+
+# Harvest intermediates (regenerable with harvest/*.py)
+harvest/adph/
+harvest/*.html
+harvest/*.log
+harvest/mchd_rows.json
+harvest/jcdh_enum*.json
+__pycache__/
