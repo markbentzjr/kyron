@@ -9,11 +9,15 @@ import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kyronapp.kyron.ui.AlertsFragment
 import com.kyronapp.kyron.ui.BrowseFragment
+import com.kyronapp.kyron.ui.CoverageActivity
 import com.kyronapp.kyron.ui.DetailActivity
 import com.kyronapp.kyron.ui.FavoritesFragment
 import com.kyronapp.kyron.ui.MapFragment
@@ -33,6 +37,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var app: KyronApplication
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var tab: Int = 0
+    private var syncingNav: Boolean = false
+
+    /** Tab fragments are created once and kept alive, so switching tabs never
+     *  loses Browse's search/scroll or other in-progress state. */
+    private val frags = arrayOfNulls<Fragment>(4)
 
     var syncing: Boolean = false
         private set
@@ -52,16 +61,33 @@ class MainActivity : AppCompatActivity() {
         app = application as KyronApplication
         setContentView(R.layout.activity_main)
 
-        val tabs = listOf(
-            findViewById<TextView>(R.id.tab_browse),
-            findViewById<TextView>(R.id.tab_map),
-            findViewById<TextView>(R.id.tab_favs),
-            findViewById<TextView>(R.id.tab_alerts)
-        )
-        tabs.forEachIndexed { i, tv ->
-            tv.setOnClickListener { selectTab(i) }
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav.setOnItemSelectedListener { item ->
+            if (syncingNav) return@setOnItemSelectedListener true
+            val idx = when (item.itemId) {
+                R.id.nav_browse -> 0
+                R.id.nav_map -> 1
+                R.id.nav_favorites -> 2
+                R.id.nav_alerts -> 3
+                else -> 0
+            }
+            selectTab(idx)
+            true
+        }
+        // Region chip (LF-4): shows the active region everywhere; tapping
+        // it opens Coverage, where states are picked/downloaded. The chip
+        // follows RegionManager, so a switch made in Coverage lands here.
+        val chip = findViewById<TextView>(R.id.region_chip)
+        chip.setOnClickListener {
+            startActivity(Intent(this, CoverageActivity::class.java))
+        }
+        scope.launch {
+            app.regions.activeRegion.collect {
+                chip.text = app.regions.activeInfo().displayName
+            }
         }
         selectTab(0)
+        maybeShowWelcome()
 
         if (Build.VERSION.SDK_INT >= 33 &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
@@ -84,26 +110,79 @@ class MainActivity : AppCompatActivity() {
         intent.getStringExtra(EXTRA_PLACE_ID)?.let { openPlace(it) }
     }
 
-    private fun selectTab(i: Int) {
+    /** Switch tabs, keeping every tab's fragment (and its scroll/search
+     *  state) alive. Also used by other screens (e.g. the Favorites empty
+     *  state's "Browse restaurants" button). */
+    fun selectTab(i: Int) {
         tab = i
-        val tabs = listOf(
-            findViewById<TextView>(R.id.tab_browse),
-            findViewById<TextView>(R.id.tab_map),
-            findViewById<TextView>(R.id.tab_favs),
-            findViewById<TextView>(R.id.tab_alerts)
-        )
-        tabs.forEachIndexed { idx, tv ->
-            tv.setBackgroundResource(if (idx == i) R.drawable.tab_selected else android.R.color.transparent)
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        val itemId = when (i) {
+            0 -> R.id.nav_browse
+            1 -> R.id.nav_map
+            2 -> R.id.nav_favorites
+            else -> R.id.nav_alerts
         }
-        val fragment: Fragment = when (i) {
-            0 -> BrowseFragment()
-            1 -> MapFragment()
-            2 -> FavoritesFragment()
-            else -> AlertsFragment()
+        if (bottomNav.selectedItemId != itemId) {
+            syncingNav = true
+            bottomNav.selectedItemId = itemId
+            syncingNav = false
         }
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.container, fragment)
-            .commit()
+        val target = frags[i]
+            ?: supportFragmentManager.findFragmentByTag("tab$i")
+            ?: when (i) {
+                0 -> BrowseFragment()
+                1 -> MapFragment()
+                2 -> FavoritesFragment()
+                else -> AlertsFragment()
+            }
+        frags[i] = target
+        val tx = supportFragmentManager.beginTransaction()
+        // Hide every other added fragment — including ones FragmentManager
+        // restored after a process recreation that we haven't tracked yet.
+        (supportFragmentManager.fragments + frags.filterNotNull()).distinct().forEach { f ->
+            if (f !== target && f.isAdded) {
+                tx.hide(f).setMaxLifecycle(f, Lifecycle.State.STARTED)
+            }
+        }
+        if (target.isAdded) {
+            tx.show(target)
+        } else {
+            tx.add(R.id.container, target, "tab$i")
+        }
+        tx.setMaxLifecycle(target, Lifecycle.State.RESUMED)
+        tx.commit()
+    }
+
+    private fun maybeShowWelcome() {
+        if (app.prefs.seenWelcome) return
+        AlertDialog.Builder(this)
+            .setTitle("Welcome to Kyron")
+            .setMessage(
+                "Kyron shows official health-inspection results for " +
+                    "restaurants and food stores. Every result is shown with its " +
+                    "inspection date and the health department it came from. " +
+                    "Alabama is included with the app; more states can be added " +
+                    "from Coverage (tap the state name at the top).\n\n" +
+                    "• Browse or search below, then tap a place to see why it " +
+                    "got its score (where the county publishes the details).\n" +
+                    "• Tap the star on a place to watch it — you'll get an " +
+                    "alert when it receives a new score.\n" +
+                    "• The Map pins every place at its real street address, " +
+                    "verified against the US Census Bureau's address data. " +
+                    "Places whose address couldn't be verified aren't pinned — " +
+                    "they're still in Browse with their address.\n" +
+                    "• Set up alerts any time in the Alerts tab. Data refreshes " +
+                    "automatically about every 12 hours.\n\n" +
+                    "No sign-up needed — everything works right away. " +
+                    "The app ships with an October 2026 snapshot and updates " +
+                    "from there."
+            )
+            .setPositiveButton("Start exploring") { d, _ ->
+                app.prefs.seenWelcome = true
+                d.dismiss()
+            }
+            .setOnDismissListener { app.prefs.seenWelcome = true }
+            .show()
     }
 
     fun openPlace(placeId: String) {
@@ -112,8 +191,8 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun startSync(includeCounties: Boolean) {
-        if (syncing) return
+    fun startSync(includeCounties: Boolean, onDone: (() -> Unit)? = null) {
+        if (syncing) { onDone?.invoke(); return }
         syncing = true
         scope.launch {
             try {
@@ -131,7 +210,8 @@ class MainActivity : AppCompatActivity() {
                 lastReport = "Sync hit a problem (${e.message ?: "unknown"}). Your saved data is unchanged."
             } finally {
                 syncing = false
-                if (tab == 3) selectTab(3) // refresh Alerts screen state
+                (frags.getOrNull(3) as? AlertsFragment)?.refresh()
+                onDone?.invoke()
             }
         }
     }
@@ -158,7 +238,7 @@ class MainActivity : AppCompatActivity() {
                 app.prefs.homeLng = loc.longitude
                 app.prefs.homeLabel = "My location"
                 Toast.makeText(this, "Area center set to your location", Toast.LENGTH_SHORT).show()
-                if (tab == 3) selectTab(3)
+                (frags.getOrNull(3) as? AlertsFragment)?.refresh()
             } else {
                 Toast.makeText(this, "No location fix yet — try again outdoors or pick a preset", Toast.LENGTH_LONG).show()
             }

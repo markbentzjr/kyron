@@ -134,14 +134,28 @@ object SyncEngine {
             val isFav = prefs.favorites.contains(p.id)
             val oldScore = e.old?.score
             if (isFav && prefs.alertsForFavorites) {
-                val title = "New score for ★ ${p.name}: ${p.score}"
-                val body = "${p.name} (${p.city}) was re-inspected on ${p.date} and scored ${p.score}" +
-                    (oldScore?.let { " (was $it)" } ?: "") + "."
-                fire(context, prefs, p, title, body, p.score < prefs.threshold)
+                if (p.hasNumericScore) {
+                    val title = "New score for ★ ${p.name}: ${p.score}"
+                    val body = "${p.name} (${p.city}) was re-inspected on ${p.date} and scored ${p.score}" +
+                        (oldScore?.let { " (was $it)" } ?: "") + "."
+                    fire(context, prefs, p, title, body, p.score < prefs.threshold)
+                } else {
+                    // LF-4: disposition jurisdictions (e.g. Florida DBPR)
+                    // publish an outcome, not a score. Never render the
+                    // NO_SCORE sentinel as a number, and never call the
+                    // result "low" — there is no scale to be low on.
+                    val result = p.nativeResult.ifBlank { "recorded" }
+                    val title = "New inspection for ★ ${p.name}"
+                    val body = "${p.name} (${p.city}) was re-inspected on ${p.date} — " +
+                        "result: $result" +
+                        (e.old?.nativeResult?.takeIf { it.isNotBlank() && it != p.nativeResult }
+                            ?.let { " (was: $it)" } ?: "") + "."
+                    fire(context, prefs, p, title, body, false)
+                }
                 fired++
                 continue
             }
-            if (prefs.alertsForArea && p.score < prefs.threshold && inMonitoredArea(p, prefs)) {
+            if (prefs.alertsForArea && p.hasNumericScore && p.score < prefs.threshold && inMonitoredArea(p, prefs)) {
                 val title = "Low score near you: ${p.name} scored ${p.score}"
                 val body = "${p.name} (${p.city}) posted a new score of ${p.score} on ${p.date}, " +
                     "below your threshold of ${prefs.threshold}."
