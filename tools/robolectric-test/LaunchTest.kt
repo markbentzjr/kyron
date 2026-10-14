@@ -1,7 +1,7 @@
 package com.kyronapp.kyron
 
 import android.os.Looper
-import android.widget.TextView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.recyclerview.widget.RecyclerView
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -13,7 +13,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34], manifest = "/home/hatch/kyron-build/test/robo-apk/AndroidManifest.xml")
+@Config(sdk = [34], application = TestKyronApplication::class, manifest = "/home/hatch/kyron-build/test/robo-apk/AndroidManifest.xml")
 class LaunchTest {
 
     private fun pump(ms: Long) {
@@ -35,15 +35,16 @@ class LaunchTest {
         assertNotNull("browse RecyclerView adapter missing", rv?.adapter)
         assertTrue("expected restaurants loaded from seed", (rv?.adapter?.itemCount ?: 0) > 0)
 
-        activity.findViewById<TextView>(R.id.tab_favs).performClick()
+        val nav = activity.findViewById<BottomNavigationView>(R.id.bottom_nav)
+        nav.selectedItemId = R.id.nav_favorites
         pump(500)
         println("KYRONTEST favorites tab OK")
 
-        activity.findViewById<TextView>(R.id.tab_alerts).performClick()
+        nav.selectedItemId = R.id.nav_alerts
         pump(500)
         println("KYRONTEST alerts tab OK")
 
-        activity.findViewById<TextView>(R.id.tab_browse).performClick()
+        nav.selectedItemId = R.id.nav_browse
         pump(500)
         println("KYRONTEST back to browse OK")
         controller.pause().stop().destroy()

@@ -20,7 +20,7 @@ APP_DEPS=$(find $M/work/aars -name 'classes.jar' | tr '\n' ':')$(find $M/work/aa
 TEST_DEPS=$(find $T/deps -name '*.jar' | tr '\n' ':')
 
 echo "== compile test =="
-$KOTLINC -cp "$M/work/classes.jar:$APP_DEPS$TEST_DEPS$ANDROID_JAR" -d $T/classes $T/src/LaunchTest.kt $T/src/TestKyronApplication.kt 2>&1 | grep -vE "^warning:" | head -n 20
+$KOTLINC -cp "$M/work/classes.jar:$APP_DEPS$TEST_DEPS$ANDROID_JAR" -d $T/classes $T/src/LaunchTest.kt $T/src/TestKyronApplication.kt 2>&1 | grep -vE "^warning:" | head -n 20 || true
 
 echo "== run test =="
 java -Xmx900m -XX:+UseSerialGC \
