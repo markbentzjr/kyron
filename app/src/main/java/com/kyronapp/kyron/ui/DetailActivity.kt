@@ -8,6 +8,9 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
 import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.R
 import com.kyronapp.kyron.data.Place
@@ -35,7 +38,7 @@ class DetailActivity : AppCompatActivity() {
         app = application as KyronApplication
         setContentView(R.layout.activity_detail)
         placeId = intent?.getStringExtra(EXTRA_PLACE_ID)
-        findViewById<TextView>(R.id.back).setOnClickListener { finish() }
+        findViewById<MaterialToolbar>(R.id.d_toolbar).setNavigationOnClickListener { finish() }
         scope.launch {
             app.repository.load()
             render()
@@ -47,64 +50,124 @@ class DetailActivity : AppCompatActivity() {
     private fun render() {
         val place = currentPlace() ?: run {
             findViewById<TextView>(R.id.d_name).text = "Place not found"
+            // No dead buttons: hide actions that have nothing to act on.
+            findViewById<View>(R.id.d_fav).visibility = View.GONE
+            findViewById<View>(R.id.d_directions).visibility = View.GONE
+            findViewById<View>(R.id.d_share).visibility = View.GONE
             return
         }
         val scoreView = findViewById<TextView>(R.id.d_score)
-        scoreView.text = place.score.toString()
-        scoreView.setBackgroundResource(
-            when {
-                place.score >= 95 -> R.drawable.score_green
-                place.score >= 85 -> R.drawable.score_lime
-                else -> R.drawable.score_amber
-            }
-        )
+        if (place.hasNumericScore) {
+            scoreView.text = place.score.toString()
+            scoreView.textSize = 19f
+            scoreView.setBackgroundResource(
+                when {
+                    place.score >= 95 -> R.drawable.score_green
+                    place.score >= 85 -> R.drawable.score_lime
+                    else -> R.drawable.score_amber
+                }
+            )
+        } else {
+            // Disposition regions: badge = the native result, compacted,
+            // tone-colored. The verbatim result is in the meta line.
+            scoreView.text = place.badgeText
+            scoreView.textSize = 11f
+            scoreView.setBackgroundResource(
+                when (place.resultTone) {
+                    1 -> R.drawable.score_green
+                    2 -> R.drawable.score_amber
+                    3 -> R.drawable.score_red
+                    else -> R.drawable.score_gray
+                }
+            )
+            scoreView.setTextColor(0xFFFFFFFF.toInt())
+        }
         findViewById<TextView>(R.id.d_name).text = place.name
         findViewById<TextView>(R.id.d_addr).text = place.fullAddress()
-        findViewById<TextView>(R.id.d_meta).text = "${place.bandLabel} · last inspected ${place.date}"
+        findViewById<TextView>(R.id.d_meta).text = if (place.hasNumericScore) {
+            "${place.bandLabel} · last inspected ${place.date}"
+        } else {
+            buildString {
+                append(place.nativeResult.ifBlank { "No inspection on file" })
+                if (place.date.isNotBlank()) append(" · last inspected ${place.date}")
+            }
+        }
         findViewById<TextView>(R.id.d_source).text =
-            "Source: ${SourceRegistry.byId(place.source)?.displayName ?: place.source}"
+            "Source: ${SourceRegistry.byId(place.source)?.displayName ?: com.kyronapp.kyron.data.Regions.sourceDisplayName(place.source)}"
 
         val isFav = app.prefs.favorites.contains(place.id)
-        val favBtn = findViewById<Button>(R.id.d_fav)
-        favBtn.text = if (isFav) "★ Watching" else "☆ Watch this place"
+        val favBtn = findViewById<MaterialButton>(R.id.d_fav)
+        favBtn.text = if (isFav) "Watching" else "Watch this place"
+        favBtn.setIconResource(if (isFav) R.drawable.ic_star else R.drawable.ic_star_border)
         favBtn.setOnClickListener {
             app.prefs.toggleFavorite(place.id)
             render()
         }
         findViewById<Button>(R.id.d_directions).setOnClickListener {
-            val uri = Uri.parse("geo:0,0?q=${Uri.encode(place.fullAddress())}")
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
+            val q = Uri.encode(place.fullAddress())
+            val geoIntent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$q"))
+            val webIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.google.com/maps/search/?api=1&query=$q")
+            )
+            runCatching { startActivity(geoIntent) }
+                .recoverCatching { startActivity(webIntent) }
+                .onFailure {
+                    android.widget.Toast.makeText(
+                        this,
+                        "No maps app available — the address is ${place.fullAddress()}",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                }
+        }
+        findViewById<Button>(R.id.d_share).setOnClickListener {
+            val resultText = if (place.hasNumericScore) {
+                "scored ${place.score} (${place.bandLabel})"
+            } else if (place.nativeResult.isNotBlank()) {
+                "got the result \"${place.nativeResult}\""
+            } else {
+                "has no inspection result on file"
+            }
+            val shareText = "${place.name} $resultText" +
+                (if (place.date.isNotBlank()) " — inspected ${place.date}." else ".") +
+                " ${place.fullAddress()}. Tracked with Kyron."
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, shareText)
+            }
+            runCatching { startActivity(Intent.createChooser(send, "Share this place")) }
         }
         findViewById<TextView>(R.id.d_watch_note).text = when {
-            isFav && app.prefs.alertsForFavorites -> "🔔 You'll be alerted when this place gets a new score."
-            isFav -> "★ Favorite (favorite alerts are off in Alerts settings)."
+            isFav && app.prefs.alertsForFavorites ->
+                if (place.hasNumericScore) "You'll be alerted when this place gets a new score."
+                else "You'll be alerted when this place gets a new inspection result."
+            isFav -> "Favorite (favorite alerts are off in Alerts settings)."
             else -> ""
         }
 
         val insps = place.inspections
-        val histTitle = findViewById<TextView>(R.id.d_history_title)
+        val histCard = findViewById<View>(R.id.d_history_card)
         val histLine = findViewById<TextView>(R.id.d_history_line)
-        val histScroll = findViewById<View>(R.id.d_history_scroll)
-        val chips = findViewById<LinearLayout>(R.id.d_history_chips)
+        val chips = findViewById<com.google.android.material.chip.ChipGroup>(R.id.d_history_chips)
         if (insps.size > 1) {
-            histTitle.visibility = View.VISIBLE
+            histCard.visibility = View.VISIBLE
+            findViewById<View>(R.id.d_history_title).visibility = View.VISIBLE
             histLine.visibility = View.VISIBLE
-            histScroll.visibility = View.VISIBLE
-            histLine.text = insps.joinToString(" → ") { it.score.toString() } + "  (newest first)"
+            findViewById<View>(R.id.d_history_scroll).visibility = View.VISIBLE
+            histLine.text = insps.joinToString(" → ") { it.badgeText } + "  (newest first)"
             chips.removeAllViews()
             insps.forEachIndexed { i, ins ->
-                val b = Button(this).apply {
-                    text = "${ins.score} · ${ins.date}"
-                    isAllCaps = false
-                    setBackgroundResource(if (i == inspIdx) R.drawable.tab_selected else android.R.color.transparent)
+                val chip = Chip(this).apply {
+                    chipMinHeight = 48f * resources.displayMetrics.density
+                    text = "${ins.badgeText} · ${ins.date}"
+                    isCheckable = true
+                    isChecked = i == inspIdx
                     setOnClickListener { inspIdx = i; render() }
                 }
-                chips.addView(b)
+                chips.addView(chip)
             }
         } else {
-            histTitle.visibility = View.GONE
-            histLine.visibility = View.GONE
-            histScroll.visibility = View.GONE
+            histCard.visibility = View.GONE
         }
 
         val cur = insps.getOrNull(minOf(inspIdx, maxOf(insps.size - 1, 0)))
@@ -118,7 +181,39 @@ class DetailActivity : AppCompatActivity() {
         // Score-only sources (ADPH, MCHD) never publish violations, so an empty
         // list there means "not published", never "clean inspection".
         val sourceHasViolations = SourceRegistry.byId(place.source)?.hasViolations == true
-        if (cur != null) {
+        if (!place.hasNumericScore) {
+            // LF-4 disposition rendering: Florida-style jurisdictions publish
+            // an outcome, not a score. Show the native result verbatim, its
+            // recorded violation categories (no points exist — none shown),
+            // and a link to the official record. No score is ever derived.
+            whyTitle.text = "Latest inspection result"
+            whyText.text = WhySummary.dispositionExplainer(place, cur)
+            violCard.visibility =
+                if (cur != null && cur.violations.isNotEmpty()) View.VISIBLE else View.GONE
+            violBox.removeAllViews()
+            if (cur != null) {
+                for (v in cur.violations) {
+                    violBox.addView(TextView(this).apply {
+                        text = "• ${v.ruleText}"
+                        textSize = 13.5f
+                        setPadding(0, 10, 0, 10)
+                    })
+                }
+            }
+            if (place.detailUrl != null) {
+                loadBtn.visibility = View.VISIBLE
+                loadBtn.text = "View official record"
+                loadBtn.setOnClickListener {
+                    runCatching {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(place.detailUrl)))
+                    }.onFailure {
+                        loadMsg.text = "Couldn't open the official record link."
+                    }
+                }
+            } else {
+                loadBtn.visibility = View.GONE
+            }
+        } else if (cur != null) {
             whyTitle.text = "Why a ${cur.score}?"
             whyText.text = when {
                 cur.violations.isNotEmpty() -> WhySummary.summarize(cur)
