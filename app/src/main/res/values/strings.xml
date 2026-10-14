@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kyron</string>
+    <string name="nav_browse">Browse</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_alerts">Alerts</string>
+    <string name="cd_watch">Watch this place (add to favorites)</string>
+    <string name="cd_watching">Watching this place (tap to stop)</string>
+    <string name="cd_my_location">Center the map on my area</string>
+    <string name="cd_close_card">Close this place card</string>
+    <string name="cd_back">Go back</string>
+    <string name="cd_search">Search restaurants</string>
+</resources>

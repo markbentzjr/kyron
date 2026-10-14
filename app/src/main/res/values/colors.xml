@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="kyron_dark">#123C26</color>
+    <color name="kyron_primary">#1E6B38</color>
     <color name="kyron_green">#2E9E4F</color>
     <color name="kyron_lime">#7AB648</color>
     <color name="kyron_amber">#E8A13A</color>
     <color name="kyron_red">#A33A3A</color>
+    <color name="tone_red">#D9534F</color>
+    <color name="tone_gray">#8A97A5</color>
+    <color name="star_on">#F2B01E</color>
     <color name="ink">#1D2733</color>
     <color name="muted">#6B7885</color>
     <color name="line">#E3E8EE</color>

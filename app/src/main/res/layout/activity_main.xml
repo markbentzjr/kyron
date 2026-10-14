@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg">
 
-    <TextView
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="@color/kyron_dark"
-        android:padding="14dp"
-        android:text="🍽️ Kyron"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        app:title="Kyron"
+        app:titleTextColor="#FFFFFF">
+
+        <!-- Region chip (LF-4): shows the active region everywhere; tapping
+             it opens Coverage, where states are picked/downloaded. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/region_chip"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="8dp"
+            android:minWidth="0dp"
+            android:text="Alabama"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#2E7D4F"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_arrow_drop_down"
+            app:iconGravity="textEnd"
+            app:iconPadding="2dp"
+            app:iconSize="16dp"
+            app:iconTint="#FFFFFF"
+            app:strokeColor="#FFFFFF" />
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <FrameLayout
         android:id="@+id/container"
@@ -21,52 +42,11 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <LinearLayout
-        android:id="@+id/tabbar"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        android:orientation="horizontal"
-        android:padding="6dp">
-
-        <TextView
-            android:id="@+id/tab_browse"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="🔍&#10;Browse"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/tab_map"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="🗺️&#10;Map"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/tab_favs"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="★&#10;Favorites"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/tab_alerts"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="🔔&#10;Alerts"
-            android:textSize="12sp" />
-    </LinearLayout>
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav" />
 </LinearLayout>

@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Kyron" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">#123C26</item>
-        <item name="colorPrimaryDark">#0C2A1A</item>
-        <item name="colorAccent">#2E9E4F</item>
+    <style name="Theme.Kyron" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">#1E6B38</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#CDEBD2</item>
+        <item name="colorOnPrimaryContainer">#0A2A16</item>
+        <item name="colorSecondary">#4F6353</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#DAE7DB</item>
+        <item name="colorOnSecondaryContainer">#16281B</item>
+        <item name="colorTertiary">#2F5D62</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorError">#B3261E</item>
+        <item name="colorOnError">#FFFFFF</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#1D2733</item>
+        <item name="colorSurfaceVariant">#E7EDE9</item>
+        <item name="colorOnSurfaceVariant">#4A5560</item>
+        <item name="colorOutline">#8A97A5</item>
+        <item name="android:colorBackground">#F4F6F8</item>
         <item name="android:statusBarColor">#123C26</item>
+        <item name="android:windowLightStatusBar">false</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:fontFamily">sans</item>
     </style>
 </resources>

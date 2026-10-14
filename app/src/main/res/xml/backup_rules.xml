@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Auto Backup rules (pre-Android 12 form; data_extraction_rules.xml is the
+  Android 12+ form). LF-2 / Free-LocalFirst plan section 5.1:
+  INCLUDE the sacred user store (kyron_user.db) and the legacy prefs file
+  (recovery copy until its migration has run everywhere).
+  EXCLUDE the replaceable catalog (re-importable / re-downloadable), the
+  legacy catalog files, and caches.
+-->
+<full-backup-content>
+    <include domain="database" path="kyron_user.db" />
+    <include domain="sharedpref" path="kyron_prefs.xml" />
+    <exclude domain="database" path="kyron_catalog.db" />
+    <exclude domain="file" path="places.json" />
+    <exclude domain="file" path="places.json.migrated-v1" />
+    <exclude domain="file" path="places_seed_geocoded.json" />
+    <exclude domain="file" path="geocache.json" />
+    <exclude domain="file" path="geocache.json.migrated-v1" />
+</full-backup-content>
