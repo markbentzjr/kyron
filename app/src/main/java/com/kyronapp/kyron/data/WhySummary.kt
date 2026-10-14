@@ -49,6 +49,40 @@ object WhySummary {
         return sb.toString()
     }
 
+    /**
+     * Plain-language account of a NON-numeric result (LF-4): the
+     * jurisdiction publishes an outcome, not a score. This only restates
+     * what the source recorded — the native result verbatim, its date,
+     * and the violation categories the inspectors filed. No score is
+     * derived, estimated, or implied.
+     */
+    fun dispositionExplainer(place: Place, insp: Inspection?): String {
+        if (insp == null || insp.nativeResult.isBlank()) {
+            return "This jurisdiction publishes inspection outcomes, not numeric scores. " +
+                "No inspection for this establishment is in the current data — only its " +
+                "license/listing record — so there is no result to show yet."
+        }
+        val sb = StringBuilder()
+        sb.append("This jurisdiction publishes inspection outcomes, not numeric scores. ")
+        sb.append("The inspection of ${insp.date} ended with: “${insp.nativeResult}”.")
+        if (insp.violations.isNotEmpty()) {
+            val cats = insp.violations.map { categoryOfFl(it) }.distinct()
+            sb.append(" Inspectors recorded ${insp.violations.size} violation " +
+                "categor${if (insp.violations.size == 1) "y" else "ies"}")
+            if (cats.isNotEmpty()) {
+                sb.append(", including ${cats.take(3).joinToString(", ")}")
+            }
+            sb.append(". The categories below are the department's own, listed as recorded.")
+        }
+        return sb.toString()
+    }
+
+    /** Category label for a non-AL violation row: the recorded text itself.
+     *  (AL violations go through [categoryOf]'s code-based mapping; rows
+     *  from disposition jurisdictions already carry the department's
+     *  category wording — restate it, never re-map it into AL terms.) */
+    fun categoryOfFl(v: Violation): String = v.ruleText
+
     /** What a score band means, for places whose source publishes no violation detail. */
     fun bandExplainer(score: Int): String = when {
         score >= 95 -> "A score of $score is excellent — at its last inspection this establishment was meeting food-safety standards with at most minor deductions. (This source publishes the score and date only, not the violation list.)"

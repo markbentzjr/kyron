@@ -1,82 +1,92 @@
 package com.kyronapp.kyron.data
 
 import android.content.Context
-import android.content.SharedPreferences
-import org.json.JSONArray
 
-/** User profile, favorites, alert rules and inbox — the per-user account data (stored on device in v2.0). */
+/**
+ * User profile, favorites, alert rules and inbox — the per-user data.
+ *
+ * LF-2: this class is now a thin facade over [UserStore] (SQLite, the
+ * plan's migration-ready user-data contract: UUIDs, timestamps,
+ * tombstones, sync outbox). The v2.0 SharedPreferences file it used to
+ * wrap is migrated into the store on first run and left in place as a
+ * recovery copy. The property API is unchanged so callers don't move.
+ */
 class Prefs(context: Context) {
-    private val sp: SharedPreferences =
-        context.getSharedPreferences("kyron_prefs", Context.MODE_PRIVATE)
+
+    val store: UserStore = UserStore(context)
 
     var profileName: String
-        get() = sp.getString("profile_name", "") ?: ""
-        set(v) = sp.edit().putString("profile_name", v).apply()
+        get() = store.profile.name
+        set(v) = store.updateProfile { it.name = v }
+
+    var seenWelcome: Boolean
+        get() = store.profile.seenWelcome
+        set(v) = store.updateProfile { it.seenWelcome = v }
 
     var favorites: Set<String>
-        get() = sp.getStringSet("favorites", emptySet()) ?: emptySet()
-        set(v) = sp.edit().putStringSet("favorites", v).apply()
+        get() = store.favorites()
+        set(v) {
+            val current = store.favorites()
+            for (id in current - v) store.setFavorite(id, false)
+            for (id in v - current) store.setFavorite(id, true)
+        }
 
-    fun toggleFavorite(id: String): Boolean {
-        val cur = favorites.toMutableSet()
-        val now = if (cur.contains(id)) { cur.remove(id); false } else { cur.add(id); true }
-        favorites = cur
-        return now
-    }
+    fun toggleFavorite(id: String): Boolean = store.toggleFavorite(id)
 
     var alertsForFavorites: Boolean
-        get() = sp.getBoolean("alerts_favorites", true)
-        set(v) = sp.edit().putBoolean("alerts_favorites", v).apply()
+        get() = store.profile.alertsFavorites
+        set(v) {
+            store.updateProfile { it.alertsFavorites = v }
+            store.setRule("FAVORITES", v, store.profile.threshold)
+        }
 
     var alertsForArea: Boolean
-        get() = sp.getBoolean("alerts_area", true)
-        set(v) = sp.edit().putBoolean("alerts_area", v).apply()
+        get() = store.profile.alertsArea
+        set(v) {
+            store.updateProfile { it.alertsArea = v }
+            store.setRule("AREA", v, store.profile.threshold)
+        }
 
     var threshold: Int
-        get() = sp.getInt("threshold", 85)
-        set(v) = sp.edit().putInt("threshold", v).apply()
+        get() = store.profile.threshold
+        set(v) {
+            val p = store.profile
+            store.updateProfile { it.threshold = v }
+            store.setRule("FAVORITES", p.alertsFavorites, v)
+            store.setRule("AREA", p.alertsArea, v)
+        }
 
     var monitoredCounties: Set<String>
-        get() = sp.getStringSet("monitored_counties", setOf("Jefferson")) ?: setOf("Jefferson")
-        set(v) = sp.edit().putStringSet("monitored_counties", v).apply()
+        get() = store.monitoredCounties()
+        set(v) = store.setMonitoredCounties(v)
 
     var homeLat: Double
-        get() = sp.getFloat("home_lat", 33.5207f).toDouble()
-        set(v) = sp.edit().putFloat("home_lat", v.toFloat()).apply()
+        get() = store.profile.homeLat
+        set(v) { store.updateProfile { it.homeLat = v }; store.syncHomeArea() }
 
     var homeLng: Double
-        get() = sp.getFloat("home_lng", (-86.8025f)).toDouble()
-        set(v) = sp.edit().putFloat("home_lng", v.toFloat()).apply()
+        get() = store.profile.homeLng
+        set(v) { store.updateProfile { it.homeLng = v }; store.syncHomeArea() }
 
     var homeLabel: String
-        get() = sp.getString("home_label", "Downtown Birmingham") ?: "Downtown Birmingham"
-        set(v) = sp.edit().putString("home_label", v).apply()
+        get() = store.profile.homeLabel
+        set(v) = store.updateProfile { it.homeLabel = v }
 
     var radiusMiles: Double
-        get() = sp.getFloat("radius_miles", 10f).toDouble()
-        set(v) = sp.edit().putFloat("radius_miles", v.toFloat()).apply()
+        get() = store.profile.radiusMiles
+        set(v) { store.updateProfile { it.radiusMiles = v }; store.syncHomeArea() }
 
     var lastSyncMs: Long
-        get() = sp.getLong("last_sync", 0L)
-        set(v) = sp.edit().putLong("last_sync", v).apply()
+        get() = store.profile.lastSyncMs
+        set(v) = store.updateProfile { it.lastSyncMs = v }
 
     var lastCountySyncMs: Long
-        get() = sp.getLong("last_county_sync", 0L)
-        set(v) = sp.edit().putLong("last_county_sync", v).apply()
+        get() = store.profile.lastCountySyncMs
+        set(v) = store.updateProfile { it.lastCountySyncMs = v }
 
     var inbox: List<AlertItem>
-        get() {
-            val raw = sp.getString("inbox", "[]") ?: "[]"
-            val arr = JSONArray(raw)
-            return (0 until arr.length()).map { AlertItem.fromJson(arr.getJSONObject(it)) }
-        }
-        set(v) {
-            val arr = JSONArray()
-            v.take(50).forEach { arr.put(it.toJson()) }
-            sp.edit().putString("inbox", arr.toString()).apply()
-        }
+        get() = store.inbox()
+        set(v) = store.replaceInbox(v)
 
-    fun addAlert(item: AlertItem) {
-        inbox = listOf(item) + inbox
-    }
+    fun addAlert(item: AlertItem) = store.addInboxItem(item)
 }
