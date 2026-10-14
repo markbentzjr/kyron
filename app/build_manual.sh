@@ -70,7 +70,7 @@ $BT/aapt2 link \
   --extra-packages "$PKGS" \
   -A $W/assets_merged \
   --min-sdk-version 29 --target-sdk-version 34 \
-  --version-code 2 --version-name "2.0" \
+  --version-code 3 --version-name "2.1" \
   --auto-add-overlay \
   $W/res_compiled/*.zip
 echo "linked resources.apk"
