@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kyronapp.kyron.ui.AlertsFragment
 import com.kyronapp.kyron.ui.BrowseFragment
 import com.kyronapp.kyron.ui.CoverageActivity
@@ -37,7 +36,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var app: KyronApplication
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var tab: Int = 0
-    private var syncingNav: Boolean = false
+
+    /** Classic tab bar (LF4FIX2): four labeled tabs, the pre-2.1
+     *  navigation. Selection is rendered directly by [selectTab]. */
+    private val tabIds = intArrayOf(R.id.tab_browse, R.id.tab_map, R.id.tab_favorites, R.id.tab_alerts)
 
     /** Tab fragments are created once and kept alive, so switching tabs never
      *  loses Browse's search/scroll or other in-progress state. */
@@ -61,23 +63,13 @@ class MainActivity : AppCompatActivity() {
         app = application as KyronApplication
         setContentView(R.layout.activity_main)
 
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
-        bottomNav.setOnItemSelectedListener { item ->
-            if (syncingNav) return@setOnItemSelectedListener true
-            val idx = when (item.itemId) {
-                R.id.nav_browse -> 0
-                R.id.nav_map -> 1
-                R.id.nav_favorites -> 2
-                R.id.nav_alerts -> 3
-                else -> 0
-            }
-            selectTab(idx)
-            true
+        tabIds.forEachIndexed { idx, id ->
+            findViewById<TextView>(id).setOnClickListener { selectTab(idx) }
         }
         // Region chip (LF-4): shows the active region everywhere; tapping
         // it opens Coverage, where states are picked/downloaded. The chip
         // follows RegionManager, so a switch made in Coverage lands here.
-        val chip = findViewById<TextView>(R.id.region_chip)
+        val chip = findViewById<android.widget.Button>(R.id.region_chip)
         chip.setOnClickListener {
             startActivity(Intent(this, CoverageActivity::class.java))
         }
@@ -115,17 +107,22 @@ class MainActivity : AppCompatActivity() {
      *  state's "Browse restaurants" button). */
     fun selectTab(i: Int) {
         tab = i
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
-        val itemId = when (i) {
-            0 -> R.id.nav_browse
-            1 -> R.id.nav_map
-            2 -> R.id.nav_favorites
-            else -> R.id.nav_alerts
-        }
-        if (bottomNav.selectedItemId != itemId) {
-            syncingNav = true
-            bottomNav.selectedItemId = itemId
-            syncingNav = false
+        // Render the selection on the classic tab bar (bold + brand
+        // color on the active tab). Setting visuals directly cannot
+        // re-enter this method, so no syncingNav-style guard is needed.
+        tabIds.forEachIndexed { idx, id ->
+            findViewById<TextView>(id)?.let { tv ->
+                val active = idx == i
+                tv.setTextColor(
+                    ContextCompat.getColor(
+                        this, if (active) R.color.kyron_primary else R.color.muted
+                    )
+                )
+                tv.setTypeface(
+                    tv.typeface,
+                    if (active) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
+                )
+            }
         }
         val target = frags[i]
             ?: supportFragmentManager.findFragmentByTag("tab$i")

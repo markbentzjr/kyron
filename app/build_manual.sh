@@ -40,6 +40,47 @@ PY
 )
 echo "extra packages: $PKGS"
 
+step "gate: validate vector pathData"
+# aapt2 never validates pathData arity, but android.util.PathParser parses
+# it at runtime during inflation -- a malformed path (e.g. an S command with
+# 10 floats) compiles clean and crashes the app on device at first frame
+# (FIX2 device crash, Oct 14 2026). This gate fails the build instead.
+if ! python3 $M/tools/validate_pathdata.py $M/src/main/res; then
+  echo "BUILD FAILED: malformed vector pathData above (file + segment named)."
+  echo "Fix the path to its canonical source; do not bypass this gate."
+  exit 1
+fi
+
+step "gate: validate seed dataset"
+# Workstream B gate (Oct 2026): a score must never ship unattached to a
+# named place at an address. The pre-gate seed failed with 88 violations
+# (2 scored places with no street address at all, 58 JCDH fused name/street
+# splits, 28 placeholder/truncated names) -- it took a user report ("2
+# scores that are not to any restaurant") to surface them. This gate fails
+# the build, naming every violating place id, if the dataset regresses.
+if ! python3 $M/tools/validate_seed.py $M/src/main/assets/places_seed_geocoded.json; then
+  echo "BUILD FAILED: seed dataset violations above (place ids named)."
+  echo "Fix the dataset at the harvest/normalizer level; do not bypass this gate."
+  exit 1
+fi
+
+step "gate: canary completeness (Workstream D)"
+# validate_seed proves the dataset is CLEAN; this gate proves it is COMPLETE.
+# 134 curated canaries (2+ well-known establishments per county, incl. the
+# Chelsea McDonald's adph_750e13236c) must be present with un-drifted
+# name/city/county; expected=pinned canaries must still carry coordinates
+# (pin regression); expected=accounted canaries must carry their signed-off
+# reason in tools/canaries.json; and 6 data-level search canaries must
+# resolve under the FIX5 search semantics. A seed rebuild that silently
+# drops an establishment (e.g. jcdh_22521, whose fused JCDH blob the current
+# splitter rejects) fails HERE, not on a user's phone. Never edit
+# canaries.json to make a build pass; fix the dataset/normalizer.
+if ! python3 $M/tools/canary_gate.py $M/src/main/assets/places_seed_geocoded.json $M/tools/canaries.json; then
+  echo "BUILD FAILED: canary completeness failures above (place ids named)."
+  echo "Fix the dataset at the harvest/normalizer level; do not bypass this gate."
+  exit 1
+fi
+
 step "3/8 aapt2 compile resources"
 rm -rf $W/res_compiled $W/gen
 mkdir -p $W/res_compiled
@@ -70,7 +111,7 @@ $BT/aapt2 link \
   --extra-packages "$PKGS" \
   -A $W/assets_merged \
   --min-sdk-version 29 --target-sdk-version 34 \
-  --version-code 3 --version-name "2.1" \
+  --version-code 9 --version-name "2.0" \
   --auto-add-overlay \
   $W/res_compiled/*.zip
 echo "linked resources.apk"

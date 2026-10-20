@@ -12,6 +12,7 @@ local.properties
 # release APK. Too large for this repo's upload channel; regenerate it with
 # harvest/adph_harvest.py + jcdh_enum.py + mchd_harvest.py, then build_seed.py.
 app/src/main/assets/places_seed.json
+app/src/main/assets/places_seed_geocoded.json
 
 # Harvest intermediates (regenerable with harvest/*.py)
 harvest/adph/
