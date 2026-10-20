@@ -1,20 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg"
     android:orientation="vertical">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/d_toolbar"
+    <!-- Header bar (classic): back button + title. -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="56dp"
         android:background="@color/kyron_dark"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        app:navigationIconTint="#FFFFFF"
-        app:title="Restaurant details"
-        app:titleTextColor="#FFFFFF" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/d_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_back"
+            android:src="@drawable/ic_arrow_back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Restaurant details"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -27,233 +41,197 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp"
-                app:strokeColor="@color/line"
-                app:strokeWidth="1dp">
+                android:background="@drawable/card_bg"
+                android:orientation="vertical"
+                android:padding="14dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="14dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/d_score"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:gravity="center"
-                            android:textColor="#FFFFFF"
-                            android:textSize="26sp"
-                            android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/d_name"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/d_addr"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/muted"
-                                android:textSize="13sp" />
-
-                            <TextView
-                                android:id="@+id/d_meta"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/muted"
-                                android:textSize="13sp" />
-
-                            <TextView
-                                android:id="@+id/d_source"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/muted"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="horizontal">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/d_fav"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Watch"
-                            app:icon="@drawable/ic_star_border"
-                            app:iconSize="18dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/d_directions"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="Directions"
-                            app:icon="@drawable/ic_directions"
-                            app:iconSize="18dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/d_share"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="Share"
-                            app:icon="@drawable/ic_share"
-                            app:iconSize="18dp" />
-                    </LinearLayout>
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/d_watch_note"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@color/muted"
-                        android:textSize="12.5sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:id="@+id/d_score"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:gravity="center"
+                        android:textColor="#FFFFFF"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
 
-            <com.google.android.material.card.MaterialCardView
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/d_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/d_addr"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/muted"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/d_meta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/muted"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/d_source"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/d_fav"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="4dp"
+                        android:text="Watch" />
+
+                    <Button
+                        android:id="@+id/d_directions"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:drawableStart="@drawable/ic_directions"
+                        android:drawablePadding="4dp"
+                        android:text="Directions" />
+
+                    <Button
+                        android:id="@+id/d_share"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:drawableStart="@drawable/ic_share"
+                        android:drawablePadding="4dp"
+                        android:text="Share" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/d_watch_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/muted"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/d_history_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:visibility="gone"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp"
-                app:strokeColor="@color/line"
-                app:strokeWidth="1dp">
+                android:background="@drawable/card_bg"
+                android:orientation="vertical"
+                android:padding="14dp"
+                android:visibility="gone">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/d_history_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Inspection history"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/d_history_line"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="14dp">
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/muted"
+                    android:textSize="12.5sp"
+                    android:visibility="gone" />
 
-                    <TextView
-                        android:id="@+id/d_history_title"
+                <HorizontalScrollView
+                    android:id="@+id/d_history_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:id="@+id/d_history_chips"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Inspection history"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
+                        android:orientation="horizontal" />
+                </HorizontalScrollView>
+            </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/d_history_line"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/muted"
-                        android:textSize="12.5sp"
-                        android:visibility="gone" />
-
-                    <HorizontalScrollView
-                        android:id="@+id/d_history_scroll"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:scrollbars="none"
-                        android:visibility="gone">
-
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/d_history_chips"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:singleSelection="true" />
-                    </HorizontalScrollView>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                app:cardBackgroundColor="@color/card_green_bg"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/line"
-                app:strokeWidth="1dp">
+                android:background="@drawable/card_green_bg"
+                android:orientation="vertical"
+                android:padding="14dp">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/d_why_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/d_why"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="14dp">
+                    android:layout_marginTop="6dp"
+                    android:textSize="14sp" />
+            </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/d_why_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/d_why"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textSize="14sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:id="@+id/d_viol_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:visibility="gone"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp"
-                app:strokeColor="@color/line"
-                app:strokeWidth="1dp">
+                android:background="@drawable/card_bg"
+                android:orientation="vertical"
+                android:padding="14dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="What the inspector found"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <LinearLayout
+                    android:id="@+id/d_viol_box"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="14dp">
+                    android:orientation="vertical" />
+            </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="What the inspector found"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <LinearLayout
-                        android:id="@+id/d_viol_box"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/d_load"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
