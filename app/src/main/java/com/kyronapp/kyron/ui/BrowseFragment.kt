@@ -7,15 +7,16 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.chip.ChipGroup
-import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.MainActivity
 import com.kyronapp.kyron.R
@@ -36,22 +37,24 @@ import kotlinx.coroutines.launch
  * published to [ExploreState], so the Map applies the identical query —
  * one search drives both surfaces (Presentation Spec priority 1).
  *
- * 2.1: Material 3 controls — outlined search field, filter chips,
- * exposed-dropdown county/sort pickers, cards, pull-to-refresh, and a
- * first-run guidance card. Query logic is unchanged from LF-4.
+ * LF4FIX2: classic Views controls (search field, band toggle row,
+ * county/sort spinners, refresh button, guidance card) — the widget
+ * family of the device-proven LF-3 build. Query logic is unchanged
+ * from LF-4, including the honest-refresh contract: a refresh runs the
+ * real sync and the completion callback re-queries.
  */
 class BrowseFragment : Fragment() {
 
     private lateinit var app: KyronApplication
     private lateinit var adapter: PlaceAdapter
     private lateinit var listView: RecyclerView
-    private lateinit var swipe: SwipeRefreshLayout
+    private lateinit var refreshBtn: Button
     private lateinit var emptyBox: View
     private lateinit var loadingBox: View
     private lateinit var countLabel: TextView
-    private lateinit var countyInput: MaterialAutoCompleteTextView
-    private lateinit var sortInput: MaterialAutoCompleteTextView
-    private lateinit var bandGroup: ChipGroup
+    private lateinit var countyInput: Spinner
+    private lateinit var sortInput: Spinner
+    private lateinit var bandButtons: Map<Int, ToggleButton>
     private lateinit var searchField: EditText
 
     private var dataLoaded: Boolean = false
@@ -82,13 +85,14 @@ class BrowseFragment : Fragment() {
         val v = inflater.inflate(R.layout.fragment_browse, container, false)
 
         listView = v.findViewById(R.id.list)
-        swipe = v.findViewById(R.id.swipe)
+        refreshBtn = v.findViewById(R.id.refresh_btn)
         emptyBox = v.findViewById(R.id.empty_box)
         loadingBox = v.findViewById(R.id.loading_box)
         countLabel = v.findViewById(R.id.count_label)
         countyInput = v.findViewById(R.id.county_input)
         sortInput = v.findViewById(R.id.sort_input)
-        bandGroup = v.findViewById(R.id.band_group)
+        bandButtons = listOf(R.id.band_all, R.id.band_low, R.id.band_mid, R.id.band_high)
+            .associateWith { v.findViewById<ToggleButton>(it) }
         searchField = v.findViewById(R.id.search)
 
         adapter = PlaceAdapter(
@@ -118,47 +122,67 @@ class BrowseFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
         })
 
-        bandGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            band = when (checkedIds.firstOrNull()) {
-                R.id.band_low -> "Below 85"
-                R.id.band_mid -> "85–94"
-                R.id.band_high -> "95+"
-                else -> "All scores"
+        // Band toggles behave as a radio group: exactly one is always
+        // selected, and tapping the selected one keeps it selected.
+        bandButtons.forEach { (id, btn) ->
+            btn.setOnClickListener {
+                selectBand(id)
+                band = bandLabel(id)
+                applyFilters()
             }
-            applyFilters()
         }
-        bandGroup.check(R.id.band_all)
+        selectBand(R.id.band_all)
 
-        // Default adapters immediately, so the dropdowns are never empty
-        // in the window before the region's data binds.
-        sortInput.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line,
-                listOf("Worst first", "Best first", "Most recent", "Name A–Z"))
+        // Default adapters immediately, so the spinners are never empty
+        // in the window before the region's data binds. Selection
+        // callbacks only act when the value actually changes, which
+        // makes programmatic re-syncs (bindRegion, clearFilters) safe.
+        sortInput.adapter = spinnerAdapter(
+            listOf("Worst first", "Best first", "Most recent", "Name A–Z")
         )
-        countyInput.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, boundCounties)
-        )
-        countyInput.setOnItemClickListener { parent, _, pos, _ ->
-            county = parent.adapter.getItem(pos)?.toString() ?: "All counties"
-            applyFilters()
+        countyInput.adapter = spinnerAdapter(boundCounties)
+        countyInput.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+                val value = parent.getItemAtPosition(pos)?.toString() ?: "All counties"
+                if (value != county) {
+                    county = value
+                    applyFilters()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
-        sortInput.setOnItemClickListener { parent, _, pos, _ ->
-            sort = parent.adapter.getItem(pos)?.toString() ?: "Worst first"
-            applyFilters()
+        sortInput.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+                val value = parent.getItemAtPosition(pos)?.toString() ?: "Worst first"
+                if (value != sort) {
+                    sort = value
+                    applyFilters()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
-        countyInput.setText(county, false)
-        sortInput.setText(sort, false)
+        syncSpinner(countyInput, county)
+        syncSpinner(sortInput, sort)
 
         v.findViewById<View>(R.id.empty_clear).setOnClickListener { clearFilters() }
 
-        swipe.setOnRefreshListener {
+        refreshBtn.setOnClickListener {
             val act = activity as? MainActivity
             if (act != null) {
-                // Re-query when the sync lands; the spinner stops when
-                // that query completes (see applyFilters' finally).
-                act.startSync(includeCounties = false) { if (isAdded) applyFilters() }
+                // Honest refresh (the pull-to-refresh contract, kept):
+                // the button shows progress until the sync completes,
+                // then the follow-up query re-renders the list.
+                refreshBtn.isEnabled = false
+                refreshBtn.text = "Refreshing…"
+                act.startSync(includeCounties = false) {
+                    if (isAdded) {
+                        refreshBtn.isEnabled = true
+                        refreshBtn.text = "Refresh"
+                        applyFilters()
+                    }
+                }
             } else {
-                swipe.isRefreshing = false
+                applyFilters()
             }
         }
 
@@ -173,13 +197,43 @@ class BrowseFragment : Fragment() {
         return v
     }
 
+    private fun spinnerAdapter(items: List<String>): ArrayAdapter<String> =
+        ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, items)
+            .apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+
+    /** Point a spinner at [value] (no-op when absent). The selection
+     *  listeners ignore values equal to the current state, so syncing
+     *  never re-fires a query by itself. */
+    private fun syncSpinner(spinner: Spinner, value: String) {
+        val adapter = spinner.adapter ?: return
+        for (i in 0 until adapter.count) {
+            if (adapter.getItem(i)?.toString() == value) {
+                if (spinner.selectedItemPosition != i) spinner.setSelection(i)
+                return
+            }
+        }
+    }
+
+    private fun bandLabel(id: Int): String = when (id) {
+        R.id.band_low -> "Below 85"
+        R.id.band_mid -> "85–94"
+        R.id.band_high -> "95+"
+        else -> "All scores"
+    }
+
+    /** Radio behavior for the band toggle row. */
+    private fun selectBand(selectedId: Int) {
+        if (!::bandButtons.isInitialized) return
+        bandButtons.forEach { (id, btn) -> btn.isChecked = id == selectedId }
+    }
+
     private fun clearFilters() {
         query = ""
         searchField.setText("")
         county = "All counties"
-        countyInput.setText(county, false)
+        syncSpinner(countyInput, county)
         band = "All scores"
-        bandGroup.check(R.id.band_all)
+        selectBand(R.id.band_all)
         applyFilters()
     }
 
@@ -190,23 +244,21 @@ class BrowseFragment : Fragment() {
     private fun bindRegion() {
         val regionId = app.regions.activeRegionId()
         activeRegionId = regionId
-        // Always re-sync the dropdowns with the fragment's own state first:
-        // after a view recreation (rotation, process restore) the framework
-        // can restore stale text into the fields while these vars hold the
-        // truth — and the adapters live in the (recreated) view, not here.
+        // Always re-sync the spinners with the fragment's own state first:
+        // after a view recreation (rotation, process restore) the views
+        // are recreated empty while these vars hold the truth — and the
+        // adapters live in the (recreated) view, not here.
         if (::countyInput.isInitialized) {
-            countyInput.setText(county, false)
             if (countyInput.adapter == null) {
-                countyInput.setAdapter(
-                    ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, boundCounties)
-                )
+                countyInput.adapter = spinnerAdapter(boundCounties)
             }
+            syncSpinner(countyInput, county)
         }
-        if (::sortInput.isInitialized) sortInput.setText(sort, false)
+        if (::sortInput.isInitialized) syncSpinner(sortInput, sort)
         if (boundRegionId == regionId) return
         boundRegionId = regionId
         county = "All counties"
-        countyInput.setText(county, false)
+        syncSpinner(countyInput, county)
         val info = app.regions.activeInfo()
         view?.findViewById<TextView>(R.id.loading_label)?.text =
             "Loading ${info.displayName} restaurants…"
@@ -215,23 +267,19 @@ class BrowseFragment : Fragment() {
             if (disposition) View.GONE else View.VISIBLE
         if (disposition) {
             band = "All scores"
-            bandGroup.check(R.id.band_all)
+            selectBand(R.id.band_all)
             if (sort == "Worst first" || sort == "Best first") sort = "Most recent"
         }
         val sorts = if (disposition) listOf("Most recent", "Name A–Z")
         else listOf("Worst first", "Best first", "Most recent", "Name A–Z")
-        sortInput.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, sorts)
-        )
-        sortInput.setText(sort, false)
+        sortInput.adapter = spinnerAdapter(sorts)
+        syncSpinner(sortInput, sort)
         scope.launch {
             val counties = listOf("All counties") + app.repository.counties(regionId)
             if (!isAdded) return@launch
             boundCounties = counties
-            countyInput.setAdapter(
-                ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, counties)
-            )
-            countyInput.setText(county, false)
+            countyInput.adapter = spinnerAdapter(counties)
+            syncSpinner(countyInput, county)
         }
     }
 
@@ -267,10 +315,9 @@ class BrowseFragment : Fragment() {
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
-                // A failed query keeps the current list; the spinner must
-                // still stop (finally below).
-            } finally {
-                if (::swipe.isInitialized) swipe.isRefreshing = false
+                // A failed query keeps the current list. (Refresh-button
+                // state is owned by the sync completion callback, not by
+                // individual queries.)
             }
         }
     }

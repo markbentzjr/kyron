@@ -126,6 +126,31 @@ class CatalogDb(context: Context) :
         /** Highest pack schema this build can install (pack_meta.schema_version). */
         const val SUPPORTED_PACK_SCHEMA = 2
 
+        // ---------------------------------------------------- search text
+        // Workstream D / FIX5: the FTS tokenizer splits "McDonald's" into
+        // the tokens (mcdonald, s), so a user typing "McDonalds" (or with
+        // a curly apostrophe from Android autocorrect, which tokenizes
+        // differently again) could NEVER match. Fix: the FTS name column
+        // stores the verbatim name PLUS an apostrophe-stripped alias
+        // ("McDonald's Chelsea McDonalds Chelsea"), and queries strip
+        // apostrophes the same way before MATCH is built. The places
+        // table always keeps the verbatim source name — only the search
+        // index carries the alias. Both apostrophes (ASCII ' and the
+        // U+2019 autocorrect form) are stripped on both sides.
+        fun stripApostrophes(s: String): String =
+            s.replace("'", "").replace("\u2019", "")
+
+        /** Value stored in places_fts.name for [name] (verbatim + alias). */
+        fun ftsName(name: String): String {
+            val alias = stripApostrophes(name)
+            return if (alias == name) name else "$name $alias"
+        }
+
+        /** SQL expression producing the same value as [ftsName] for the
+         *  places.name column (used by SQL-side FTS rebuilds). */
+        const val FTS_NAME_SQL: String =
+            "name || ' ' || REPLACE(REPLACE(name, '''', ''), '\u2019', '')"
+
         private val dateFmt = java.text.SimpleDateFormat("M/d/yyyy", java.util.Locale.US)
 
         /** Epoch-day sort key for an "M/d/yyyy" inspection date (0 when unparseable).
@@ -191,6 +216,54 @@ class CatalogDb(context: Context) :
         db.execSQL("DELETE FROM places WHERE region_id=?", arrayOf(regionId))
     }
 
+    /** Rows in the FTS index (0 when FTS is unavailable). */
+    fun ftsRowCount(db: SQLiteDatabase): Int {
+        if (!ftsAvailable) return 0
+        return db.rawQuery("SELECT COUNT(*) FROM places_fts", null).use { c ->
+            if (c.moveToFirst()) c.getInt(0) else 0
+        }
+    }
+
+    /**
+     * Workstream D / FIX5 self-heal: the FTS index must mirror the places
+     * table exactly. A lost FTS row (the LF-4 desync class) makes a place
+     * invisible to text search while Browse and the map still find it, and
+     * before this check NOTHING ever reconciled the two tables — the
+     * desync was permanent. Count mismatch ⇒ rebuild the whole index from
+     * the places table (with the search alias, see [ftsName]). Returns
+     * true when a rebuild happened.
+     */
+    fun reconcileFts(db: SQLiteDatabase): Boolean {
+        if (!ftsAvailable) return false
+        if (ftsRowCount(db) == placeCount(db)) return false
+        db.beginTransaction()
+        try {
+            db.execSQL("DELETE FROM places_fts")
+            db.execSQL(
+                "INSERT INTO places_fts(place_id,name,city,address,zip,county) " +
+                    "SELECT id, $FTS_NAME_SQL, city, address, zip, county FROM places"
+            )
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+        return true
+    }
+
+    /** Coordinates a device itself produced (geo_prov='DEVICE' — the old
+     *  on-device geocoder cache, drive-by fixes) for one region. The
+     *  bundled-region refresh preserves these across the swap: they are
+     *  device data, not seed data. */
+    fun deviceCoords(db: SQLiteDatabase, regionId: String): Map<String, Pair<Double, Double>> =
+        db.rawQuery(
+            "SELECT id, lat, lng FROM places WHERE region_id=? AND geo_prov='DEVICE' AND lat IS NOT NULL AND lng IS NOT NULL",
+            arrayOf(regionId)
+        ).use { c ->
+            val out = HashMap<String, Pair<Double, Double>>()
+            while (c.moveToNext()) out[c.getString(0)] = c.getDouble(1) to c.getDouble(2)
+            out
+        }
+
     // ---------------------------------------------------------------- writes
 
     /** Insert or replace one place and its inspections + FTS row. */
@@ -225,7 +298,7 @@ class CatalogDb(context: Context) :
         if (ftsAvailable) {
             db.delete("places_fts", "place_id=?", arrayOf(p.id))
             val fv = ContentValues().apply {
-                put("place_id", p.id); put("name", p.name); put("city", p.city)
+                put("place_id", p.id); put("name", ftsName(p.name)); put("city", p.city)
                 put("address", p.address); put("zip", p.zip); put("county", p.county)
             }
             db.insert("places_fts", null, fv)
@@ -311,7 +384,7 @@ class CatalogDb(context: Context) :
                 }
                 if (fs != null) {
                     fs.clearBindings()
-                    fs.bindString(1, p.id); fs.bindString(2, p.name); fs.bindString(3, p.city)
+                    fs.bindString(1, p.id); fs.bindString(2, ftsName(p.name)); fs.bindString(3, p.city)
                     fs.bindString(4, p.address); fs.bindString(5, p.zip); fs.bindString(6, p.county)
                     fs.executeInsert()
                 }
@@ -441,7 +514,13 @@ class CatalogDb(context: Context) :
      */
     fun ftsIds(db: SQLiteDatabase, text: String, limit: Int): List<String>? {
         if (!ftsAvailable || text.isBlank()) return null
-        val query = text.trim().split(Regex("\\s+"))
+        // Workstream D / FIX5: strip apostrophes from the query exactly as
+        // the index alias does (see ftsName) — "McDonald's", "McDonalds"
+        // and the autocorrect form "McDonald’s" all become the token
+        // "mcdonalds", which the alias in the index carries.
+        val cleaned = stripApostrophes(text)
+        if (cleaned.isBlank()) return null
+        val query = cleaned.trim().split(Regex("\\s+"))
             .filter { it.isNotEmpty() }
             .joinToString(" ") { "\"" + it.replace("\"", "\"\"") + "\"*" }
         if (query.isEmpty()) return null
@@ -489,8 +568,18 @@ class CatalogDb(context: Context) :
             // QA fix (2026-10-13): escape LIKE wildcards so user text is
             // matched literally — searching "%" or "_" used to return the
             // whole catalog through this fallback path.
-            where.append(" AND (name LIKE ? ESCAPE '\\' OR city LIKE ? ESCAPE '\\' OR address LIKE ? ESCAPE '\\' OR zip LIKE ? ESCAPE '\\' OR county LIKE ? ESCAPE '\\')")
-            val esc = textLike.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            // Workstream D / FIX5: the comparison is apostrophe-insensitive
+            // on BOTH sides (columns via REPLACE, pattern pre-stripped), so
+            // this fallback — now also used when FTS returns zero hits —
+            // finds "McDonald's" from a "McDonalds" query too.
+            fun col(c: String) = "REPLACE(REPLACE($c,'''',''),'\u2019','')"
+            where.append(
+                " AND (${col("name")} LIKE ? ESCAPE '\\' OR ${col("city")} LIKE ? ESCAPE '\\'" +
+                    " OR ${col("address")} LIKE ? ESCAPE '\\' OR ${col("zip")} LIKE ? ESCAPE '\\'" +
+                    " OR ${col("county")} LIKE ? ESCAPE '\\')"
+            )
+            val esc = stripApostrophes(textLike)
+                .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
             val pat = "%$esc%"
             repeat(5) { args.add(pat) }
         }

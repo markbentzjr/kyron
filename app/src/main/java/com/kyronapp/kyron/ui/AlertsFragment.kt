@@ -8,21 +8,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.EditText
+import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
-import com.google.android.material.materialswitch.MaterialSwitch
-import com.google.android.material.slider.Slider
 import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.MainActivity
 import com.kyronapp.kyron.R
@@ -40,14 +39,20 @@ import java.text.DateFormat
 import java.util.Date
 
 /**
- * Alerts (2.1 redesign): alert rules are readable cards, not a settings
- * form. Favorites alerts are a one-tap switch; area alerts summarize
+ * Alerts: alert rules are readable cards, not a settings form.
+ * Favorites alerts are a one-tap switch; area alerts summarize
  * themselves in plain language ("Watching Jefferson County · alert me
  * when a new score drops below 85 · within 10 miles of Downtown
  * Birmingham") with Edit / Remove actions. Editing happens in a
  * collapsible editor whose centerpiece is a SEARCHABLE county picker —
  * the 67-checkbox wall is gone. All rule semantics (Prefs/UserStore)
  * are unchanged from LF-2/LF-4.
+ *
+ * LF4FIX2: the controls are classic Views (SwitchCompat, SeekBars,
+ * toggle-button presets, card backgrounds) instead of Material
+ * widgets; every behavior above — including the bind-time value
+ * normalization that keeps imported fractional/legacy values from
+ * crashing the controls — is preserved.
  */
 class AlertsFragment : Fragment() {
 
@@ -139,9 +144,9 @@ class AlertsFragment : Fragment() {
         val prefs = app.prefs
         // Normalize legacy/imported values into the controls' ranges:
         // backups can carry a threshold up to 100 (the pre-2.1 SeekBar's
-        // max) or an unbounded radius; the Sliders would throw on those.
+        // max) or an unbounded radius; discrete controls throw on those.
         if (prefs.threshold !in 60..99) prefs.threshold = prefs.threshold.coerceIn(60, 99)
-        // Radius must also be a whole number: the Slider is discrete
+        // Radius must also be a whole number: the control is discrete
         // (step 1) and throws on fractional values from imported backups.
         val r0 = prefs.radiusMiles
         if (r0 !in 1.0..50.0 || r0 % 1.0 != 0.0) {
@@ -154,13 +159,13 @@ class AlertsFragment : Fragment() {
         if (nameField.text.toString() != prefs.profileName && !nameField.hasFocus()) {
             nameField.setText(prefs.profileName)
         }
-        root.findViewById<MaterialButton>(R.id.save_profile).setOnClickListener {
+        root.findViewById<Button>(R.id.save_profile).setOnClickListener {
             prefs.profileName = nameField.text.toString()
             Toast.makeText(requireContext(), "Profile saved", Toast.LENGTH_SHORT).show()
         }
 
         // Rule card 1: favorites (one-tap quick-pick)
-        val swFav = root.findViewById<MaterialSwitch>(R.id.sw_fav_alerts)
+        val swFav = root.findViewById<SwitchCompat>(R.id.sw_fav_alerts)
         swFav.setOnCheckedChangeListener(null)
         swFav.isChecked = prefs.alertsForFavorites
         swFav.setOnCheckedChangeListener { _, checked ->
@@ -169,7 +174,7 @@ class AlertsFragment : Fragment() {
         }
 
         // Rule card 2: area alerts — summary + switch + edit/remove
-        val swArea = root.findViewById<MaterialSwitch>(R.id.sw_area_alerts)
+        val swArea = root.findViewById<SwitchCompat>(R.id.sw_area_alerts)
         swArea.setOnCheckedChangeListener(null)
         swArea.isChecked = prefs.alertsForArea
         swArea.setOnCheckedChangeListener { _, checked ->
@@ -178,7 +183,7 @@ class AlertsFragment : Fragment() {
             bind()
         }
         root.findViewById<TextView>(R.id.area_summary).text = areaSummaryText()
-        val removeBtn = root.findViewById<MaterialButton>(R.id.area_remove)
+        val removeBtn = root.findViewById<Button>(R.id.area_remove)
         removeBtn.visibility = if (prefs.alertsForArea) View.VISIBLE else View.GONE
         removeBtn.setOnClickListener {
             prefs.alertsForArea = false
@@ -188,7 +193,7 @@ class AlertsFragment : Fragment() {
         }
         val editor = root.findViewById<View>(R.id.area_editor)
         editor.visibility = if (editorOpen) View.VISIBLE else View.GONE
-        root.findViewById<MaterialButton>(R.id.area_edit).setOnClickListener {
+        root.findViewById<Button>(R.id.area_edit).setOnClickListener {
             editorOpen = !editorOpen
             editor.visibility = if (editorOpen) View.VISIBLE else View.GONE
         }
@@ -205,38 +210,39 @@ class AlertsFragment : Fragment() {
             else -> "${monitored.size} counties: " +
                 monitored.sorted().take(3).joinToString(", ") + " and ${monitored.size - 3} more"
         }
-        root.findViewById<MaterialButton>(R.id.choose_counties).setOnClickListener { showCountyPicker() }
+        root.findViewById<Button>(R.id.choose_counties).setOnClickListener { showCountyPicker() }
 
         // Threshold — plain language, number always visible.
         val thrLabel = root.findViewById<TextView>(R.id.threshold_label)
-        val thrSlider = root.findViewById<Slider>(R.id.threshold_slider)
+        val thrSlider = root.findViewById<SeekBar>(R.id.threshold_slider)
         thrLabel.text = "Alert me when a new score drops below ${prefs.threshold}"
-        // Clamp: the pre-2.1 SeekBar allowed up to 100; the Slider range is 60..99
-        // and setting an out-of-range value throws.
-        val thrClamped = prefs.threshold.coerceIn(60, 99).toFloat()
-        if (thrSlider.value != thrClamped) thrSlider.value = thrClamped
-        thrSlider.clearOnChangeListeners()
-        thrSlider.addOnChangeListener { _, value, _ ->
-            thrLabel.text = "Alert me when a new score drops below ${value.toInt()}"
-        }
-        thrSlider.clearOnSliderTouchListeners()
-        thrSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: Slider) {}
-            override fun onStopTrackingTouch(slider: Slider) {
-                prefs.threshold = slider.value.toInt()
+        // The stored value was normalized into 60..99 at the top of
+        // bind(), so the SeekBar (min 60, max 99) always accepts it —
+        // the same protection the discrete Material Slider needed,
+        // kept verbatim.
+        val thrClamped = prefs.threshold.coerceIn(60, 99)
+        if (thrSlider.progress != thrClamped) thrSlider.progress = thrClamped
+        thrSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                thrLabel.text = "Alert me when a new score drops below $progress"
+            }
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+            override fun onStopTrackingTouch(sb: SeekBar?) {
+                prefs.threshold = thrSlider.progress
                 bind()
             }
         })
 
-        // Area center: current label + preset chips + device location.
+        // Area center: current label + preset toggles + device location.
         root.findViewById<TextView>(R.id.home_label).text = "Area center: ${prefs.homeLabel}"
-        val presetBox = root.findViewById<ChipGroup>(R.id.preset_box)
+        val presetBox = root.findViewById<GridLayout>(R.id.preset_box)
         presetBox.removeAllViews()
         for ((label, la, ln) in HOME_PRESETS) {
-            val chip = Chip(requireContext()).apply {
-                chipMinHeight = 48f * resources.displayMetrics.density
+            val chip = ToggleButton(requireContext()).apply {
+                minHeight = (48f * resources.displayMetrics.density).toInt()
+                textOn = label
+                textOff = label
                 text = label
-                isCheckable = true
                 isChecked = prefs.homeLabel == label
                 setOnClickListener {
                     prefs.homeLat = la; prefs.homeLng = ln; prefs.homeLabel = label
@@ -245,25 +251,23 @@ class AlertsFragment : Fragment() {
             }
             presetBox.addView(chip)
         }
-        root.findViewById<MaterialButton>(R.id.use_location).setOnClickListener {
+        root.findViewById<Button>(R.id.use_location).setOnClickListener {
             (activity as? MainActivity)?.requestLocation()
         }
 
         // Radius — plain language.
         val radLabel = root.findViewById<TextView>(R.id.radius_label)
-        val radSlider = root.findViewById<Slider>(R.id.radius_slider)
+        val radSlider = root.findViewById<SeekBar>(R.id.radius_slider)
         radLabel.text = "Watch places within ${prefs.radiusMiles.toInt()} miles of my area center"
-        val radClamped = prefs.radiusMiles.coerceIn(1.0, 50.0).roundToInt().toFloat()
-        if (radSlider.value != radClamped) radSlider.value = radClamped
-        radSlider.clearOnChangeListeners()
-        radSlider.addOnChangeListener { _, value, _ ->
-            radLabel.text = "Watch places within ${value.toInt()} miles of my area center"
-        }
-        radSlider.clearOnSliderTouchListeners()
-        radSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: Slider) {}
-            override fun onStopTrackingTouch(slider: Slider) {
-                prefs.radiusMiles = slider.value.toDouble()
+        val radClamped = prefs.radiusMiles.coerceIn(1.0, 50.0).roundToInt()
+        if (radSlider.progress != radClamped) radSlider.progress = radClamped
+        radSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                radLabel.text = "Watch places within $progress miles of my area center"
+            }
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+            override fun onStopTrackingTouch(sb: SeekBar?) {
+                prefs.radiusMiles = radSlider.progress.toDouble()
                 bind()
             }
         })
@@ -275,17 +279,17 @@ class AlertsFragment : Fragment() {
         else
             "Not synced yet — the app ships with a statewide snapshot and refreshes itself."
         val main = activity as? MainActivity
-        val syncBtn = root.findViewById<MaterialButton>(R.id.sync_now)
+        val syncBtn = root.findViewById<Button>(R.id.sync_now)
         syncBtn.isEnabled = main?.syncing != true
         syncBtn.text = if (main?.syncing == true) "Syncing…" else "Sync now"
         syncBtn.setOnClickListener { main?.startSync(includeCounties = true) }
         root.findViewById<TextView>(R.id.sync_report).text = main?.lastReport ?: ""
 
         // Backup / restore
-        root.findViewById<MaterialButton>(R.id.export_backup).setOnClickListener {
+        root.findViewById<Button>(R.id.export_backup).setOnClickListener {
             exportLauncher.launch("kyron-backup.json")
         }
-        root.findViewById<MaterialButton>(R.id.import_backup).setOnClickListener {
+        root.findViewById<Button>(R.id.import_backup).setOnClickListener {
             importLauncher.launch(arrayOf("application/json", "text/plain"))
         }
 
@@ -356,16 +360,16 @@ class AlertsFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
         })
-        dialog.findViewById<MaterialButton>(R.id.picker_all).setOnClickListener {
+        dialog.findViewById<Button>(R.id.picker_all).setOnClickListener {
             working.addAll(all)
             refreshList()
         }
-        dialog.findViewById<MaterialButton>(R.id.picker_clear).setOnClickListener {
+        dialog.findViewById<Button>(R.id.picker_clear).setOnClickListener {
             working.clear()
             refreshList()
         }
-        dialog.findViewById<MaterialButton>(R.id.picker_cancel).setOnClickListener { dialog.dismiss() }
-        dialog.findViewById<MaterialButton>(R.id.picker_done).setOnClickListener {
+        dialog.findViewById<Button>(R.id.picker_cancel).setOnClickListener { dialog.dismiss() }
+        dialog.findViewById<Button>(R.id.picker_done).setOnClickListener {
             app.prefs.monitoredCounties = working
             dialog.dismiss()
             bind()
@@ -385,10 +389,9 @@ class AlertsFragment : Fragment() {
         val density = resources.displayMetrics.density
         fun dp(v: Int): Int = (v * density).toInt()
         for (a in inbox) {
-            val card = MaterialCardView(requireContext()).apply {
-                radius = dp(10).toFloat()
-                cardElevation = dp(1).toFloat()
-                setCardBackgroundColor(0xFFFFFFFF.toInt())
+            val card = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                setBackgroundResource(R.drawable.card_bg)
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                 ).apply { setMargins(0, dp(4), 0, dp(4)) }
