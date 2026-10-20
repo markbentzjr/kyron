@@ -17,8 +17,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
 import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.R
 import com.kyronapp.kyron.data.PackManifest
@@ -43,6 +41,11 @@ import java.net.URL
  * always confirms, and a state Kyron doesn't cover is named as such,
  * never shown as an empty region. Picking by hand marks the choice as
  * manual, and nothing automatic ever overrides it.
+ *
+ * LF4FIX2: view construction uses the classic widget set (header bar,
+ * card-background containers, plain buttons) instead of Material
+ * components. Behavior, copy, statuses, dialogs, and entry points are
+ * byte-for-byte the LF-4 contract.
  */
 class CoverageActivity : AppCompatActivity() {
 
@@ -59,8 +62,7 @@ class CoverageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         app = application as KyronApplication
         setContentView(R.layout.activity_coverage)
-        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.cov_toolbar)
-            .setNavigationOnClickListener { finish() }
+        findViewById<View>(R.id.cov_back).setOnClickListener { finish() }
         findViewById<Button>(R.id.cov_location_btn).setOnClickListener { onUseLocation() }
         findViewById<EditText>(R.id.cov_search).addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) { filter = s?.toString() ?: ""; render() }
@@ -101,10 +103,9 @@ class CoverageActivity : AppCompatActivity() {
             val installed = info != null && (info.bundled || installedCount > 0)
             val isActive = regionId == activeId
 
-            val card = MaterialCardView(this).apply {
-                radius = dp(12).toFloat()
-                cardElevation = dp(1).toFloat()
-                setCardBackgroundColor(0xFFFFFFFF.toInt())
+            val card = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setBackgroundResource(R.drawable.card_bg)
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                 ).apply { setMargins(dp(4), dp(4), dp(4), dp(4)) }
@@ -193,8 +194,8 @@ class CoverageActivity : AppCompatActivity() {
         }
     }
 
-    private fun actionButton(label: String, onClick: () -> Unit): MaterialButton =
-        MaterialButton(this).apply {
+    private fun actionButton(label: String, onClick: () -> Unit): Button =
+        Button(this).apply {
             text = label
             isAllCaps = false
             textSize = 13f

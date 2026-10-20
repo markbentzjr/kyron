@@ -14,8 +14,8 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.google.android.material.button.MaterialButton
 import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.MainActivity
 import com.kyronapp.kyron.R
@@ -181,7 +181,12 @@ class MapFragment : Fragment() {
      *  disposition region's NO_SCORE sentinel is not "below 85". */
     private fun applyFilter(places: List<Place>): List<Place> {
         val q = currentFilter
-        val text = q.text.trim()
+        // Workstream D / FIX5: the map's copy of the shared Explore query
+        // must be apostrophe-insensitive like Browse search (CatalogDb) —
+        // a "McDonalds" filter used to hide every "McDonald's" pin here
+        // even though the pin itself was on the map.
+        val text = com.kyronapp.kyron.data.db.CatalogDb.stripApostrophes(q.text.trim())
+        fun field(s: String) = com.kyronapp.kyron.data.db.CatalogDb.stripApostrophes(s)
         return places.filter { p ->
             (q.county == null || p.county == q.county) &&
                 (when (q.band) {
@@ -190,8 +195,8 @@ class MapFragment : Fragment() {
                     "95+" -> p.hasNumericScore && p.score >= 95
                     else -> true
                 }) &&
-                (text.isEmpty() || p.name.contains(text, true) || p.city.contains(text, true) ||
-                    p.address.contains(text, true) || p.zip.contains(text) || p.county.contains(text, true))
+                (text.isEmpty() || field(p.name).contains(text, true) || field(p.city).contains(text, true) ||
+                    field(p.address).contains(text, true) || p.zip.contains(text) || field(p.county).contains(text, true))
         }
     }
 
@@ -441,10 +446,15 @@ class MapFragment : Fragment() {
     }
 
     private fun bindSheetFav(p: Place) {
-        val fav = view?.findViewById<MaterialButton>(R.id.sheet_fav) ?: return
+        val fav = view?.findViewById<Button>(R.id.sheet_fav) ?: return
         val watching = app.prefs.favorites.contains(p.id)
         fav.text = if (watching) "Watching" else "Watch"
-        fav.setIconResource(if (watching) R.drawable.ic_star else R.drawable.ic_star_border)
+        // Classic compound-drawable star (the MaterialButton icon slot's
+        // replacement): filled star while watching, outline otherwise.
+        val icon = ContextCompat.getDrawable(
+            fav.context, if (watching) R.drawable.ic_star else R.drawable.ic_star_border
+        )
+        fav.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
     }
 
     private fun hideSheet() {

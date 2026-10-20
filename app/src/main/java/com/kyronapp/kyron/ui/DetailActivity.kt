@@ -7,10 +7,9 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.chip.Chip
+import androidx.core.content.ContextCompat
 import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.R
 import com.kyronapp.kyron.data.Place
@@ -38,7 +37,7 @@ class DetailActivity : AppCompatActivity() {
         app = application as KyronApplication
         setContentView(R.layout.activity_detail)
         placeId = intent?.getStringExtra(EXTRA_PLACE_ID)
-        findViewById<MaterialToolbar>(R.id.d_toolbar).setNavigationOnClickListener { finish() }
+        findViewById<View>(R.id.d_back).setOnClickListener { finish() }
         scope.launch {
             app.repository.load()
             render()
@@ -96,9 +95,12 @@ class DetailActivity : AppCompatActivity() {
             "Source: ${SourceRegistry.byId(place.source)?.displayName ?: com.kyronapp.kyron.data.Regions.sourceDisplayName(place.source)}"
 
         val isFav = app.prefs.favorites.contains(place.id)
-        val favBtn = findViewById<MaterialButton>(R.id.d_fav)
+        val favBtn = findViewById<Button>(R.id.d_fav)
         favBtn.text = if (isFav) "Watching" else "Watch this place"
-        favBtn.setIconResource(if (isFav) R.drawable.ic_star else R.drawable.ic_star_border)
+        favBtn.setCompoundDrawablesWithIntrinsicBounds(
+            ContextCompat.getDrawable(this, if (isFav) R.drawable.ic_star else R.drawable.ic_star_border),
+            null, null, null
+        )
         favBtn.setOnClickListener {
             app.prefs.toggleFavorite(place.id)
             render()
@@ -148,7 +150,7 @@ class DetailActivity : AppCompatActivity() {
         val insps = place.inspections
         val histCard = findViewById<View>(R.id.d_history_card)
         val histLine = findViewById<TextView>(R.id.d_history_line)
-        val chips = findViewById<com.google.android.material.chip.ChipGroup>(R.id.d_history_chips)
+        val chips = findViewById<LinearLayout>(R.id.d_history_chips)
         if (insps.size > 1) {
             histCard.visibility = View.VISIBLE
             findViewById<View>(R.id.d_history_title).visibility = View.VISIBLE
@@ -157,10 +159,15 @@ class DetailActivity : AppCompatActivity() {
             histLine.text = insps.joinToString(" → ") { it.badgeText } + "  (newest first)"
             chips.removeAllViews()
             insps.forEachIndexed { i, ins ->
-                val chip = Chip(this).apply {
-                    chipMinHeight = 48f * resources.displayMetrics.density
-                    text = "${ins.badgeText} · ${ins.date}"
-                    isCheckable = true
+                // Classic single-select history picker: toggle buttons
+                // whose checked state render() owns (a tap re-renders,
+                // which re-checks exactly the selected inspection).
+                val chip = ToggleButton(this).apply {
+                    minHeight = (48f * resources.displayMetrics.density).toInt()
+                    val label = "${ins.badgeText} · ${ins.date}"
+                    textOn = label
+                    textOff = label
+                    text = label
                     isChecked = i == inspIdx
                     setOnClickListener { inspIdx = i; render() }
                 }

@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg"
     android:orientation="vertical">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/cov_toolbar"
+    <!-- Header bar (classic): back button + title. Same entry/exit
+         contract as the Material version — back finishes the activity. -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="56dp"
         android:background="@color/kyron_dark"
-        app:navigationContentDescription="@string/cd_back"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        app:navigationIconTint="#FFFFFF"
-        app:title="Coverage &amp; states"
-        app:titleTextColor="#FFFFFF" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/cov_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_back"
+            android:src="@drawable/ic_arrow_back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coverage &amp; states"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
@@ -24,16 +38,16 @@
         android:text="Kyron covers states one region pack at a time, from each health department's own published data. A state listed as “Not covered yet” has no pack — Kyron won't pretend otherwise."
         android:textSize="13sp" />
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/cov_location_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
+        android:drawableStart="@drawable/ic_my_location"
+        android:drawablePadding="6dp"
         android:text="Use my location"
-        android:textAllCaps="false"
-        app:icon="@drawable/ic_my_location"
-        app:iconSize="18dp" />
+        android:textAllCaps="false" />
 
     <TextView
         android:id="@+id/cov_status"
@@ -43,23 +57,20 @@
         android:textSize="13sp"
         android:visibility="gone" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+    <EditText
+        android:id="@+id/cov_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
+        android:background="@drawable/card_bg"
+        android:drawableStart="@drawable/ic_search"
+        android:drawablePadding="8dp"
         android:hint="Search states"
-        app:startIconDrawable="@drawable/ic_search">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/cov_search"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:maxLines="1" />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:inputType="text"
+        android:maxLines="1"
+        android:padding="10dp" />
 
     <ScrollView
         android:layout_width="match_parent"
