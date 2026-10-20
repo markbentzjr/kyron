@@ -159,7 +159,14 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
             val prev = prevArtifact(regionId)
             val prevManifest = prevManifestFile(regionId)
             val hadCurrent = cur.exists()
-            val currentManifestJson = catalog.metaGet(db, "pack_manifest:$regionId")
+            // F-2: pair the artifact with the manifest that describes
+            // ITS contents — its own manifest file. The live meta is
+            // only a fallback for artifacts installed before the
+            // pairing file existed; after a delta the meta is ahead of
+            // the artifact and would mislabel the rollback target.
+            val currentManifestJson = artifactManifestFile(regionId)
+                .takeIf { it.exists() }?.readText()
+                ?: catalog.metaGet(db, "pack_manifest:$regionId")
             if (hadCurrent && currentManifestJson != null) {
                 prev.delete()
                 cur.copyTo(prev, overwrite = true)
@@ -183,9 +190,11 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
             catalog.metaPut(db, "pack_version:$regionId", manifest.datasetVersion)
             catalog.metaPut(db, "pack_manifest:$regionId", manifest.raw.toString())
 
-            // Promote the verified artifact to the canonical slot.
+            // Promote the verified artifact to the canonical slot, and
+            // record the manifest that describes it (F-2 pairing).
             cur.delete()
             packFile.copyTo(cur, overwrite = true)
+            artifactManifestFile(regionId).writeText(manifest.raw.toString())
             return PackInstallResult(regionId, manifest.datasetVersion, manifest.placeCount)
         } finally {
             tmpDb.delete()
@@ -301,9 +310,12 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
                        WHERE place_id IN (SELECT id FROM packsrc.places WHERE region_id = '$rid')"""
                 )
                 if (catalog.ftsAvailable) {
+                    // Workstream D / FIX5: FTS rows carry the apostrophe-
+                    // stripped search alias (CatalogDb.ftsName) — the same
+                    // construction importSeed/upsertPlace/reconcileFts use.
                     db.execSQL(
                         """INSERT INTO places_fts (place_id,name,city,address,zip,county)
-                           SELECT id,name,city,address,zip,county FROM packsrc.places
+                           SELECT id, ${CatalogDb.FTS_NAME_SQL}, city, address, zip, county FROM packsrc.places
                            WHERE region_id = '$rid'"""
                     )
                 }
@@ -365,6 +377,25 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
         val delArr = root.optJSONArray("deletions") ?: JSONArray()
         for (i in 0 until delArr.length()) deletions += delArr.getString(i)
 
+        // F-2: freeze the artifact↔manifest pairing BEFORE the write
+        // below advances the meta. The stored full-pack artifact keeps
+        // holding the PRE-delta data; its own manifest file (written at
+        // install time, or captured here from the still-current meta
+        // for artifacts installed before the pairing file existed) is
+        // what a later rotation pairs it with — never the post-delta
+        // meta. An artifact that cannot be paired is dropped, so
+        // rollback fails closed instead of mislabelling old data.
+        val art = artifact(regionId)
+        val artManifest = artifactManifestFile(regionId)
+        if (art.exists() && !artManifest.exists()) {
+            val metaManifest = catalog.metaGet(db, "pack_manifest:$regionId")
+            if (metaManifest != null) {
+                artManifest.writeText(metaManifest)
+            } else {
+                art.delete()
+            }
+        }
+
         db.beginTransaction()
         try {
             for (id in deletions) catalog.deletePlace(db, id)
@@ -407,6 +438,7 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
             db.endTransaction()
         }
         artifact(regionId).delete()
+        artifactManifestFile(regionId).delete()
         prevArtifact(regionId).delete()
         prevManifestFile(regionId).delete()
     }

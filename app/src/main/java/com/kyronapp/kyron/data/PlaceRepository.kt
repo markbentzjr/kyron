@@ -36,6 +36,14 @@ data class PlaceQuery(
  */
 class PlaceRepository(private val context: Context) {
 
+    companion object {
+        /** Meta key holding the SHA-256 of the bundled seed this catalog
+         *  was last refreshed from (Workstream D / FIX5). Absent on every
+         *  catalog created before the fix — which is exactly the aged-DB
+         *  population the refresh exists to heal. */
+        const val META_BUNDLED_SHA = "bundled_seed_sha:us-al"
+    }
+
     private val catalog = CatalogDb(context)
     val packs: PackManager = PackManager(context, catalog)
     private val appContext = context.applicationContext
@@ -50,22 +58,106 @@ class PlaceRepository(private val context: Context) {
         withContext(Dispatchers.IO) {
             val db = catalog.writableDatabase
             if (catalog.placeCount(db) == 0) {
-                importInitial(db)
+                val importedBundled = importInitial(db)
+                if (importedBundled) {
+                    // Fresh install from the bundled seed: record its
+                    // fingerprint so a later seed change is detectable.
+                    bundledSeed()?.let { (_, sha) ->
+                        catalog.metaPut(db, META_BUNDLED_SHA, sha)
+                    }
+                } else {
+                    // The catalog was seeded from a LEGACY places.json
+                    // (pre-SQLite app): its rows predate the bundled
+                    // seed's geocoding. Refresh the bundled region from
+                    // the current seed right away — this is the exact
+                    // state that left upgraded phones serving a pre-
+                    // geocode catalog (and a pin-less map) forever.
+                    refreshBundledRegion(db)
+                }
+            } else {
+                refreshBundledRegionIfSeedChanged(db)
             }
+            // Self-heal: the FTS index must mirror the places table.
+            catalog.reconcileFts(db)
             _places.value = catalog.allPlaces(db)
             loaded = true
         }
     }
 
+    /** The bundled region's seed (staged sideload file wins over the APK
+     *  asset — same precedence as the first import, minus the legacy file,
+     *  which is a one-time migration source, never a refresh source) plus
+     *  its SHA-256 fingerprint. Null when unreadable. */
+    private fun bundledSeed(): Pair<String, String>? = runCatching {
+        val stagedSeed = File(appContext.filesDir, "places_seed_geocoded.json")
+        val text = if (stagedSeed.exists()) stagedSeed.readText() else readAssetSeed()
+        val sha = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(text.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+        text to sha
+    }.getOrNull()
+
+    /**
+     * Workstream D / FIX5 — the catalog-refresh trigger that did not exist:
+     * before this, load() imported the bundled seed ONLY into an empty
+     * catalog, so no bundled-seed improvement (the LF-1 Census pins, the
+     * FIX4 name restorations and orphan drops, Workstream A's +1,099 pins)
+     * EVER reached a device that had installed an earlier build — its
+     * catalog stayed at whatever its first install imported. When the
+     * bundled seed's fingerprint differs from the one recorded on device,
+     * replace the bundled region's rows from the current seed (the same
+     * wholesale-swap semantics PackManager applies to downloaded packs),
+     * in one transaction. Device-produced coordinates (geo_prov='DEVICE')
+     * are preserved across the swap; downloaded regions and the user
+     * store are untouched. Sync-merged freshness for Alabama places is
+     * re-merged by the next scheduled sync, exactly as after a pack
+     * full-install.
+     */
+    private fun refreshBundledRegionIfSeedChanged(db: android.database.sqlite.SQLiteDatabase) {
+        val (text, sha) = bundledSeed() ?: return
+        if (catalog.metaGet(db, META_BUNDLED_SHA) == sha) return
+        swapBundledRegion(db, text, sha)
+    }
+
+    private fun refreshBundledRegion(db: android.database.sqlite.SQLiteDatabase) {
+        val (text, sha) = bundledSeed() ?: return
+        swapBundledRegion(db, text, sha)
+    }
+
+    private fun swapBundledRegion(
+        db: android.database.sqlite.SQLiteDatabase, seedText: String, seedSha: String
+    ) {
+        val regionId = Regions.ALABAMA.regionId
+        val deviceCoords = catalog.deviceCoords(db, regionId)
+        db.beginTransaction()
+        try {
+            catalog.deleteRegionRows(db, regionId)
+            catalog.importSeed(db, JSONArray(seedText))
+            for ((id, ll) in deviceCoords) {
+                if (catalog.exists(db, id)) {
+                    catalog.setCoords(db, id, ll.first, ll.second, "DEVICE")
+                }
+            }
+            catalog.metaPut(db, META_BUNDLED_SHA, seedSha)
+            catalog.metaPut(db, "pack_version:$regionId", "bundled-" + seedSha.take(12))
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     /** First-import source order: on-device geocoded seed (tests/sideload),
-     *  legacy places.json (upgrades — preserves merged data), bundled asset. */
-    private fun importInitial(db: android.database.sqlite.SQLiteDatabase) {
+     *  legacy places.json (upgrades — preserves merged data), bundled asset.
+     *  Returns true when the BUNDLED seed (staged or asset) was imported,
+     *  false when the legacy file was (the refresh must then run). */
+    private fun importInitial(db: android.database.sqlite.SQLiteDatabase): Boolean {
         val filesDir = appContext.filesDir
         val stagedSeed = File(filesDir, "places_seed_geocoded.json")
         val legacy = File(filesDir, "places.json")
+        var usedBundled = true
         val text: String = when {
             stagedSeed.exists() -> stagedSeed.readText()
-            legacy.exists() -> legacy.readText()
+            legacy.exists() -> { usedBundled = false; legacy.readText() }
             else -> readAssetSeed()
         }
         catalog.importSeed(db, JSONArray(text))
@@ -98,6 +190,7 @@ class PlaceRepository(private val context: Context) {
         if (catalog.metaGet(db, "pack_version:us-al") == null) {
             catalog.metaPut(db, "pack_version:us-al", "bundled-2026-10")
         }
+        return usedBundled
     }
 
     private fun readAssetSeed(): String {
@@ -142,7 +235,13 @@ class PlaceRepository(private val context: Context) {
             else -> "score ASC, name_lc ASC"
         }
         val text = query.text.trim()
-        val ftsIds = if (text.isNotEmpty()) catalog.ftsIds(db, text, 2000) else null
+        var ftsIds = if (text.isNotEmpty()) catalog.ftsIds(db, text, 2000) else null
+        // Workstream D / FIX5 (search defect a): the LIKE fallback used to
+        // fire ONLY when FTS was unavailable (ftsIds == null). An FTS
+        // query that matched ZERO rows was a dead end — no second chance.
+        // Zero hits now falls back to the (apostrophe-insensitive) LIKE
+        // scan like any other FTS miss.
+        if (ftsIds != null && ftsIds.isEmpty()) ftsIds = null
         val like = if (text.isNotEmpty() && ftsIds == null) text else null
         val found = catalog.search(
             db, ids = ftsIds, county = query.county,

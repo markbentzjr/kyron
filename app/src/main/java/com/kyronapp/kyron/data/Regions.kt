@@ -46,8 +46,20 @@ object Regions {
         manifestUrl = "https://markbentzjr.github.io/kyron/data/us-fl.manifest.json"
     )
 
+    /** Georgia (Workstream C3): pack verified end-to-end in the rig, but
+     *  the shipped app refused it — PackManager rejects regions missing
+     *  from KNOWN ("Unknown region us-ga"). This one entry is the whole
+     *  fix; the pack itself needed no app-side change (native 0–100
+     *  scores, A/B/C/U band riding in result_text). */
+    val GEORGIA = RegionInfo(
+        regionId = "us-ga", state = "GA", displayName = "Georgia",
+        scoreModel = MODEL_SCORE, bundled = false,
+        centerLat = 32.96, centerLng = -83.11,
+        manifestUrl = "https://markbentzjr.github.io/kyron/data/us-ga.manifest.json"
+    )
+
     /** Regions with a real data source today. Everything else is uncovered. */
-    val KNOWN: List<RegionInfo> = listOf(ALABAMA, FLORIDA)
+    val KNOWN: List<RegionInfo> = listOf(ALABAMA, FLORIDA, GEORGIA)
 
     fun byId(regionId: String): RegionInfo? = KNOWN.firstOrNull { it.regionId == regionId }
 
@@ -59,6 +71,7 @@ object Regions {
     /** Friendly source label for sources the AL-only SourceRegistry doesn't know. */
     fun sourceDisplayName(source: String): String = when (source) {
         "FL-DBPR" -> "Florida DBPR (Dept. of Business & Professional Regulation)"
+        "GA-DPH" -> "Georgia Dept. of Public Health"
         else -> source
     }
 
