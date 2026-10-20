@@ -1,0 +1,1238 @@
+{
+ "version": 1,
+ "about": "Curated completeness canaries for the Kyron AL catalog (Workstream D, Oct 2026). canary_gate.py fails the build if any canary record is missing from the seed, if its name/city/county drift, or if an expected='pinned' canary loses its coordinates. expected='accounted' canaries are known list-only establishments; the reason field is the signed-off exception and must stay filled. Add canaries as new establishments are verified in source data; never delete one to make a build pass.",
+ "search_canaries": [
+  {
+   "query": "McDonalds",
+   "expect_id": "adph_750e13236c"
+  },
+  {
+   "query": "McDonald's",
+   "expect_id": "adph_750e13236c"
+  },
+  {
+   "query": "McDonald’s",
+   "expect_id": "adph_750e13236c"
+  },
+  {
+   "query": "16758",
+   "expect_id": "adph_750e13236c"
+  },
+  {
+   "query": "280 Chelsea",
+   "expect_id": "adph_750e13236c"
+  },
+  {
+   "query": "mcdonalds chelsea",
+   "expect_id": "adph_750e13236c"
+  }
+ ],
+ "canaries": [
+  {
+   "id": "adph_750e13236c",
+   "name": "McDonald's Chelsea #24310",
+   "city": "Chelsea",
+   "county": "Shelby",
+   "expected": "pinned",
+   "reason": "",
+   "note": "MANDATORY (WS-D origin): the Chelsea McDonald's Mark could not find."
+  },
+  {
+   "id": "jcdh_22521",
+   "name": "Soho Social - Standard",
+   "city": "Homewood",
+   "county": "Jefferson",
+   "expected": "accounted",
+   "reason": "Ships list-only by design: no verified address-level coordinates yet (Census no-match/tie; in the Geocodio residual / WS-F free-source queue). Presence and identity are still enforced by the canary gate.",
+   "note": "Regression sentinel: the current build_seed splitter REJECTS this record's fused JCDH blob (suite-interleaved street) although the shipped seed carries it correctly — a seed rebuild that drops it must fail here."
+  },
+  {
+   "id": "adph_478b417410",
+   "name": "AFC Sushi  @  Piggly Wiggly #36",
+   "city": "Deatsville",
+   "county": "Autauga",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_7703363abc",
+   "name": "ALDI, Inc 03",
+   "city": "Prattville",
+   "county": "Autauga",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_fe613b8a0b",
+   "name": "AFC Sushi @ Publix #1213",
+   "city": "Orange Beach",
+   "county": "Baldwin",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_3088ced650",
+   "name": "AFC Sushi @ Publix #1292",
+   "city": "Gulf Shores",
+   "county": "Baldwin",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_cd835ddc77",
+   "name": "Apricus QSR, LLC Little Caesars # 364041",
+   "city": "Eufaula",
+   "county": "Barbour",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_5fd8543574",
+   "name": "Burger King # 26850",
+   "city": "Eufaula",
+   "county": "Barbour",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_8903b16c1b",
+   "name": "Dollar General #22196",
+   "city": "Brent",
+   "county": "Bibb",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_54af811912",
+   "name": "Dollar General #23106",
+   "city": "Randolph",
+   "county": "Bibb",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_a47596c64d",
+   "name": "Bojangles",
+   "city": "Oneonta",
+   "county": "Blount",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_7673535f5b",
+   "name": "Burger King #11950/CC #1598",
+   "city": "Oneonta",
+   "county": "Blount",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_4f4775e334",
+   "name": "Piggly Wiggly Deli",
+   "city": "Union Springs",
+   "county": "Bullock",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_22d2381bae",
+   "name": "Piggly Wiggly Market",
+   "city": "Union Springs",
+   "county": "Bullock",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_1aa008a9b2",
+   "name": "Arby's #6405",
+   "city": "Greenville",
+   "county": "Butler",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_2747ffb572",
+   "name": "Burger King",
+   "city": "Greenville",
+   "county": "Butler",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_641e106ed7",
+   "name": "Alexandria Foodland Inc",
+   "city": "Alexandria",
+   "county": "Calhoun",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_ade2a74e57",
+   "name": "Alexandria Foodland Inc. ( Deli and Bakery)",
+   "city": "Alexandria",
+   "county": "Calhoun",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_324826304e",
+   "name": "Burger King #19956",
+   "city": "Valley",
+   "county": "Chambers",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_7013ceba16",
+   "name": "Chick-fil-A Valley",
+   "city": "Valley",
+   "county": "Chambers",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_c8bcb01ddc",
+   "name": "MCDONALDS-CENTRE",
+   "city": "CENTRE",
+   "county": "Cherokee",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_4aed52aaf7",
+   "name": "PIGGLY WIGGLY OF CEDAR BLUFF",
+   "city": "CEDAR BLUFF",
+   "county": "Cherokee",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_624b2355c0",
+   "name": "Burger King #23203",
+   "city": "Jemison",
+   "county": "Chilton",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_41e38f1b9f",
+   "name": "Burger King #6903",
+   "city": "Clanton",
+   "county": "Chilton",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_e9f52633b6",
+   "name": "BUTLER FOODLAND",
+   "city": "Butler",
+   "county": "Choctaw",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_674d77fb15",
+   "name": "McDonalds #36349",
+   "city": "Butler",
+   "county": "Choctaw",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_74f33b7ece",
+   "name": "Burger King #26860-Jackson",
+   "city": "Jackson",
+   "county": "Clarke",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_0d1d2a3e60",
+   "name": "Burger King/Grove Hill #9958",
+   "city": "Grove Hill",
+   "county": "Clarke",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_840090a046",
+   "name": "DECK Foods, Inc DBA McDonalds",
+   "city": "Ashland",
+   "county": "Clay",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_af231eab42",
+   "name": "Piggly Wiggly of Ashland, INC. Deli",
+   "city": "Ashland",
+   "county": "Clay",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_3c6b102f19",
+   "name": "Bojangles at Love's Travel Stop #818",
+   "city": "Heflin",
+   "county": "Cleburne",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_ab13617c9b",
+   "name": "Deck Foods DBA McDonalds",
+   "city": "Heflin",
+   "county": "Cleburne",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_a2a7ad0053",
+   "name": "AFC Sushi at Publix #1402",
+   "city": "Enterprise",
+   "county": "Coffee",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_0d1efc43db",
+   "name": "Burger King #4848",
+   "city": "Enterprise",
+   "county": "Coffee",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_7de0da7668",
+   "name": "Arby's # 6764",
+   "city": "Muscle Shoals",
+   "county": "Colbert",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_4fc713397c",
+   "name": "Bojangles Restaurant # 5",
+   "city": "Muscle Shoals",
+   "county": "Colbert",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_f116e453e0",
+   "name": "Love's Travel   Stop # 225 / ARBY'S",
+   "city": "Evergreen",
+   "county": "Conecuh",
+   "expected": "accounted",
+   "reason": "Ships list-only by design: no verified address-level coordinates yet (Census no-match/tie; in the Geocodio residual / WS-F free-source queue). Presence and identity are still enforced by the canary gate.",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_65a67072da",
+   "name": "Dollar General Store #22066",
+   "city": "Kellyton",
+   "county": "Coosa",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_61b29ad1e7",
+   "name": "Dollar General Store # 6057",
+   "city": "Rockford",
+   "county": "Coosa",
+   "expected": "accounted",
+   "reason": "Ships list-only by design: no verified address-level coordinates yet (Census no-match/tie; in the Geocodio residual / WS-F free-source queue). Presence and identity are still enforced by the canary gate.",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_a0119d7839",
+   "name": "BURGER KING #11481",
+   "city": "ANDALUSIA",
+   "county": "Covington",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_2d5a020dbe",
+   "name": "Bravo # 13/Subway",
+   "city": "FLORALA",
+   "county": "Covington",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_320903e82d",
+   "name": "Hardees #1427",
+   "city": "Luverne",
+   "county": "Crenshaw",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_b231c9d633",
+   "name": "Jack's Family Restaurant",
+   "city": "Luverne",
+   "county": "Crenshaw",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_dc566148f3",
+   "name": "Burger King #11914",
+   "city": "Cullman",
+   "county": "Cullman",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_fc767e0a56",
+   "name": "Chick-Fil-A Cullman North",
+   "city": "Cullman",
+   "county": "Cullman",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_249bef3146",
+   "name": "Dairy Queen",
+   "city": "Ozark",
+   "county": "Dale",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_ce6e955311",
+   "name": "Domino's #9400",
+   "city": "Daleville",
+   "county": "Dale",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_5df9164f1d",
+   "name": "ALDI",
+   "city": "SELMA",
+   "county": "Dallas",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_8f07df36ea",
+   "name": "DOLLAR GENERAL #1303",
+   "city": "SELMA",
+   "county": "Dallas",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_8b46f97a0c",
+   "name": "Ace Sushi at Bruce's Foodland",
+   "city": "FORT PAYNE",
+   "county": "DeKalb",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_2806204805",
+   "name": "Burger King #6150",
+   "city": "FORT PAYNE",
+   "county": "DeKalb",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_514a3e4387",
+   "name": "AFC Sushi @ Publix #2010",
+   "city": "Wetumpka",
+   "county": "Elmore",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_0fa0b68a0c",
+   "name": "AFC Sushi @ Publix 1228",
+   "city": "Prattville",
+   "county": "Elmore",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_8af162f553",
+   "name": "Arby's of Atmore #7425",
+   "city": "Atmore",
+   "county": "Escambia",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_6dacac1fce",
+   "name": "Arby's of Brewton #7249",
+   "city": "Brewton",
+   "county": "Escambia",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_1b08e8612c",
+   "name": "AFC SUSHI @ PUBLIX #1476",
+   "city": "RAINBOW CITY",
+   "county": "Etowah",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_0b7ec92f65",
+   "name": "APPLEBEE'S NEIGHBORHOOD GRILL & BAR",
+   "city": "GADSDEN",
+   "county": "Etowah",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_50257b28ae",
+   "name": "Dollar General #10065",
+   "city": "Fayette",
+   "county": "Fayette",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_e6e36e4c15",
+   "name": "Dollar General #1501",
+   "city": "Berry",
+   "county": "Fayette",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_083d0276d8",
+   "name": "Dollar General  # 22991",
+   "city": "Russellville",
+   "county": "Franklin",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_0de493b0ab",
+   "name": "Dollar General # 17373",
+   "city": "Russellville",
+   "county": "Franklin",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_f2b1ac36e0",
+   "name": "Jack's Family Restaurants #305",
+   "city": "Slocomb",
+   "county": "Geneva",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_4428b9eb9f",
+   "name": "McDonald's #11008",
+   "city": "Geneva",
+   "county": "Geneva",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_891bb30da4",
+   "name": "Dollar General # 8705",
+   "city": "Eutaw",
+   "county": "Greene",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_2f22d4a4bd",
+   "name": "Piggly Wiggly",
+   "city": "Eutaw",
+   "county": "Greene",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_594b5afb01",
+   "name": "Dollar General # 3715",
+   "city": "Greensboro",
+   "county": "Hale",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_5f5f7fa83b",
+   "name": "Dollar General Store #25840",
+   "city": "Sawyerville",
+   "county": "Hale",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_95ca2003a2",
+   "name": "Burger King #24565",
+   "city": "Headland",
+   "county": "Henry",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_15d3e36f0d",
+   "name": "Pizza Hut #043104",
+   "city": "Headland",
+   "county": "Henry",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_fa32012a57",
+   "name": "AFC Sushi @ Publix # 1369",
+   "city": "Dothan",
+   "county": "Houston",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_7b62a77548",
+   "name": "AFC Sushi @ Publix #1375",
+   "city": "Dothan",
+   "county": "Houston",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_0b35084e8d",
+   "name": "AFC Sushi @ Publix #1830",
+   "city": "Scottsboro",
+   "county": "Jackson",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_7b366838bd",
+   "name": "Arby's",
+   "city": "Scottsboro",
+   "county": "Jackson",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "jcdh_16470",
+   "name": "Afc Sushi @ Publix #1059",
+   "city": "Birmingham",
+   "county": "Jefferson",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_7feafbaefc",
+   "name": "Dollar General #19704",
+   "city": "Detroit",
+   "county": "Lamar",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_ae952dc284",
+   "name": "Dollar General #24709",
+   "city": "Sulligent",
+   "county": "Lamar",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_4e8efce983",
+   "name": "AFC Sushi @ Publix #1409",
+   "city": "Florence",
+   "county": "Lauderdale",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_1c88795808",
+   "name": "Aldi #96",
+   "city": "Florence",
+   "county": "Lauderdale",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_317bdf59fd",
+   "name": "Burger King",
+   "city": "Moulton",
+   "county": "Lawrence",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_082445d8df",
+   "name": "Dollar General #11204",
+   "city": "Courtland",
+   "county": "Lawrence",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_9c08ae6491",
+   "name": "AFC Sushi @ Publix #1086",
+   "city": "Phenix City",
+   "county": "Lee",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_f356b3d80e",
+   "name": "AFC Sushi @ Publix #1294",
+   "city": "Auburn",
+   "county": "Lee",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_ca3c51a160",
+   "name": "AFC Sushi @ Publix # 1185",
+   "city": "Madison",
+   "county": "Limestone",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_ab691c7a2b",
+   "name": "AFC Sushi @ Publix # 1203",
+   "city": "Athens",
+   "county": "Limestone",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_a6a128d32f",
+   "name": "Dollar General #18648",
+   "city": "Letohatchee",
+   "county": "Lowndes",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_6bae7cdf65",
+   "name": "Dollar General #21971",
+   "city": "Hayneville",
+   "county": "Lowndes",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_713b9a0453",
+   "name": "Burger King #2616",
+   "city": "Tuskegee",
+   "county": "Macon",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_1f965b6569",
+   "name": "Love's Travel Stop #577/Subway",
+   "city": "Shorter",
+   "county": "Macon",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_d92c402c83",
+   "name": "AFC Sushi @ Publix # 1126",
+   "city": "Huntsville",
+   "county": "Madison",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_66243f6416",
+   "name": "AFC Sushi @ Publix # 1218",
+   "city": "Harvest",
+   "county": "Madison",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_c452b5fa9e",
+   "name": "Bulldog Restaurants - Burger King #19875",
+   "city": "Demopolis",
+   "county": "Marengo",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_d739da9792",
+   "name": "Dollar General # 1385",
+   "city": "Demopolis",
+   "county": "Marengo",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_44eb39a4e5",
+   "name": "Burger King #1585",
+   "city": "Hamilton",
+   "county": "Marion",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_3d6b3f0689",
+   "name": "Dollar General #23295",
+   "city": "Winfield",
+   "county": "Marion",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_6e4d4d40b1",
+   "name": "AFC Sushi @ Publix #1462",
+   "city": "Guntersville",
+   "county": "Marshall",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_07d849e8cc",
+   "name": "ALDI Grocery Store #85",
+   "city": "Guntersville",
+   "county": "Marshall",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "mchd_f99c98c93f",
+   "name": "AFC Sushi @ Publix #1404",
+   "city": "Mobile",
+   "county": "Mobile",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "mchd_c5293b4787",
+   "name": "AFC Sushi @ Publix #1436",
+   "city": "Mobile",
+   "county": "Mobile",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_b17748c06f",
+   "name": "Darby Red & White",
+   "city": "Monroeville",
+   "county": "Monroe",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_45a3cbb08e",
+   "name": "HFR Holdings LLC DBA McDonald's",
+   "city": "Monroeville",
+   "county": "Monroe",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_34abc6a6c7",
+   "name": "AFC Sushi @ Publix # 1024",
+   "city": "Montgomery",
+   "county": "Montgomery",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_d4c4c08164",
+   "name": "AFC Sushi @ Publix # 1025",
+   "city": "Montgomery",
+   "county": "Montgomery",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_1d117d6163",
+   "name": "AFC Sushi @ Publix #1609",
+   "city": "Decatur",
+   "county": "Morgan",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_c830d8dc94",
+   "name": "AFC Sushi @ Publix #45",
+   "city": "Decatur",
+   "county": "Morgan",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_9ead128e81",
+   "name": "Dollar General #24785",
+   "city": "Marion",
+   "county": "Perry",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_e06e090b37",
+   "name": "Dollar General #721",
+   "city": "Marion",
+   "county": "Perry",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_ed4ce2b7ac",
+   "name": "CVS Pharmacy #4946",
+   "city": "Aliceville",
+   "county": "Pickens",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_3d9ec91e08",
+   "name": "Dollar General # 4937",
+   "city": "Reform",
+   "county": "Pickens",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_bdf6ae1925",
+   "name": "Arby's  Unit 7236",
+   "city": "Troy",
+   "county": "Pike",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_193170178a",
+   "name": "Burger King #4058",
+   "city": "Troy",
+   "county": "Pike",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_61ad17c095",
+   "name": "McDonald's",
+   "city": "Roanoke",
+   "county": "Randolph",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_88286d28e1",
+   "name": "Burger King #7164",
+   "city": "Roanoke",
+   "county": "Randolph",
+   "expected": "accounted",
+   "reason": "Ships list-only by design: no verified address-level coordinates yet (Census no-match/tie; in the Geocodio residual / WS-F free-source queue). Presence and identity are still enforced by the canary gate.",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_f08830b04e",
+   "name": "Burger King #10948",
+   "city": "Phenix City",
+   "county": "Russell",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_53a8cb4dd7",
+   "name": "CVS/Pharmacy #4934",
+   "city": "Phenix City",
+   "county": "Russell",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_63b27d967c",
+   "name": "AFC Sushi @ Publix #1073",
+   "city": "Alabaster",
+   "county": "Shelby",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_8203dc1600",
+   "name": "AFC Sushi at Publix #1508",
+   "city": "Moody",
+   "county": "St. Clair",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_6ed9cab763",
+   "name": "Arby's #6506",
+   "city": "Leeds",
+   "county": "St. Clair",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_3328e0ad28",
+   "name": "Burger King #10800",
+   "city": "Livingston",
+   "county": "Sumter",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_80b1aa79dd",
+   "name": "Dollar General Store #25400",
+   "city": "Livingston",
+   "county": "Sumter",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_d2de8185f2",
+   "name": "Arby's #1867",
+   "city": "Sylacauga",
+   "county": "Talladega",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_1de1971fb0",
+   "name": "Arby's #1900",
+   "city": "Talladega",
+   "county": "Talladega",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_37066711a3",
+   "name": "Kowaliga Restaurant",
+   "city": "Alexander City",
+   "county": "Tallapoosa",
+   "expected": "pinned",
+   "reason": "",
+   "note": "county coverage canary (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_789da712c9",
+   "name": "Alexander City Work Release",
+   "city": "Alexander city",
+   "county": "Tallapoosa",
+   "expected": "accounted",
+   "reason": "Ships list-only by design: no verified address-level coordinates yet (Census no-match/tie; in the Geocodio residual / WS-F free-source queue). Presence and identity are still enforced by the canary gate.",
+   "note": "county coverage canary (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_8898c4f64d",
+   "name": "AFC Sushi @ Publix #1075",
+   "city": "Northport",
+   "county": "Tuscaloosa",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_5189b79f84",
+   "name": "AFC Sushi @ Publix #1083",
+   "city": "Tuscaloosa",
+   "county": "Tuscaloosa",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_1cc8e876c7",
+   "name": "Arby's #7066",
+   "city": "Jasper",
+   "county": "Walker",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_0247ecfa65",
+   "name": "Burger King #25743(new)",
+   "city": "Jasper",
+   "county": "Walker",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_22be461b6e",
+   "name": "SUBWAY OF CHATOM",
+   "city": "CHATOM",
+   "county": "Washington",
+   "expected": "accounted",
+   "reason": "Ships list-only by design: no verified address-level coordinates yet (Census no-match/tie; in the Geocodio residual / WS-F free-source queue). Presence and identity are still enforced by the canary gate.",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_2a874a2e59",
+   "name": "LEROY HIGH SCHOOL",
+   "city": "LEROY",
+   "county": "Washington",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_e07f980fd6",
+   "name": "Piggly Wiggly #125 Deli",
+   "city": "Camden",
+   "county": "Wilcox",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_e14ab50eda",
+   "name": "Piggly Wiggly #125 Market",
+   "city": "Camden",
+   "county": "Wilcox",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_f8c050ba6c",
+   "name": "Burger King #1565",
+   "city": "Haleyville",
+   "county": "Winston",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_adf0e6e0f9",
+   "name": "Dollar General Store #24753",
+   "city": "Haleyville",
+   "county": "Winston",
+   "expected": "pinned",
+   "reason": "",
+   "note": "well-known chain/landmark (auto-curated WS-D)"
+  },
+  {
+   "id": "adph_fbbf131bf4",
+   "name": "Conecuh County Early Learning Academy",
+   "city": "Evergreen",
+   "county": "Conecuh",
+   "expected": "pinned",
+   "reason": "",
+   "note": "pin-regression canary (auto-curated WS-D)"
+  }
+ ]
+}
