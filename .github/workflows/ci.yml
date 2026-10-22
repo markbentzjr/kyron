@@ -39,7 +39,7 @@ jobs:
 
       - name: Validate vector pathData
         run: |
-          python3 app/tools/validate_pathdata.py app/src/main/res || exit 1
+          python3 tools/validate_pathdata.py app/src/main/res || exit 1
         continue-on-error: false
 
       - name: Check seed dataset exists
@@ -59,7 +59,7 @@ jobs:
             SEED_FILE="app/src/main/assets/places_seed.json"
           fi
           if [ -n "$SEED_FILE" ]; then
-            python3 app/tools/validate_seed.py "$SEED_FILE" || exit 1
+            python3 tools/validate_seed.py "$SEED_FILE" || exit 1
           fi
         continue-on-error: false
 
@@ -71,8 +71,8 @@ jobs:
           elif [ -f "app/src/main/assets/places_seed.json" ]; then
             SEED_FILE="app/src/main/assets/places_seed.json"
           fi
-          if [ -n "$SEED_FILE" ] && [ -f "app/tools/canaries.json" ]; then
-            python3 app/tools/canary_gate.py "$SEED_FILE" app/tools/canaries.json || exit 1
+          if [ -n "$SEED_FILE" ] && [ -f "tools/canaries.json" ]; then
+            python3 tools/canary_gate.py "$SEED_FILE" tools/canaries.json || exit 1
           fi
         continue-on-error: false
 
