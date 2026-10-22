@@ -28,6 +28,27 @@ official sources:
 Accounts, favorites and alert rules live on the device in this release;
 cloud-synced accounts are on the roadmap (see `docs/Kyron-2.0-Blueprint.md`).
 
+## Installation
+
+### Installing from GitHub Releases
+
+Kyron is distributed as an APK file that you can download and install directly from GitHub releases.
+
+**Quick install:**
+1. Go to the [Releases page](https://github.com/markbentzjr/kyron/releases)
+2. Download the latest `Kyron-2.0.apk`
+3. Install the APK on your Android device
+4. Open Kyron and start browsing
+
+For detailed installation instructions, troubleshooting, and system requirements, see [INSTALL.md](INSTALL.md).
+
+**System requirements:**
+- Android 9.0 (API level 29) or later
+- 20-30 MB free storage space
+- Internet connection for initial sync and updates
+
+**Note:** You may need to enable "Install from unknown sources" in your phone's settings to install the APK. This is a standard Android security feature for apps not from the Play Store. See [INSTALL.md](INSTALL.md) for detailed instructions.
+
 ## Why one adapter per source?
 
 The US has **no national restaurant-inspection database** — every state and
@@ -57,11 +78,14 @@ so Tallapoosa backfills automatically once ADPH fixes their page.
 - `harvest/` — Python tooling that builds the bundled statewide snapshot
   (`app/src/main/assets/places_seed.json`): ADPH county harvester, JCDH
   catalog enumerator, MCHD harvester, and the seed builder that merges them.
-- `tools/parser-harness/` — a JVM harness that runs the app's real Kotlin
-  parsers against live health-department pages (used to verify parsing
-  fixes, including the ADPH inspection-date fix).
-- `docs/` — the 1.x audit, the 2.0 product blueprint, and the Alabama /
-  USA source research.
+- `tools/` — Validation gates (pathData, seed dataset, canary completeness),
+  geocoding tools, region pack tools, and Robolectric test suite.
+- `docs/` — The 1.x audit, the 2.0 product blueprint, the Alabama / USA
+  source research, and detailed dev update reports.
+- `CONTRIBUTING.md` — Build instructions, development guidelines, and how to
+  add new data sources.
+- `CHANGELOG.md` — Version history and release notes.
+- `SECURITY.md` — Security policy and vulnerability reporting guidelines.
 
 ## Data
 
