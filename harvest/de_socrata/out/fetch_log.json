@@ -1,0 +1,117 @@
+{
+ "base": "https://data.delaware.gov/resource/384s-wygj.json",
+ "started_utc": "2026-10-23T02:20:48Z",
+ "requests": [
+  {
+   "what": "probe_select_rowid",
+   "status": 200,
+   "rows": 1
+  },
+  {
+   "what": "count_unfiltered",
+   "status": 200,
+   "rows": 1
+  },
+  {
+   "what": "count_where_window",
+   "status": 200,
+   "rows": 1
+  },
+  {
+   "what": "page offset=0",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "page offset=5000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "page offset=10000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "page offset=15000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "page offset=20000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "page offset=25000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "page offset=30000",
+   "status": 200,
+   "rows": 3519
+  },
+  {
+   "what": "rowid page offset=0",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "rowid page offset=5000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "rowid page offset=10000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "rowid page offset=15000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "rowid page offset=20000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "rowid page offset=25000",
+   "status": 200,
+   "rows": 5000
+  },
+  {
+   "what": "rowid page offset=30000",
+   "status": 200,
+   "rows": 3519
+  }
+ ],
+ "rows_missing_rowid": 0,
+ "select_rowid_star": "rejected: GET failed after 1 retries: <HTTPError 400: 'Bad Request'> https://data.delaware.gov/resource/384s-wygj.json?%24select=%3Aid%2C%2A&%24limit=1",
+ "rowid_select_supported": true,
+ "count_unfiltered": 33519,
+ "count_where_window": 33087,
+ "chosen_pattern": "A: unfiltered $offset paging with $order=:id (pattern B's window count is recorded as a cross-check; dataset window is >= 2 years)",
+ "rowid_unique": 33519,
+ "rowid_range": [
+  "row-c5na.dcpn.irs7",
+  "row-e6d9_45je.89yz"
+ ],
+ "paired_by_position": true,
+ "pages": [
+  5000,
+  5000,
+  5000,
+  5000,
+  5000,
+  5000,
+  3519
+ ],
+ "rows_written": 33519,
+ "expected_total": 33519,
+ "counts_match": true,
+ "exact_duplicate_rows_in_stream": 0,
+ "finished_utc": "02:21:09Z"
+}

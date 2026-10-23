@@ -1,0 +1,31 @@
+{
+ "rows_in": 33519,
+ "rows_bad_date": 0,
+ "rows_excluded_blank_name": 0,
+ "rows_excluded_blank_street": 1,
+ "rows_null_violation": 948,
+ "rows_violation_without_desc": 14,
+ "rows_desc_without_code": 0,
+ "rows_bad_geocode": 511,
+ "inspections_merged_same_date_type": 24316,
+ "place_id_collisions": [],
+ "establishments": 3731,
+ "places_out": 3731,
+ "inspections_out": 9202,
+ "violations_out": 32570,
+ "places_with_coords": 3657,
+ "places_without_coords": 74,
+ "zip_len_census": {
+  "5": 33495,
+  "0": 23
+ },
+ "insp_type_census": {
+  "Routine": 30466,
+  "Follow-up": 2723,
+  "Complaint": 329
+ },
+ "inspection_date_min": "2024-10-14",
+ "inspection_date_max": "2026-12-03",
+ "inspections_dated_after_2026_10_22": 10,
+ "excluded_rows": 1
+}

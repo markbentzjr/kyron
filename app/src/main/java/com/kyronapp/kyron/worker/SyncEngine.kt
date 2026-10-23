@@ -125,42 +125,148 @@ object SyncEngine {
                 }
         }
 
-        // 5) Alerts
+        // 5) Alerts — AlertEvaluator (context-free) decides; this loop only
+        //    reads/writes the persisted metadata and delivers.
+        //
+        // Persisted metadata (catalog meta table, survives restarts +
+        // pack updates + process rollback; removed WITH the region):
+        //  - `alerts_baseline:<regionId>`  stamped by PackManager at first
+        //    full install, or here at the end of a first successful sync
+        //    for a bundled region (Alabama ships with no install step).
+        //  - `alerts_evt:<placeId>`        the last event key seen for that
+        //    place — repeat deliveries/retries/corrections are judged
+        //    against it.
+        //
+        // Result-model semantics resolve at SOURCE level per place
+        // (modelForPlace): unresolved → UNKNOWN, and UNKNOWN never earns
+        // an Alabama threshold comparison (or any numeric framing).
+        val natcov = com.kyronapp.kyron.data.NationalCoverage
+        val coverage = natcov.load(context)
+        val baselineSeenBefore = HashMap<String, Boolean>() // regionId -> was baselined BEFORE this cycle
+        val baselineStampedThisCycle = LinkedHashSet<String>()
+        val regionsTouched = LinkedHashSet<String>()
         var fired = 0
         val seen = HashSet<String>()
         for (e in events) {
             val p = repo.byId(e.new.id) ?: e.new
             if (!seen.add(p.id)) continue
+            val regionId = p.regionId
+            regionsTouched += regionId
             val isFav = prefs.favorites.contains(p.id)
-            val oldScore = e.old?.score
-            if (isFav && prefs.alertsForFavorites) {
-                if (p.hasNumericScore) {
-                    val title = "New score for ★ ${p.name}: ${p.score}"
-                    val body = "${p.name} (${p.city}) was re-inspected on ${p.date} and scored ${p.score}" +
-                        (oldScore?.let { " (was $it)" } ?: "") + "."
-                    fire(context, prefs, p, title, body, p.score < prefs.threshold)
-                } else {
-                    // LF-4: disposition jurisdictions (e.g. Florida DBPR)
-                    // publish an outcome, not a score. Never render the
-                    // NO_SCORE sentinel as a number, and never call the
-                    // result "low" — there is no scale to be low on.
-                    val result = p.nativeResult.ifBlank { "recorded" }
-                    val title = "New inspection for ★ ${p.name}"
-                    val body = "${p.name} (${p.city}) was re-inspected on ${p.date} — " +
-                        "result: $result" +
-                        (e.old?.nativeResult?.takeIf { it.isNotBlank() && it != p.nativeResult }
-                            ?.let { " (was: $it)" } ?: "") + "."
-                    fire(context, prefs, p, title, body, false)
-                }
-                fired++
-                continue
+            val baselineDone = baselineSeenBefore.getOrPut(regionId) {
+                repo.metaGet("alerts_baseline:$regionId") != null
             }
-            if (prefs.alertsForArea && p.hasNumericScore && p.score < prefs.threshold && inMonitoredArea(p, prefs)) {
-                val title = "Low score near you: ${p.name} scored ${p.score}"
-                val body = "${p.name} (${p.city}) posted a new score of ${p.score} on ${p.date}, " +
-                    "below your threshold of ${prefs.threshold}."
-                fire(context, prefs, p, title, body, true)
-                fired++
+            val lastKey = repo.metaGet("alerts_evt:${p.id}")
+            val model = natcov.modelForPlace(coverage, p)
+            val thresholdApplies = natcov.supportsThresholdAlerts(model)
+            val oldScore = e.old?.score
+            val inArea = inMonitoredArea(p, prefs)
+            val d = AlertEvaluator.evaluate(
+                AlertEvaluator.Input(
+                    hasPrior = e.old != null,
+                    baselineDone = baselineDone,
+                    lastEventKey = lastKey,
+                    eventKey = p.eventKey,
+                    oldDate = e.old?.date,
+                    newDate = p.date,
+                    isFavorite = isFav,
+                    alertsForFavorites = prefs.alertsForFavorites,
+                    alertsForArea = prefs.alertsForArea,
+                    inMonitoredArea = inArea,
+                    thresholdApplies = thresholdApplies,
+                    numeric = p.hasNumericScore,
+                    belowThreshold = p.hasNumericScore && thresholdApplies && p.score < prefs.threshold,
+                    areaEligible = prefs.alertsForArea && thresholdApplies &&
+                        p.hasNumericScore && p.score < prefs.threshold && inArea
+                )
+            )
+            // Record the event key for every OBSERVED place (baseline rows
+            // too) so later deliveries dedupe and corrections are detected
+            // against the real history — never against a date cutoff.
+            if (d.kind != AlertEvaluator.Kind.IGNORE) {
+                repo.metaPut("alerts_evt:${p.id}", p.eventKey)
+            }
+            when (d.kind) {
+                AlertEvaluator.Kind.SUPPRESS_BASELINE,
+                AlertEvaluator.Kind.SUPPRESS_DUPLICATE,
+                AlertEvaluator.Kind.IGNORE -> Unit
+                AlertEvaluator.Kind.NEW_ESTABLISHMENT -> {
+                    if (d.inbox) {
+                        prefs.addAlert(
+                            AlertItem(
+                                p.id,
+                                "Newly listed: ${p.name}",
+                                "First result on file for ${p.name} (${p.city}) — " +
+                                    p.date.ifBlank { "no date on file" } + ". " +
+                                    "This is an initial record, not a new inspection result.",
+                                System.currentTimeMillis(), false
+                            )
+                        )
+                        fired++
+                    }
+                }
+                AlertEvaluator.Kind.CORRECTED_RECORD,
+                AlertEvaluator.Kind.NEW_INSPECTION_LOW,
+                AlertEvaluator.Kind.NEW_INSPECTION_NUM,
+                AlertEvaluator.Kind.NEW_INSPECTION_TEXT -> {
+                    val corrected = d.kind == AlertEvaluator.Kind.CORRECTED_RECORD
+                    val nameStar = if (isFav) "★ ${p.name}" else p.name
+                    val title: String
+                    val body: String
+                    if (p.hasNumericScore) {
+                        title = if (corrected) "Corrected result for $nameStar: ${p.score}"
+                        else "New result for $nameStar: ${p.score}"
+                        body = buildString {
+                            append("$nameStar (${p.city}) ")
+                            append(
+                                if (corrected)
+                                    "published a corrected result for the ${p.date} inspection"
+                                else
+                                    "was re-inspected on ${p.date}"
+                            )
+                            append(" — ${p.score}")
+                            oldScore?.takeIf { it != p.score }?.let { append(" (was $it)") }
+                            append(". ${natcov.legend(model)}")
+                        }
+                    } else {
+                        val result = p.nativeResult.ifBlank { "recorded" }
+                        title = if (corrected) "Corrected result for $nameStar"
+                        else "New inspection for $nameStar"
+                        body = buildString {
+                            append("$nameStar (${p.city}) ")
+                            append(
+                                if (corrected)
+                                    "published a corrected result for the ${p.date} inspection"
+                                else
+                                    "was re-inspected on ${p.date}"
+                            )
+                            append(" — result: $result")
+                            e.old?.nativeResult
+                                ?.takeIf { it.isNotBlank() && it != p.nativeResult }
+                                ?.let { append(" (was: $it)") }
+                            append(".")
+                        }
+                    }
+                    fire(context, prefs, p, title, body, d.low, d.sysNotify)
+                    fired++
+                }
+            }
+        }
+        // End-of-cycle baseline stamping, AFTER the loop: this cycle's
+        // events were already treated as baseline (suppressed); painting
+        // the marker here makes the NEXT cycle the first monitored one.
+        // Bundled regions (Alabama) get their baseline here — they never
+        // go through a pack install.
+        for (regionId in regionsTouched) {
+            if (baselineSeenBefore[regionId] != true &&
+                baselineStampedThisCycle.add(regionId) &&
+                repo.metaGet("alerts_baseline:$regionId") == null
+            ) {
+                repo.metaPut(
+                    "alerts_baseline:$regionId",
+                    java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                        .format(java.util.Date())
+                )
             }
         }
 
@@ -174,9 +280,15 @@ object SyncEngine {
         )
     }
 
-    private fun fire(context: Context, prefs: Prefs, p: Place, title: String, body: String, low: Boolean) {
+    /** LF-N: [sysNotify] gates the system notification (the in-app inbox
+     *  row is always written by [fire]'s addAlert). Newly listed places use
+     *  inbox-only delivery — an informational listing, not an incident. */
+    private fun fire(
+        context: Context, prefs: Prefs, p: Place,
+        title: String, body: String, low: Boolean, sysNotify: Boolean = true
+    ) {
         prefs.addAlert(AlertItem(p.id, title, body, System.currentTimeMillis(), low))
-        Notifier.notify(context, p.id, title, body)
+        if (sysNotify) Notifier.notify(context, p.id, title, body)
     }
 
     fun inMonitoredArea(p: Place, prefs: Prefs): Boolean {

@@ -158,8 +158,10 @@ class MainActivity : AppCompatActivity() {
                 "Kyron shows official health-inspection results for " +
                     "restaurants and food stores. Every result is shown with its " +
                     "inspection date and the health department it came from. " +
-                    "Alabama is included with the app; more states can be added " +
-                    "from Coverage (tap the state name at the top).\n\n" +
+                    "Alabama is included with the app, and every U.S. state is " +
+                    "registered in Coverage — pack-covered states download free region " +
+                    "packs, others show their official inspection portals. " +
+                    "Tap the state name at the top to change state.\n\n" +
                     "• Browse or search below, then tap a place to see why it " +
                     "got its score (where the county publishes the details).\n" +
                     "• Tap the star on a place to watch it — you'll get an " +

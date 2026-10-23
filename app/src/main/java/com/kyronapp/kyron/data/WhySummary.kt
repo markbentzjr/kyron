@@ -83,10 +83,28 @@ object WhySummary {
      *  category wording — restate it, never re-map it into AL terms.) */
     fun categoryOfFl(v: Violation): String = v.ruleText
 
-    /** What a score band means, for places whose source publishes no violation detail. */
-    fun bandExplainer(score: Int): String = when {
-        score >= 95 -> "A score of $score is excellent — at its last inspection this establishment was meeting food-safety standards with at most minor deductions. (This source publishes the score and date only, not the violation list.)"
-        score >= 85 -> "A score of $score is in Alabama's passing range, but points were deducted for food-safety problems found at inspection. (This source publishes the score and date only, not the violation list.)"
-        else -> "A score of $score is below 85, Alabama's reinspection line: the health department requires a follow-up inspection, usually within 60 days. Scores this low typically involve problems like unsafe food temperatures or sanitation failures. (This source publishes the score and date only, not the violation list.)"
+    /** What a score band means, for places whose source publishes no violation detail.
+     *  LF-N: the interpretation is in the place's own region's terms — the
+     *  "Alabama reinspection line" text is Alabama-only, and a Georgia
+     *  (or Oregon) score must not be explained with it. Any DERIVED
+     *  narrative stays clearly distinguishable from an official rating. */
+    fun bandExplainer(score: Int): String = bandExplainer(score, "AL")
+
+    fun bandExplainer(score: Int, state: String?): String {
+        val stateName = state?.let { Regions.knownDisplayName(it) } ?: "the jurisdiction"
+        if (state != null && !state.equals("AL", ignoreCase = true)) {
+            // Model-generic wording: Kyron never applies Alabama's
+            // specific bands (85/95, 60-day line) to other jurisdictions.
+            return when {
+                score >= 95 -> "A score of $score is at the high end of this jurisdiction's scale, with at most minor deductions. (This source publishes the score and date only, not the violation list; the score is the agency's own.)"
+                score >= 85 -> "A score of $score is in the mid-range for $stateName's inspections; points were deducted for food-safety problems found. (This source publishes the score and date only, not the violation list.)"
+                else -> "A score of $score is toward the low end of $stateName's scale — check the official report for the findings. (This source publishes the score and date only, not the violation list.)"
+            }
+        }
+        return when {
+            score >= 95 -> "A score of $score is excellent — at its last inspection this establishment was meeting food-safety standards with at most minor deductions. (This source publishes the score and date only, not the violation list.)"
+            score >= 85 -> "A score of $score is in Alabama's passing range, but points were deducted for food-safety problems found at inspection. (This source publishes the score and date only, not the violation list.)"
+            else -> "A score of $score is below 85, Alabama's reinspection line: the health department requires a follow-up inspection, usually within 60 days. Scores this low typically involve problems like unsafe food temperatures or sanitation failures. (This source publishes the score and date only, not the violation list.)"
+        }
     }
 }

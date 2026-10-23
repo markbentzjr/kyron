@@ -125,12 +125,48 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
     // ------------------------------------------------------------- full
 
     /**
+     * LF-N hardening: an explicit, registry-derived pack-install eligibility
+     * check that REPLACES the legacy hard-coded "Unknown region" refusal.
+     *
+     * A pack may only be installed when:
+     *  1. the region ships with the app (States.KNOWN / bundled), or
+     *  2. the bundled national registry lists the jurisdiction with a
+     *     pack-capable pack_status (bundled | published | built).
+     *
+     * A source-verified state (pack_status "none") can NEVER be turned
+     * installable merely by staging a file — the refusal is explicit:
+     * "verified source data" and "installable pack" are distinct concepts.
+     * The manifest/pack identity checks (region/schema/version/count) below
+     * apply to every accepted install regardless of path.
+     */
+    private fun checkPackEligibility(regionId: String) {
+        if (Regions.byId(regionId) != null) return
+        val jur = com.kyronapp.kyron.data.NationalCoverage.byRegionId(
+            runCatching {
+                com.kyronapp.kyron.data.NationalCoverage.load(appContext)
+            }.getOrDefault(emptyList()),
+            regionId
+        ) ?: throw PackException("Unknown region $regionId")
+        if (!com.kyronapp.kyron.data.NationalCoverage.packInstallable(jur)) {
+            throw PackException(
+                "Refusing pack for $regionId — its registry pack_status is " +
+                    "'${jur.packStatus}'; verified sources do not make a pack installable"
+            )
+        }
+    }
+
+    /** Meta key recording the dataset version this region was BASELINED at
+     *  (first full install). The first sync after a baseline treats its
+     *  old==null events as initial population, never as incidents. */
+    private fun baselineKey(regionId: String) = "alerts_baseline:$regionId"
+
+    /**
      * Install a full region pack from a local file (already downloaded).
      * Throws [PackException] on any refusal; the catalog is unchanged then.
      */
     fun installFullPack(db: SQLiteDatabase, packFile: File, manifest: PackManifest): PackInstallResult {
         val regionId = manifest.regionId
-        if (Regions.byId(regionId) == null) throw PackException("Unknown region $regionId")
+        checkPackEligibility(regionId)
         if (!packFile.exists()) throw PackException("Pack file missing: ${packFile.name}")
         if (manifest.fullBytes > 0 && packFile.length() != manifest.fullBytes) {
             throw PackException(
@@ -189,6 +225,13 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
             }
             catalog.metaPut(db, "pack_version:$regionId", manifest.datasetVersion)
             catalog.metaPut(db, "pack_manifest:$regionId", manifest.raw.toString())
+            // baseline = THIS dataset version (LF-N alerts): the very first
+            // sync that observes only this version treats its old==null
+            // events as initial population, never as incidents. A region
+            // that already had a baseline keeps its old marker.
+            if (catalog.metaGet(db, baselineKey(regionId)) == null) {
+                catalog.metaPut(db, baselineKey(regionId), manifest.datasetVersion)
+            }
 
             // Promote the verified artifact to the canonical slot, and
             // record the manifest that describes it (F-2 pairing).
@@ -426,13 +469,26 @@ class PackManager(context: Context, private val catalog: CatalogDb) {
     /** Delete a downloaded region's rows + artifacts. Bundled regions and
      *  the user store are never touched. */
     fun removeRegion(db: SQLiteDatabase, regionId: String) {
-        val info = Regions.byId(regionId) ?: throw PackException("Unknown region $regionId")
+        // LF-N: removal obeys the same registry-derived eligibility as
+        // install (avoid removing a region only the registry vouches for,
+        // and never silently "remove" something unknown).
+        val jur = com.kyronapp.kyron.data.NationalCoverage.byRegionId(
+            runCatching {
+                com.kyronapp.kyron.data.NationalCoverage.load(appContext)
+            }.getOrDefault(emptyList()),
+            regionId
+        )
+        val info = Regions.byId(regionId)
+            ?: (if (com.kyronapp.kyron.data.NationalCoverage.packInstallable(jur))
+                Regions.fromRegistry(appContext, regionId) else null)
+        if (info == null) throw PackException("Unknown region $regionId")
         if (info.bundled) throw PackException("${info.displayName} ships with the app and can't be removed")
         db.beginTransaction()
         try {
             catalog.deleteRegionRows(db, regionId)
             catalog.metaDelete(db, "pack_version:$regionId")
             catalog.metaDelete(db, "pack_manifest:$regionId")
+            catalog.metaDelete(db, baselineKey(regionId))
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()

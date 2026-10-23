@@ -225,7 +225,7 @@ class DetailActivity : AppCompatActivity() {
             whyText.text = when {
                 cur.violations.isNotEmpty() -> WhySummary.summarize(cur)
                 sourceHasViolations -> WhySummary.summarize(cur)
-                else -> WhySummary.bandExplainer(cur.score) +
+                else -> WhySummary.bandExplainer(cur.score, place.state) +
                     "\n\n${SourceRegistry.byId(place.source)?.displayName ?: "This source"} publishes scores and dates only — the violation detail stays on the paper report posted inside the restaurant, so no item-by-item breakdown is available online."
             }
             violCard.visibility = if (sourceHasViolations) View.VISIBLE else View.GONE
@@ -276,7 +276,7 @@ class DetailActivity : AppCompatActivity() {
             }
         } else {
             whyTitle.text = "Why a ${place.score}?"
-            whyText.text = WhySummary.bandExplainer(place.score)
+            whyText.text = WhySummary.bandExplainer(place.score, place.state)
             violCard.visibility = View.GONE
             if (place.detailUrl != null) {
                 loadBtn.visibility = View.VISIBLE
