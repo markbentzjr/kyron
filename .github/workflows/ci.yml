@@ -42,6 +42,11 @@ jobs:
           python3 tools/validate_pathdata.py app/src/main/res || exit 1
         continue-on-error: false
 
+      - name: Validate national coverage registry (50 states + D.C.)
+        run: |
+          python3 tools/coverage/coverage_pipeline.py gate || exit 1
+        continue-on-error: false
+
       - name: Check seed dataset exists
         run: |
           if [ ! -f "app/src/main/assets/places_seed_geocoded.json" ] && [ ! -f "app/src/main/assets/places_seed.json" ]; then

@@ -26,12 +26,36 @@ data class RegionInfo(
     val centerLng: Double,
     /** Where the region's pack manifest lives once published (LF-5 ops).
      *  Null = no downloadable pack exists for this region. */
-    val manifestUrl: String? = null
+    val manifestUrl: String? = null,
+    /**
+     * LF-N hardening: the region's model in the NATIONAL registry vocabulary,
+     * set only when this descriptor was derived from the registry. Empty for
+     * legacy hard-coded entries (scoreModel governs those, as before).
+     */
+    val nationalModel: String = "",
+    /** True when synthesized from the coverage registry rather than hand-coded. */
+    val fromRegistry: Boolean = false
 )
 
 object Regions {
     const val MODEL_SCORE = "SCORE_100"
     const val MODEL_DISPOSITION = "DISPOSITION"
+
+    /**
+     * LF-N: a region's presentation model in the national registry's
+     * richer vocabulary. Regions.KNOWN predates the registry, so its two
+     * legacy constants map onto it explicitly; a registry-derived
+     * descriptor carries its own nationalModel and must never be coerced
+     * into the legacy two-value vocabulary (its legacy scoreModel is a
+     * documented approximation for the legacy paths only).
+     */
+    fun nationalModel(info: RegionInfo): String {
+        if (info.nationalModel.isNotBlank()) return info.nationalModel
+        return when (info.scoreModel) {
+            MODEL_SCORE -> NationalCoverage.MODEL_SCORE_100_HIGH
+            else -> NationalCoverage.MODEL_DISPOSITION
+        }
+    }
 
     val ALABAMA = RegionInfo(
         regionId = "us-al", state = "AL", displayName = "Alabama",
@@ -63,10 +87,48 @@ object Regions {
 
     fun byId(regionId: String): RegionInfo? = KNOWN.firstOrNull { it.regionId == regionId }
 
+    /**
+     * LF-N hardening: a descriptor from the bundled coverage REGISTRY for a
+     * region outside the hand-coded KNOWN list. The registry is the
+     * validated operational source of "what may be pack-installed"; a
+     * source-verified state (pack_status "none") is NOT eligible and returns
+     * null — vigilance against an accidental install path.
+     */
+    fun fromRegistry(context: Context, regionId: String): RegionInfo? {
+        val jur = NationalCoverage.byRegionId(
+            runCatching { NationalCoverage.load(context) }.getOrDefault(emptyList()), regionId
+        ) ?: return null
+        if (!NationalCoverage.packInstallable(jur)) return null
+        val legacyScoreModel = when (jur.resultModel) {
+            NationalCoverage.MODEL_SCORE_100_HIGH -> MODEL_SCORE
+            else -> MODEL_DISPOSITION // all other models behave as the legacy disposition path
+        }
+        return RegionInfo(
+            regionId = jur.regionId,
+            state = jur.state,
+            displayName = jur.name,
+            scoreModel = legacyScoreModel,
+            bundled = jur.packStatus == "bundled",
+            centerLat = jur.centerLat ?: 39.0,
+            centerLng = jur.centerLng ?: -98.0,
+            manifestUrl = jur.packManifestUrl,
+            nationalModel = jur.resultModel,
+            fromRegistry = true
+        )
+    }
+
+    /** KNOWN entry, or a registry-derived descriptor when the registry vouches. */
+    fun byIdOrRegistry(context: Context, regionId: String): RegionInfo? =
+        byId(regionId) ?: fromRegistry(context, regionId)
+
     fun byState(state: String): RegionInfo? =
         KNOWN.firstOrNull { it.state.equals(state, ignoreCase = true) }
 
     fun regionIdForState(state: String): String = "us-" + state.lowercase()
+
+    /** Name of a state from its code (e.g. "GA" -> "Georgia"). */
+    fun knownDisplayName(state: String): String? =
+        US_STATES.firstOrNull { it.first.equals(state, ignoreCase = true) }?.second
 
     /** Friendly source label for sources the AL-only SourceRegistry doesn't know. */
     fun sourceDisplayName(source: String): String = when (source) {
@@ -174,6 +236,8 @@ class RegionManager(context: Context) {
     private val sp = context.applicationContext
         .getSharedPreferences("kyron_regions", Context.MODE_PRIVATE)
 
+    private val appContext = context.applicationContext
+
     private val _activeRegion = MutableStateFlow(
         sp.getString(KEY_ACTIVE, Regions.ALABAMA.regionId) ?: Regions.ALABAMA.regionId
     )
@@ -187,11 +251,18 @@ class RegionManager(context: Context) {
 
     fun activeRegionId(): String = _activeRegion.value
 
+    /** The active region: hand-coded KNOWN entry first, else a
+     *  registry-derived descriptor (validated pack-capable), else Alabama. */
     fun activeInfo(): RegionInfo =
-        Regions.byId(_activeRegion.value) ?: Regions.ALABAMA
+        Regions.byId(_activeRegion.value)
+            ?: Regions.fromRegistry(appContext, _activeRegion.value)
+            ?: Regions.ALABAMA
 
+    /** LF-N hardening: activation is allowed for a KNOWN region OR a
+     *  registry-vouched pack-capable region — never for an unverified or
+     *  registry-unknown id. */
     fun setActive(regionId: String, manual: Boolean) {
-        if (Regions.byId(regionId) == null) return
+        if (Regions.byIdOrRegistry(appContext, regionId) == null) return
         sp.edit().putString(KEY_ACTIVE, regionId).apply()
         if (manual) manualOverride = true
         _activeRegion.value = regionId

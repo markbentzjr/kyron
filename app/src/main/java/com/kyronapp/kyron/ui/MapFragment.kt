@@ -20,6 +20,7 @@ import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.MainActivity
 import com.kyronapp.kyron.R
 import com.kyronapp.kyron.data.ExploreState
+import com.kyronapp.kyron.data.NationalCoverage
 import com.kyronapp.kyron.data.Place
 import com.kyronapp.kyron.data.Regions
 import com.kyronapp.kyron.source.SourceRegistry
@@ -177,10 +178,22 @@ class MapFragment : Fragment() {
     }
 
     /** The unified Explore query (Spec priority 1) filters the map too.
-     *  Score bands only ever match places that HAVE a numeric score — a
-     *  disposition region's NO_SCORE sentinel is not "below 85". */
+     *  LF-N: score bands are interpreted in the ACTIVE REGION's own
+     *  result model — a penalty-scale region gets demerit ranges, a
+     *  disposition region gets no numeric bands at all, and the
+     *  NO_SCORE sentinel never falls into a band in any model. */
     private fun applyFilter(places: List<Place>): List<Place> {
         val q = currentFilter
+        // LF-N hardening: bands resolve in the region's registry model
+        // (per-source semantics live in the registry), never from the
+        // legacy two-value mapping alone.
+        val states = com.kyronapp.kyron.data.NationalCoverage.cached()
+            ?: runCatching {
+                com.kyronapp.kyron.data.NationalCoverage.load(requireContext())
+            }.getOrDefault(emptyList())
+        val model = com.kyronapp.kyron.data.NationalCoverage
+            .byRegionId(states, app.regions.activeRegionId())?.resultModel
+            ?: Regions.nationalModel(app.regions.activeInfo())
         // Workstream D / FIX5: the map's copy of the shared Explore query
         // must be apostrophe-insensitive like Browse search (CatalogDb) —
         // a "McDonalds" filter used to hide every "McDonald's" pin here
@@ -189,12 +202,7 @@ class MapFragment : Fragment() {
         fun field(s: String) = com.kyronapp.kyron.data.db.CatalogDb.stripApostrophes(s)
         return places.filter { p ->
             (q.county == null || p.county == q.county) &&
-                (when (q.band) {
-                    "Below 85" -> p.hasNumericScore && p.score < 85
-                    "85–94" -> p.hasNumericScore && p.score in 85..94
-                    "95+" -> p.hasNumericScore && p.score >= 95
-                    else -> true
-                }) &&
+                NationalCoverage.bandMatches(model, q.band, p.score) &&
                 (text.isEmpty() || field(p.name).contains(text, true) || field(p.city).contains(text, true) ||
                     field(p.address).contains(text, true) || p.zip.contains(text) || field(p.county).contains(text, true))
         }
@@ -275,10 +283,43 @@ class MapFragment : Fragment() {
 
     // -------------------------------------------------------------- markers
 
-    private fun bandColor(score: Int): Int = when {
-        score >= 95 -> 0xFF2E9E4F.toInt()
-        score >= 85 -> 0xFF7AB648.toInt()
-        else -> 0xFFE8A13A.toInt()
+    // Per-place model cache — pin/cluster/sheet all call modelFor, hitting
+    // the bundled national registry once per process at most.
+    private var cacheStates: List<com.kyronapp.kyron.data.NationalCoverage.Jurisdiction>? = null
+    private fun statesForModels(): List<com.kyronapp.kyron.data.NationalCoverage.Jurisdiction> {
+        cacheStates ?: run {
+            cacheStates = com.kyronapp.kyron.data.NationalCoverage.cached()
+                ?: runCatching {
+                    com.kyronapp.kyron.data.NationalCoverage.load(requireContext())
+                }.getOrDefault(emptyList())
+        }
+        return cacheStates ?: emptyList()
+    }
+
+    /** The result model THIS place publishes under, resolved at SOURCE
+     *  level (a state may contain sources with different scales; an
+     *  unresolved place degrades to UNKNOWN, never to Alabama's scale). */
+    private fun modelFor(p: Place): String =
+        com.kyronapp.kyron.data.NationalCoverage.modelForPlace(statesForModels(), p)
+
+    /**
+     * Pin/cluster fill color, score-direction aware: on a 0–100 scale
+     * HIGH is good; on a penalty scale HIGH is BAD. Non-numeric or
+     * unknown-model scores stay neutral gray.
+     */
+    private fun bandColor(score: Int, model: String): Int = when {
+        score < 0 -> toneColor(0)
+        model == com.kyronapp.kyron.data.NationalCoverage.MODEL_PENALTY_LOW -> when {
+            score <= 9 -> 0xFF2E9E4F.toInt()
+            score <= 19 -> 0xFFE8A13A.toInt()
+            else -> 0xFFD9534F.toInt()
+        }
+        model == com.kyronapp.kyron.data.NationalCoverage.MODEL_SCORE_100_HIGH -> when {
+            score >= 95 -> 0xFF2E9E4F.toInt()
+            score >= 85 -> 0xFF7AB648.toInt()
+            else -> 0xFFE8A13A.toInt()
+        }
+        else -> toneColor(0)
     }
 
     /** Tone colors for native (non-numeric) results: good/warn/bad/neutral. */
@@ -289,11 +330,17 @@ class MapFragment : Fragment() {
         else -> 0xFF8A97A5.toInt()
     }
 
-    private fun badgeIcon(key: String, lines: List<String>, colorScore: Int, big: Boolean): BitmapDrawable =
-        badgeIconColored(
-            key, lines, bandColor(colorScore),
-            if (colorScore >= 85) 0xFFFFFFFF.toInt() else 0xFF1D2733.toInt(), big
-        )
+    private fun badgeIcon(
+        key: String, lines: List<String>, colorScore: Int, colorModel: String, big: Boolean
+    ): BitmapDrawable {
+        val fill = bandColor(colorScore, colorModel)
+        // Legibility: dark text only on the mid-amber fill (mirrors the
+        // legacy >=85/else split for 0–100 scales); green/red/gray keep
+        // white text in every model.
+        val text =
+            if (fill == 0xFFE8A13A.toInt()) 0xFF1D2733.toInt() else 0xFFFFFFFF.toInt()
+        return badgeIconColored(key, lines, fill, text, big)
+    }
 
     private fun badgeIconColored(
         key: String, lines: List<String>, fillColor: Int, textColor: Int, big: Boolean
@@ -346,7 +393,7 @@ class MapFragment : Fragment() {
         marker.id = p.id
         marker.position = GeoPoint(p.lat!!, p.lng!!)
         marker.icon = if (p.hasNumericScore) {
-            badgeIcon("pin${p.score}", listOf(p.score.toString()), p.score, big = false)
+            badgeIcon("pin${p.score}", listOf(p.score.toString()), p.score, modelFor(p), big = false)
         } else {
             // Disposition regions pin the native result's short label,
             // colored by its tone — never an invented number.
@@ -367,7 +414,16 @@ class MapFragment : Fragment() {
     private fun clusterMarker(cluster: Cluster): Marker {
         val mv = mapView!!
         val scored = cluster.members.filter { it.hasNumericScore }
-        val worst = if (scored.isNotEmpty()) scored.minOf { it.score } else Place.NO_SCORE
+        // "Worst" is model-relative: on a 0–100 scale the LOWEST score is
+        // worst; on a penalty scale the HIGHEST penalty is worst. Members
+        // may even mix sources with different scales — each is judged by
+        // its own registry model's tone, and the worst tone wins.
+        val worstMember = scored.maxByOrNull {
+            com.kyronapp.kyron.data.NationalCoverage.numericTone(modelFor(it), it.score)
+        }
+        val worst = worstMember?.score ?: Place.NO_SCORE
+        val worstModel = worstMember?.let { modelFor(it) } ?: ""
+        val penaltyScale = worstModel == com.kyronapp.kyron.data.NationalCoverage.MODEL_PENALTY_LOW
         val marker = Marker(mv)
         marker.id = "__cluster__"
         marker.position = GeoPoint(cluster.centerLat, cluster.centerLng)
@@ -375,7 +431,7 @@ class MapFragment : Fragment() {
             badgeIcon(
                 "clu${cluster.members.size}_$worst",
                 listOf(cluster.members.size.toString(), "low $worst"),
-                worst, big = true
+                worst, worstModel, big = true
             )
         } else {
             // No numeric scores in this cluster (disposition region):
@@ -387,7 +443,8 @@ class MapFragment : Fragment() {
         }
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         marker.title = if (worst != Place.NO_SCORE) {
-            "${cluster.members.size} places — lowest score $worst"
+            if (penaltyScale) "${cluster.members.size} places — highest penalty $worst"
+            else "${cluster.members.size} places — lowest score $worst"
         } else {
             "${cluster.members.size} places"
         }
@@ -413,13 +470,24 @@ class MapFragment : Fragment() {
         badge.textSize = if (p.hasNumericScore) 20f else 10f
         badge.setBackgroundResource(
             when {
-                p.hasNumericScore && p.score >= 95 -> R.drawable.score_green
-                p.hasNumericScore && p.score >= 85 -> R.drawable.score_lime
-                p.hasNumericScore -> R.drawable.score_amber
-                p.resultTone == 1 -> R.drawable.score_green
-                p.resultTone == 2 -> R.drawable.score_amber
-                p.resultTone == 3 -> R.drawable.score_red
-                else -> R.drawable.score_gray
+                !p.hasNumericScore -> when (p.resultTone) {
+                    1 -> R.drawable.score_green
+                    2 -> R.drawable.score_amber
+                    3 -> R.drawable.score_red
+                    else -> R.drawable.score_gray
+                }
+                // LF-N hardening: numeric fills are MODEL-aware (the place's
+                // own registry source model). On a penalty scale HIGH is
+                // bad — the naive >=95/<=85 thresholds would paint the
+                // WORST penalty places green.
+                else -> when (com.kyronapp.kyron.data.NationalCoverage
+                    .numericTone(modelFor(p), p.score)) {
+                    1 -> R.drawable.score_green
+                    2 -> if (modelFor(p) == com.kyronapp.kyron.data.NationalCoverage.MODEL_SCORE_100_HIGH)
+                        R.drawable.score_lime else R.drawable.score_amber
+                    3 -> R.drawable.score_red
+                    else -> R.drawable.score_gray
+                }
             }
         )
         val sourceName = SourceRegistry.byId(p.source)?.displayName

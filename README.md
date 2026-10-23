@@ -1,15 +1,32 @@
-# Kyron — Alabama Restaurant Health Scores
+# Kyron — Nationwide Restaurant Health Scores
 
 Kyron is a free Android app that makes public restaurant health-inspection
-scores easy to browse and worth paying attention to. It covers **every county
-in Alabama (23,526 establishments)** and keeps itself current from the
-official sources:
+results easy to browse and worth paying attention to. **Alabama ships with
+the app** (23,526 establishments, live-synced), and **every U.S. state —
+plus Washington, D.C. — is registered** in the built-in national coverage
+registry (`app/src/main/assets/coverage/us_national_registry.json`,
+generated from `tools/coverage/coverage_pipeline.py`; see
+`docs/Kyron-National-Coverage-Matrix.md`).
+
+"Covers every state" means the nationwide FRAMEWORK is in place: each state
+lists its official source(s), status, access method, verification date and
+result model — honestly distinguishing integrated data, built-but-
+unpublished packs, verified-but-not-ingested sources, and official-link-only
+fallbacks. It does NOT mean every jurisdiction's data is integrated yet.
+Today's integrated data:
 
 | Source | Coverage | What it publishes |
 |---|---|---|
-| **JCDH** — Jefferson County Dept. of Health | Jefferson County | Scores **plus full violation detail** and inspection history |
-| **ADPH** — Alabama Dept. of Public Health | 65 counties | Latest score + inspection date |
-| **MCHD** — Mobile County Health Dept. | Mobile County | Scores + up to 4 dated inspections per place |
+| **JCDH** — Jefferson County Dept. of Health | Jefferson County, AL | Scores **plus full violation detail** and inspection history |
+| **ADPH** — Alabama Dept. of Public Health | 65 AL counties | Latest score + inspection date |
+| **MCHD** — Mobile County Health Dept. | Mobile County, AL | Scores + up to 4 dated inspections per place |
+
+Plus region packs (built, app-registered): **Florida DBPR** (dispositions,
+70,051 places) and **Georgia DPH** (100-pt A/B/C/U). Packs for **Tennessee**
+and **South Carolina** are built and staged — blocked only on publishing
+infrastructure. 28 further states have official sources directly
+fetch-verified (HTTP 200 with real content) as of 2026-10-22; the matrix
+documents every state's concrete next step.
 
 ## Features
 
@@ -64,6 +81,22 @@ ADPH's own search for **Tallapoosa County** currently returns a server error
 (HTTP 500) on the state's site, so only a couple of its establishments could
 be included in the bundled snapshot. The app re-checks counties during sync,
 so Tallapoosa backfills automatically once ADPH fixes their page.
+
+## How nationwide coverage works
+
+- **Result models differ by jurisdiction** and Kyron never converts them
+  into one fabricated 0–100 number: 0–100 scores where higher is better
+  (AL, GA, TN…), penalty/demerit scales where LOWER is better, letter
+  grades (MS), pass/fail and compliance (PA, WI…), violations-only (VA,
+  AR, DC…), and dispositions (FL, HI placards…). Missing scores are never
+  rendered, banded, or averaged as 0.
+- **Region packs** add states on demand — a verified, checksummed SQLite
+  pack per region, never bundled nationwide data in the APK. Favorites,
+  alerts and preferences live in a separate user store and survive pack
+  install/update/rollback/remove.
+- **Adding a state** = harvest pipeline under `harvest/<state>/` →
+  `tools/packs/build_pack.py` → publish the manifest at the pack host →
+  register the pack region. See CONTRIBUTING.md and the matrix doc.
 
 ## Repository layout
 

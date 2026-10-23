@@ -606,13 +606,21 @@ class CatalogDb(context: Context) :
     ): List<Place> = search(db, ids, county, minScore, maxScore, textLike, orderBy, limit, null)
 
     /** Places with real coordinates inside a lat/lng box (map viewport).
-     *  [regionId] (LF-4) scopes to one region; null = all regions. */
+     *  [regionId] (LF-4) scopes to one region; null = all regions.
+     *
+     *  LF-N (nationwide): a viewport that crosses the antimeridian (the
+     *  western Aleutians in Alaska fall east of +180) produces
+     *  minLng > maxLng. `BETWEEN` can never match across a wrap, so the
+     *  query becomes a two-sided OR for that case — otherwise west-Alaska
+     *  places would silently vanish from the map. */
     fun inBounds(
         db: SQLiteDatabase, minLat: Double, maxLat: Double,
         minLng: Double, maxLng: Double, limit: Int,
         regionId: String? = null
     ): List<Place> {
         val regionClause = if (regionId != null) " AND region_id=?" else ""
+        val wrapped = minLng > maxLng
+        val lngClause = if (wrapped) "(lng >= ? OR lng <= ?)" else "lng BETWEEN ? AND ?"
         val args = mutableListOf(
             minLat.toString(), maxLat.toString(), minLng.toString(), maxLng.toString()
         )
@@ -621,7 +629,7 @@ class CatalogDb(context: Context) :
         return db.rawQuery(
             """SELECT $placeCols FROM places
                WHERE lat IS NOT NULL AND lng IS NOT NULL AND geo_status='ACCEPTED'
-                 AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?$regionClause
+                 AND lat BETWEEN ? AND ? AND $lngClause$regionClause
                LIMIT ?""",
             args.toTypedArray()
         ).use { c ->

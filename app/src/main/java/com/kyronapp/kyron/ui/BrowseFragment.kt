@@ -21,6 +21,7 @@ import com.kyronapp.kyron.KyronApplication
 import com.kyronapp.kyron.MainActivity
 import com.kyronapp.kyron.R
 import com.kyronapp.kyron.data.ExploreState
+import com.kyronapp.kyron.data.NationalCoverage
 import com.kyronapp.kyron.data.PlaceQuery
 import com.kyronapp.kyron.data.Regions
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +64,11 @@ class BrowseFragment : Fragment() {
     private var county: String = "All counties"
     private var band: String = "All scores"
     private var sort: String = "Worst first"
+
+    /** LF-N: the active region's result model. Band chip labels, band
+     *  semantic, and sort order all follow it (a penalty-scale state's
+     *  chips are demerit ranges; a disposition state hides the chips). */
+    private var regionModel: String = NationalCoverage.MODEL_SCORE_100_HIGH
 
     /** LF-4: Browse is scoped to the active region. When the region
      *  changes (Coverage screen), filters that belonged to the old region
@@ -131,6 +137,8 @@ class BrowseFragment : Fragment() {
                 applyFilters()
             }
         }
+        // LF-N: chip labels are region-model specific; the default first
+        // bind happens in bindRegion().
         selectBand(R.id.band_all)
 
         // Default adapters immediately, so the spinners are never empty
@@ -214,11 +222,18 @@ class BrowseFragment : Fragment() {
         }
     }
 
-    private fun bandLabel(id: Int): String = when (id) {
-        R.id.band_low -> "Below 85"
-        R.id.band_mid -> "85–94"
-        R.id.band_high -> "95+"
-        else -> "All scores"
+    private fun bandLabel(id: Int): String {
+        // LF-N: chip labels come from the ACTIVE region's own result
+        // model ("Below 85" on a 0–100 scale; "10–19" penalty points on
+        // an Alabama-forbidden demerit scale, etc.). The band vocabulary
+        // is shared with PlaceRepository.searchPlaces and MapFragment.
+        val bands = NationalCoverage.bands(regionModel)
+        return when (id) {
+            R.id.band_low -> bands.getOrElse(1) { "All scores" }
+            R.id.band_mid -> bands.getOrElse(2) { "All scores" }
+            R.id.band_high -> bands.getOrElse(3) { "All scores" }
+            else -> "All scores"
+        }
     }
 
     /** Radio behavior for the band toggle row. */
@@ -238,12 +253,23 @@ class BrowseFragment : Fragment() {
     }
 
     /** (Re)bind controls to the active region: county list, and — for
-     *  regions whose jurisdiction publishes outcomes instead of scores —
-     *  hide the score-band chips and score sorts, which would otherwise
-     *  be filters over a number that doesn't exist there. */
+     *  regions whose jurisdiction does not publish numeric 0–100-style
+     *  scores — adapter chip labels or hide the band row entirely, and
+     *  swap score sorts for sorts that make sense in the model. */
     private fun bindRegion() {
         val regionId = app.regions.activeRegionId()
         activeRegionId = regionId
+        // LF-N hardening: the region's model resolves from the REGISTRY
+        // (per-source semantics live there), never from the legacy
+        // two-value Regions mapping alone — but the legacy mapping stays
+        // as the fallback when the registry hasn't loaded in this process.
+        val states = com.kyronapp.kyron.data.NationalCoverage.cached()
+            ?: runCatching {
+                com.kyronapp.kyron.data.NationalCoverage.load(requireContext())
+            }.getOrDefault(emptyList())
+        regionModel = com.kyronapp.kyron.data.NationalCoverage
+            .byRegionId(states, regionId)?.resultModel
+            ?: Regions.nationalModel(app.regions.activeInfo())
         // Always re-sync the spinners with the fragment's own state first:
         // after a view recreation (rotation, process restore) the views
         // are recreated empty while these vars hold the truth — and the
@@ -262,16 +288,29 @@ class BrowseFragment : Fragment() {
         val info = app.regions.activeInfo()
         view?.findViewById<TextView>(R.id.loading_label)?.text =
             "Loading ${info.displayName} restaurants…"
-        val disposition = info.scoreModel == Regions.MODEL_DISPOSITION
-        view?.findViewById<View>(R.id.band_scroll)?.visibility =
-            if (disposition) View.GONE else View.VISIBLE
-        if (disposition) {
+        val numeric = NationalCoverage.isNumeric(regionModel)
+        val chipRow = view?.findViewById<View>(R.id.band_scroll)
+        if (numeric) {
+            chipRow?.visibility = View.VISIBLE
+            // Re-label the chips for this region's model (penalty scales
+            // get demerit ranges; 0–100 scales keep their labels).
+            val bands = NationalCoverage.bands(regionModel)
+            bandButtons[R.id.band_low]?.text = bands.getOrElse(1) { "" }
+            bandButtons[R.id.band_mid]?.text = bands.getOrElse(2) { "" }
+            bandButtons[R.id.band_high]?.text = bands.getOrElse(3) { "" }
+            if (band == "All scores") selectBand(R.id.band_all)
+        } else {
+            chipRow?.visibility = View.GONE
             band = "All scores"
             selectBand(R.id.band_all)
             if (sort == "Worst first" || sort == "Best first") sort = "Most recent"
         }
-        val sorts = if (disposition) listOf("Most recent", "Name A–Z")
-        else listOf("Worst first", "Best first", "Most recent", "Name A–Z")
+        val sorts = if (numeric) {
+            val worst = NationalCoverage.scoreSortLabel(regionModel)
+            val best = if (regionModel == NationalCoverage.MODEL_PENALTY_LOW)
+                "Fewest penalty points first" else "Best first"
+            listOf(worst, best, "Most recent", "Name A–Z")
+        } else listOf("Most recent", "Name A–Z")
         sortInput.adapter = spinnerAdapter(sorts)
         syncSpinner(sortInput, sort)
         scope.launch {
@@ -305,7 +344,7 @@ class BrowseFragment : Fragment() {
         queryJob?.cancel()
         queryJob = scope.launch {
             try {
-                val list = app.repository.searchPlaces(spec, regionId)
+                val list = app.repository.searchPlaces(spec, regionId, regionModel)
                 if (!isAdded) return@launch
                 adapter.submit(list, app.prefs.favorites)
                 countLabel.text = if (loaded) {

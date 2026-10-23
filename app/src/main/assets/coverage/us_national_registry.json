@@ -1,0 +1,2177 @@
+{
+  "schema": 2,
+  "generated": "2026-10-22",
+  "license_note": "Registry data describes OFFICIAL public sources; it carries no restaurant records, scores, or violations.",
+  "jurisdiction_types": {
+    "state": "one of the 50 states",
+    "federal-district": "Washington, D.C. (NOT a state)"
+  },
+  "pack_availability_vocabulary": {
+    "bundled": "data ships inside the APK (no download exists)",
+    "downloadable-verified": "manifest + artifact fetched and hash-verified — the ONLY state in which a download may be offered",
+    "declared-only": "a publication is declared but the artifact could not be verified downloadable — NO download may be offered",
+    "staged-local": "pack built and validated locally; not published",
+    "none": "no pack exists"
+  },
+  "jurisdictions": [
+    {
+      "regionId": "us-al",
+      "state": "AL",
+      "name": "Alabama",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Shipped bundled in the APK; three live sync sources.",
+      "pack_status": "bundled",
+      "pack_manifest_url": null,
+      "pack_availability": "bundled",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 32.58,
+        "lng": -86.68
+      },
+      "sources": [
+        {
+          "id": "al-jcdh",
+          "agency": "Jefferson County Department of Health",
+          "coverage": "Jefferson County",
+          "access": "live-sync",
+          "website": "https://www.jcdh.org/SitePages/Programs-Services/Scores-Lists/Food/FoodServScores.aspx",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "integrated",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "In-app live adapter (every ~12 h) + bundled seed",
+          "last_refresh": "",
+          "notes": "Scores plus full violation detail and per-place inspection history."
+        },
+        {
+          "id": "al-adph",
+          "agency": "Alabama Department of Public Health",
+          "coverage": "Statewide (65 counties)",
+          "access": "html",
+          "website": "https://foodscores.state.al.us/default.aspx",
+          "violations": "none",
+          "history": "latest-only",
+          "result_model": "SCORE_100_HIGH",
+          "status": "integrated",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "Jefferson and Mobile are NOT served by ADPH — separate agencies.",
+          "refresh": "In-app live adapter (county re-checks ~20 h) + bundled seed",
+          "last_refresh": "",
+          "notes": "ASP.NET statewide search; latest score + inspection date only. Tallapoosa County upstream HTTP 500 (README caveat)."
+        },
+        {
+          "id": "al-mchd",
+          "agency": "Mobile County Health Department",
+          "coverage": "Mobile County",
+          "access": "html",
+          "website": "https://mchd.org/",
+          "violations": "none",
+          "history": "some-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "integrated",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "In-app live adapter (admin-ajax table)",
+          "last_refresh": "",
+          "notes": "Up to 4 dated inspections per establishment; no violation detail."
+        }
+      ]
+    },
+    {
+      "regionId": "us-fl",
+      "state": "FL",
+      "name": "Florida",
+      "type": "state",
+      "result_model": "DISPOSITION",
+      "summary": "Pack built and registered in-app; the PUBLICATION is declared but the pack host returned HTTP 404 on 2026-10-22 — the download is NOT verified available until it is republished (declared-only).",
+      "pack_status": "published",
+      "pack_manifest_url": "https://markbentzjr.github.io/kyron/data/us-fl.manifest.json",
+      "pack_availability": "declared-only",
+      "artifact_verified": "",
+      "pack_host_status": "unreachable-404",
+      "pack_host_checked": "2026-10-22",
+      "center": {
+        "lat": 27.7,
+        "lng": -83.72
+      },
+      "sources": [
+        {
+          "id": "fl-dbpr",
+          "agency": "Florida Department of Business & Professional Regulation (DBPR), Hotels & Restaurants",
+          "coverage": "Statewide",
+          "access": "bulk-csv",
+          "website": "https://www2.myfloridalicense.com/hotels-restaurants/",
+          "violations": "full",
+          "history": "latest-only",
+          "result_model": "DISPOSITION",
+          "status": "pack-built",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "Harvest pipeline harvest/fl_dbpr -> tools/packs/build_pack.py",
+          "last_refresh": "",
+          "notes": "No numeric score: outcomes are dispositions (met standards, warning, closure…). District CSV extracts + inspection detail pages. Pack built and app-verified (70,051 places)."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ga",
+      "state": "GA",
+      "name": "Georgia",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Pack verified end-to-end in the rig and registered in-app; the publication is declared but the host returned HTTP 404 on 2026-10-22 (declared-only, not verified downloadable).",
+      "pack_status": "published",
+      "pack_manifest_url": "https://markbentzjr.github.io/kyron/data/us-ga.manifest.json",
+      "pack_availability": "declared-only",
+      "artifact_verified": "",
+      "pack_host_status": "unreachable-404",
+      "pack_host_checked": "2026-10-22",
+      "center": {
+        "lat": 32.68,
+        "lng": -83.23
+      },
+      "sources": [
+        {
+          "id": "ga-dph",
+          "agency": "Georgia Department of Public Health",
+          "coverage": "Statewide (excl. Gwinnett/Newton/Rockdale)",
+          "access": "html",
+          "website": "https://ga.healthinspections.us/stateofgeorgia/",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "pack-built",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "Gwinnett, Newton and Rockdale counties are NOT in the statewide search.",
+          "refresh": "Harvest pipeline harvest/ga -> tools/packs/build_pack.py",
+          "last_refresh": "",
+          "notes": "100-point scale with A/B/C/U grades; full inspector notes."
+        }
+      ]
+    },
+    {
+      "regionId": "us-tn",
+      "state": "TN",
+      "name": "Tennessee",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Ingestion verified (138 MB place dataset, QA crosscheck pass); pack staged locally — blocked on publishing infrastructure.",
+      "pack_status": "built",
+      "pack_manifest_url": null,
+      "pack_availability": "staged-local",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 35.83,
+        "lng": -85.98
+      },
+      "sources": [
+        {
+          "id": "tn-tdh",
+          "agency": "Tennessee Department of Health",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://inspections.myhealthdepartment.com/tennessee",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "pack-built",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "Harvest pipeline harvest/tn",
+          "last_refresh": "",
+          "notes": "Statewide scores with per-violation observation text (HealthSpace platform). Place dataset built (122,091 detail pages); pack staged, not yet published."
+        }
+      ]
+    },
+    {
+      "regionId": "us-sc",
+      "state": "SC",
+      "name": "South Carolina",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Ingestion verified (35,862 places, QA all-pass); pack staged locally — blocked on publishing infrastructure.",
+      "pack_status": "built",
+      "pack_manifest_url": null,
+      "pack_availability": "staged-local",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 33.63,
+        "lng": -80.96
+      },
+      "sources": [
+        {
+          "id": "sc-dhec",
+          "agency": "South Carolina DHEC — Food Grades",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://apps.dhec.sc.gov/Environment/FoodGrades/",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "pack-built",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "Harvest pipeline harvest/sc",
+          "last_refresh": "",
+          "notes": "Points-based (A >87); full inspection report as PDF. 35,862 places harvested; pack staged, not yet published."
+        }
+      ]
+    },
+    {
+      "regionId": "us-nc",
+      "state": "NC",
+      "name": "North Carolina",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Statewide web front-end over county inspections.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 35.22,
+        "lng": -79.19
+      },
+      "sources": [
+        {
+          "id": "nc-dhhs",
+          "agency": "North Carolina DHHS — Environmental Health Inspections",
+          "coverage": "Statewide (county-run inspections, statewide front-end)",
+          "access": "html",
+          "website": "https://epi.ncdhhs.gov/inspections/search",
+          "violations": "full",
+          "history": "latest-only",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "100-pt scores with A/B/C grade cards; violations as written by the inspector. Harvest adapters exist (harvest/nc) but no pack yet."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ms",
+      "state": "MS",
+      "name": "Mississippi",
+      "type": "state",
+      "result_model": "LETTER_GRADE",
+      "summary": "Letter grades only — the registry's Kyron model is LETTER_GRADE; numeric Alabama bands do NOT apply.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 32.38,
+        "lng": -89.88
+      },
+      "sources": [
+        {
+          "id": "ms-msdh",
+          "agency": "Mississippi State Department of Health",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://msdh.ms.gov/page/43,0,231,203.html",
+          "violations": "partial",
+          "history": "full-history",
+          "result_model": "LETTER_GRADE",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Letter grades A/B/C only (no numeric score); full inspection history per facility (apps.msdh.ms.gov/food/FacilityRecord.aspx)."
+        }
+      ]
+    },
+    {
+      "regionId": "us-va",
+      "state": "VA",
+      "name": "Virginia",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Violations-only jurisdiction — alerts are new-result notices, never threshold violations.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 38.01,
+        "lng": -79.48
+      },
+      "sources": [
+        {
+          "id": "va-vdh",
+          "agency": "Virginia Department of Health",
+          "coverage": "Statewide (health districts)",
+          "access": "html",
+          "website": "https://inspections.myhealthdepartment.com/virginia/districts",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Violations with critical/non-critical flags and corrective actions; no score or grade of any kind."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ar",
+      "state": "AR",
+      "name": "Arkansas",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "In/out-of-compliance model.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 34.75,
+        "lng": -92.13
+      },
+      "sources": [
+        {
+          "id": "ar-adh",
+          "agency": "Arkansas Department of Health",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://foodserviceprod.adh.arkansas.gov/Web/inspection/publicinspectionsearch.aspx",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "In/out-of-compliance model with per-report observation detail."
+        }
+      ]
+    },
+    {
+      "regionId": "us-la",
+      "state": "LA",
+      "name": "Louisiana",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Violation-based; icon ratings are jurisdiction presentation, not a numeric Kyron score.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 30.98,
+        "lng": -91.43
+      },
+      "sources": [
+        {
+          "id": "la-ldh",
+          "agency": "Louisiana Department of Health (EatSafe)",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://eatsafe.la.gov/",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Updated daily; violations (critical vs non-critical) + corrective actions; historically pelican-icon ratings rather than numbers."
+        }
+      ]
+    },
+    {
+      "regionId": "us-pa",
+      "state": "PA",
+      "name": "Pennsylvania",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Pass/fail with published violation reports.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 41.0,
+        "lng": -77.61
+      },
+      "sources": [
+        {
+          "id": "pa-pda",
+          "agency": "Pennsylvania Department of Agriculture",
+          "coverage": "Statewide (excl. some city/county programs)",
+          "access": "html",
+          "website": "https://www.pafoodsafety.pa.gov/Web/Inspection/PublicInspectionSearch.aspx",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "Covers state-inspected facilities; Philadelphia and Allegheny County run their own programs.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Violations + inspector comments in full report view."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ny",
+      "state": "NY",
+      "name": "New York",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "NYC has one of the country's best open-data feeds; upstate is county-fragmented.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 42.76,
+        "lng": -75.81
+      },
+      "sources": [
+        {
+          "id": "ny-nyc-dohmh",
+          "agency": "NYC Department of Health & Mental Hygiene",
+          "coverage": "New York City",
+          "access": "api",
+          "website": "https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "NYC only — the rest of New York State is fragmented by county.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Socrata API (resource/43nn-pn8j.json): one row per violation citation; numeric score + letter grade."
+        },
+        {
+          "id": "ny-statewide",
+          "agency": "Rest of New York State (county health departments)",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://www.health.ny.gov/food_safety/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "No statewide public portal verified; county-level publication."
+        }
+      ]
+    },
+    {
+      "regionId": "us-il",
+      "state": "IL",
+      "name": "Illinois",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Chicago's feed is excellent; statewide coverage is county-by-county.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 39.74,
+        "lng": -87.52
+      },
+      "sources": [
+        {
+          "id": "il-chicago",
+          "agency": "Chicago Department of Public Health",
+          "coverage": "Chicago",
+          "access": "api",
+          "website": "https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "Chicago only; the rest of Illinois is fragmented.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Socrata (SODA) API; pass / pass-with-conditions / fail; violations field with codes and inspector comments."
+        },
+        {
+          "id": "il-statewide",
+          "agency": "Rest of Illinois (local health departments)",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://dph.illinois.gov/topics-services/food-safety.html",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "No statewide results portal verified."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ca",
+      "state": "CA",
+      "name": "California",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "County-fragmented by design (CalCode). LA County + SF datasets cover a big population share.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 37.27,
+        "lng": -119.27
+      },
+      "sources": [
+        {
+          "id": "ca-lacounty",
+          "agency": "Los Angeles County Department of Public Health",
+          "coverage": "Los Angeles County (excl. Pasadena/Long Beach/Vernon)",
+          "access": "api",
+          "website": "https://data.lacounty.gov/Health/LOS-ANGELES-COUNTY-RESTAURANT-AND-MARKET-INSPECTIO/6ni6-h5kp",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "Excludes Pasadena, Long Beach and Vernon (own health departments).",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Inspections + separate violations dataset (8jyd-4pv9); numeric score + letter grade."
+        },
+        {
+          "id": "ca-sf",
+          "agency": "San Francisco Department of Public Health",
+          "coverage": "San Francisco",
+          "access": "api",
+          "website": "https://data.sfgov.org/resource/pyih-qa8i.json",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Numeric 0-100 score plus dedicated violations dataset (f29f-c3np)."
+        },
+        {
+          "id": "ca-statewide",
+          "agency": "California Department of Public Health (Retail Food Program)",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/RetailFoodProgram.aspx",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "CalCode makes 60+ county EHDs the publishers; no statewide portal, bulk download, or API (AFDO index lists counties only; CDPH page fetch-blocked on 2026-10-22)."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ma",
+      "state": "MA",
+      "name": "Massachusetts",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Boston has a strong open dataset; the rest is municipal.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 41.99,
+        "lng": -71.43
+      },
+      "sources": [
+        {
+          "id": "ma-boston",
+          "agency": "City of Boston Inspectional Services",
+          "coverage": "Boston",
+          "access": "bulk-csv",
+          "website": "https://data.boston.gov/dataset/food-establishment-inspections",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Analyze Boston CKAN, daily refresh, per-violation rows with inspector comments (fetched 200 with data 2026-10-22)."
+        },
+        {
+          "id": "ma-dph",
+          "agency": "Massachusetts DPH Food Protection Program",
+          "coverage": "State-inspected facilities",
+          "access": "html",
+          "website": "https://dphanalytics.hhs.mass.gov/ibmcognos/bi/?pathRef=MEPHTN/inspections/food-protection/food-protection-list",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "blocked",
+          "verified": "2026-10-22",
+          "blocker": "Cognos JS report serves an empty body to non-browser fetches; municipal boards inpublish independently.",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "~350 municipal health boards are the real publishers."
+        }
+      ]
+    },
+    {
+      "regionId": "us-wa",
+      "state": "WA",
+      "name": "Washington",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "King County covers the Seattle metro; statewide is fragmented.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 47.27,
+        "lng": -120.83
+      },
+      "sources": [
+        {
+          "id": "wa-kingcounty",
+          "agency": "Public Health — Seattle & King County",
+          "coverage": "King County (incl. Seattle)",
+          "access": "api",
+          "website": "https://dev.socrata.com/foundry/data.kingcounty.gov/gkhn-e8mn",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-13",
+          "blocker": "",
+          "restrictions": "King County only; other counties publish separately.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "One row per violation, red (critical)/blue points; inspection point totals from last 4 inspections."
+        },
+        {
+          "id": "wa-statewide",
+          "agency": "Washington State DOH + county health departments",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://doh.wa.gov/you-and-your-family/food-safety",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "No statewide results portal verified."
+        }
+      ]
+    },
+    {
+      "regionId": "us-or",
+      "state": "OR",
+      "name": "Oregon",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Statewide, scored, full history — top integration candidate.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 44.14,
+        "lng": -120.52
+      },
+      "sources": [
+        {
+          "id": "or-oha",
+          "agency": "Oregon Health Authority (statewide, county-run inspections)",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://inspections.myhealthdepartment.com/oregon",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "HealthSpace/MyHealthDepartment statewide search (fetched 200 OK)",
+          "last_refresh": "",
+          "notes": "Restaurant 100-pt scale: priority items deduct 5, priority-foundation 3; < 70 fails. One of the cleanest candidate integrations in the country."
+        }
+      ]
+    },
+    {
+      "regionId": "us-wi",
+      "state": "WI",
+      "name": "Wisconsin",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Dual-vendor state (DATCP + HealthSpace local agencies).",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 44.79,
+        "lng": -89.85
+      },
+      "sources": [
+        {
+          "id": "wi-datcp",
+          "agency": "Wisconsin DATCP (state-inspected facilities)",
+          "coverage": "Statewide (state-inspected)",
+          "access": "html",
+          "website": "https://inspections.myhealthdepartment.com/wisconsin-datcp",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "State-inspected jurisdictions only; agency-delegated ones are a second source.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "DATCP publishes directly (fetched 200 OK); ~130 agency-managed local health departments publish separately in HealthSpace."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ok",
+      "state": "OK",
+      "name": "Oklahoma",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Statewide form-based search on a legacy ASP.NET site.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 35.31,
+        "lng": -98.72
+      },
+      "sources": [
+        {
+          "id": "ok-phin",
+          "agency": "Oklahoma State Department of Health — Consumer Protection",
+          "coverage": "Statewide (77 counties)",
+          "access": "html",
+          "website": "https://www.phin.state.ok.us/inspections/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Legacy ASP.NET form (fetched 200 OK), county+name search; report records are form-post downloads. Tulsa and OKC-County also publish their own."
+        }
+      ]
+    },
+    {
+      "regionId": "us-vt",
+      "state": "VT",
+      "name": "Vermont",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Single-state agency; numeric score + violations; same platform family as SD/WY/PA.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 43.87,
+        "lng": -72.45
+      },
+      "sources": [
+        {
+          "id": "vt-vdh",
+          "agency": "Vermont Department of Health — Food & Lodging Program",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://vtdoh.safefoodinspection.com/Inspection/PublicInspectionSearch.aspx",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "'Food Safety 5.5' platform; numeric inspection score (44-item checklist) + critical flags since May 2016. ASP.NET POST needed."
+        }
+      ]
+    },
+    {
+      "regionId": "us-sd",
+      "state": "SD",
+      "name": "South Dakota",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Statewide report platform; Sioux Falls separate.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 44.22,
+        "lng": -100.26
+      },
+      "sources": [
+        {
+          "id": "sd-doh",
+          "agency": "South Dakota Department of Health",
+          "coverage": "Statewide (excl. Sioux Falls)",
+          "access": "html",
+          "website": "https://sddoh.safefoodinspection.com/Inspection/PublicInspectionSearch.aspx",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "'Food Safety 5.5' platform (fetched 200 OK); each inspection is a report/PDF; Sioux Falls inspects separately."
+        }
+      ]
+    },
+    {
+      "regionId": "us-wy",
+      "state": "WY",
+      "name": "Wyoming",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Statewide compliance platform minus a handful of local jurisdictions.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 43.0,
+        "lng": -107.56
+      },
+      "sources": [
+        {
+          "id": "wy-wda",
+          "agency": "Wyoming Department of Agriculture — Consumer Health Services",
+          "coverage": "Statewide (excl. 5 local jurisdictions)",
+          "access": "html",
+          "website": "https://wda.safefoodinspection.com/Inspection/PublicInspectionSearch.aspx",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "'Food Safety 5.5' platform (fetched 200 OK); in/out-of-compliance with violation explanation; excludes Laramie, Natrona, Sublette, Sweetwater, Teton + City of Laramie."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ri",
+      "state": "RI",
+      "name": "Rhode Island",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Statewide; reachable but JS-postback heavy.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 41.67,
+        "lng": -71.49
+      },
+      "sources": [
+        {
+          "id": "ri-ridoh",
+          "agency": "Rhode Island Department of Health — Center for Food Protection",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://ri.healthinspections.us/ri/",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Official portal (linked from health.ri.gov/food-safety, fetched 200); Tyler-hosted JS/postback app — parsing needs the postback, not plain links."
+        }
+      ]
+    },
+    {
+      "regionId": "us-nj",
+      "state": "NJ",
+      "name": "New Jersey",
+      "type": "state",
+      "result_model": "DISPOSITION",
+      "summary": "Fragmented into local agencies; dispositions are the common currency.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 40.15,
+        "lng": -74.73
+      },
+      "sources": [
+        {
+          "id": "nj-burlington",
+          "agency": "Burlington County Health Department (HDGov pattern)",
+          "coverage": "Burlington County",
+          "access": "html",
+          "website": "https://bcnj.co.burlington.nj.us/Views/HealthInspections/",
+          "violations": "partial",
+          "history": "some-history",
+          "result_model": "DISPOSITION",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Satisfactory / Conditionally Satisfactory / Unsatisfactory dispositions; XLSX export; the HDGov 'Views/HealthInspections' app recurs across NJ counties (Camden, Cape May, Gloucester, Ocean)."
+        },
+        {
+          "id": "nj-statewide",
+          "agency": "New Jersey Department of Health (local agencies)",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://www.nj.gov/health/ceohs/food-safety-defense/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "~110 delegated local agencies publish in their own formats; no statewide public database."
+        }
+      ]
+    },
+    {
+      "regionId": "us-nv",
+      "state": "NV",
+      "name": "Nevada",
+      "type": "state",
+      "result_model": "DISPOSITION",
+      "summary": "SNHD's nightly CSV is best-in-class bulk data.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 38.5,
+        "lng": -117.03
+      },
+      "sources": [
+        {
+          "id": "nv-snhd",
+          "agency": "Southern Nevada Health District (Clark County / Las Vegas)",
+          "coverage": "Southern Nevada",
+          "access": "bulk-csv",
+          "website": "https://www.southernnevadahealthdistrict.org/permits-and-regulations/restaurant-inspections/restaurant-inspection-search/",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "DISPOSITION",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "Southern Nevada only; Washoe County and rural DPBH counties are separate.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Nightly developer CSV download (restaurants.zip + SQL schema; both pages fetched 200) — ~5-day posting lag. Also demerit-style detail; no portal 0-100 number."
+        }
+      ]
+    },
+    {
+      "regionId": "us-tx",
+      "state": "TX",
+      "name": "Texas",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "Big-city open-data APIs (Austin verified); no statewide results search.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 31.17,
+        "lng": -100.08
+      },
+      "sources": [
+        {
+          "id": "tx-austin",
+          "agency": "Austin Public Health",
+          "coverage": "Austin",
+          "access": "api",
+          "website": "https://data.austintexas.gov/resource/ecmv-9xxi.json",
+          "violations": "partial",
+          "history": "full-history",
+          "result_model": "SCORE_100_HIGH",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Socrata API (fetched 200 JSON): numeric 0-100 with color bands."
+        },
+        {
+          "id": "tx-dshs",
+          "agency": "Texas DSHS Retail Food Safety Unit",
+          "coverage": "Where no local program exists",
+          "access": "official-link-only",
+          "website": "https://www.dshs.texas.gov/retail-food-establishments",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "DSHS inspects only where no local program exists; Houston/Dallas/San Antonio/El Paso publish their own (Dallas/SOCRATA unverified-cited).",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "DSHS (fetched 200) publishes no public results search — only an ArcGIS jurisdiction map and open-records requests."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ut",
+      "state": "UT",
+      "name": "Utah",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "13 local districts; Salt Lake County portal verified.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 39.5,
+        "lng": -111.55
+      },
+      "sources": [
+        {
+          "id": "ut-slco",
+          "agency": "Salt Lake County Health Department",
+          "coverage": "Salt Lake County",
+          "access": "html",
+          "website": "https://public.cdpehs.com/UTEnvPbl/VW_EST_PUBLIC/ShowVW_EST_PUBLICTablePage.aspx",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Live ASP.NET search incl. closures (fetched 200 OK)."
+        },
+        {
+          "id": "ut-statewide",
+          "agency": "Utah's 13 local health districts",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://coronavirus-response.health.utah.gov/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "No statewide public search; Utah, Davis, Weber, Cache counties are separate integrations."
+        }
+      ]
+    },
+    {
+      "regionId": "us-mi",
+      "state": "MI",
+      "name": "Michigan",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "State portal covers groceries only; restaurants are local agencies.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 45.0,
+        "lng": -86.27
+      },
+      "sources": [
+        {
+          "id": "mi-mdard",
+          "agency": "Michigan Dept. of Agriculture & Rural Development — MiSafe",
+          "coverage": "Grocery/processor facilities ONLY (NOT restaurants)",
+          "access": "html",
+          "website": "https://www2.mda.state.mi.us/MiSafe/Default",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "blocked",
+          "verified": "2026-10-22",
+          "blocker": "MiSafe (fetched 200 OK) explicitly EXCLUDES restaurants — those are inspected by ~45 local health agencies with their own portals.",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Do not count MiSafe as restaurant data; Kent County et al. are the real restaurant publishers."
+        }
+      ]
+    },
+    {
+      "regionId": "us-md",
+      "state": "MD",
+      "name": "Maryland",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "County APIs verified (Montgomery); statewide portal at present unreachable.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 38.81,
+        "lng": -77.27
+      },
+      "sources": [
+        {
+          "id": "md-montgomery",
+          "agency": "Montgomery County",
+          "coverage": "Montgomery County",
+          "access": "api",
+          "website": "https://data.montgomerycountymd.gov/resource/5pue-gfbe.json",
+          "violations": "partial",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Socrata (fetched 200 with data): per-item In/Out of Compliance rows."
+        },
+        {
+          "id": "md-statewide",
+          "agency": "Maryland DHMH Office of Food Protection (24 LHDs)",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://health.maryland.gov/phpa/pages/ofp.aspx",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Statewide search vsi.maryland.gov was unreachable on 2026-10-22 (3 attempts); many counties publish by records request."
+        }
+      ]
+    },
+    {
+      "regionId": "us-mo",
+      "state": "MO",
+      "name": "Missouri",
+      "type": "state",
+      "result_model": "DISPOSITION",
+      "summary": "City-level sources (St. Louis verified); state publishes nothing centrally.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 38.31,
+        "lng": -92.7
+      },
+      "sources": [
+        {
+          "id": "mo-stl",
+          "agency": "City of St. Louis Department of Health",
+          "coverage": "City of St. Louis",
+          "access": "html",
+          "website": "https://www.stlouis-mo.gov/government/departments/health/environmental-health/food-control/restaurant-ratings-search.cfm",
+          "violations": "partial",
+          "history": "some-history",
+          "result_model": "DISPOSITION",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Lookup runs on HealthSpace (fetched 200). Kansas City (Socrata, dataset unconfirmed), Springfield-Greene, Joplin also publish."
+        },
+        {
+          "id": "mo-statewide",
+          "agency": "Missouri DHSS",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://health.mo.gov/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "No statewide public restaurant-inspection portal."
+        }
+      ]
+    },
+    {
+      "regionId": "us-mn",
+      "state": "MN",
+      "name": "Minnesota",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "State page verified absent of portal; Minneapolis open data recommended next.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 46.44,
+        "lng": -93.41
+      },
+      "sources": [
+        {
+          "id": "mn-mdh",
+          "agency": "Minnesota Department of Health (FPLS)",
+          "coverage": "Statewide-program page only",
+          "access": "official-link-only",
+          "website": "https://www.health.state.mn.us/communities/environment/food/index.html",
+          "violations": "none",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Page fetched 200 but confirms: no online inspection portal; reports by request. Minneapolis open-data lookup is the big-population coverage (dashboard fetch failed 2026-10-22)."
+        }
+      ]
+    },
+    {
+      "regionId": "us-mt",
+      "state": "MT",
+      "name": "Montana",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "State-endorsed vendor dashboard plus ~26 independent counties.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 46.68,
+        "lng": -110.05
+      },
+      "sources": [
+        {
+          "id": "mt-dphhs",
+          "agency": "Montana DPHHS Environmental Health & Food Safety",
+          "coverage": "~30 counties",
+          "access": "html",
+          "website": "https://dphhs.mt.gov/publichealth/ehfs/",
+          "violations": "partial",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "DPHHS page (fetched 200) links the state-endorsed myhealthdepartment.com/montana dashboard; ~26 other counties run their own."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ne",
+      "state": "NE",
+      "name": "Nebraska",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "JS-only state app; can't be confirmed without a browser session.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 41.5,
+        "lng": -98.68
+      },
+      "sources": [
+        {
+          "id": "ne-nda",
+          "agency": "Nebraska Department of Agriculture",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://ecmp.nebraska.gov/agr-fspav/index.html",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "blocked",
+          "verified": "2026-10-22",
+          "blocker": "Portal fetched 200 but renders a JS-only search app; result model and history could not be confirmed by plain HTTP GET.",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Lincoln-Lancaster and Douglas/Omaha (biggest populations) publish separately."
+        }
+      ]
+    },
+    {
+      "regionId": "us-nh",
+      "state": "NH",
+      "name": "New Hampshire",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "No public online database; records by email request.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 44.01,
+        "lng": -71.64
+      },
+      "sources": [
+        {
+          "id": "nh-dhhs",
+          "agency": "NH DHHS Food Protection Section",
+          "coverage": "Statewide",
+          "access": "official-link-only",
+          "website": "https://www.dhhs.nh.gov/programs-services/environmental-health-and-you/food-protection/learn-about-food-inspections-view",
+          "violations": "none",
+          "history": "latest-only",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "blocked",
+          "verified": "2026-10-22",
+          "blocker": "DHHS page 403s automated fetches and confirms there is NO online inspection database — records by email request; a few cities (Keene) publish their own lookups.",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Do not present NH as covered; official email-request path only."
+        }
+      ]
+    },
+    {
+      "regionId": "us-nm",
+      "state": "NM",
+      "name": "New Mexico",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Records-on-request at state level; city of Albuquerque has a lookup.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 34.17,
+        "lng": -106.03
+      },
+      "sources": [
+        {
+          "id": "nm-nmed",
+          "agency": "New Mexico Environment Department — Food Program",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://env.nm.gov/food-program/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "NMED states inspection records are public but publishes no searchable portal (AFDO-cited; not fetched this session) — records custodian path; Albuquerque has its own lookup."
+        }
+      ]
+    },
+    {
+      "regionId": "us-nd",
+      "state": "ND",
+      "name": "North Dakota",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Unverified in this pass; platform-family membership suspected only.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 47.47,
+        "lng": -100.57
+      },
+      "sources": [
+        {
+          "id": "nd-doh",
+          "agency": "North Dakota Department of Health & Human Services (local food programs)",
+          "coverage": "Statewide",
+          "access": "official-link-only",
+          "website": "https://www.hhs.nd.gov/food-beverage/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Not fetch-verified in the LF-N research pass; ND is expected to ride the 'Food Safety 5.5' platform family alongside SD/VT/WY/IL/IA but that is UNCONFIRMED — verify before integration work."
+        }
+      ]
+    },
+    {
+      "regionId": "us-wv",
+      "state": "WV",
+      "name": "West Virginia",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "~50 separate county publishers; no statewide portal.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 38.92,
+        "lng": -80.18
+      },
+      "sources": [
+        {
+          "id": "wv-oehs",
+          "agency": "WV Bureau for Public Health — Office of Environmental Health Services",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://oehs.wvdhhr.org/phs/food-safety/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "No consolidated portal; ~50 county/subcounty departments publish in their own formats (AFDO lists no state entry) — highest integration burden in the batch."
+        }
+      ]
+    },
+    {
+      "regionId": "us-az",
+      "state": "AZ",
+      "name": "Arizona",
+      "type": "state",
+      "result_model": "LETTER_GRADE",
+      "summary": "County-run; Maricopa letter grades verified; no statewide search.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 34.17,
+        "lng": -111.93
+      },
+      "sources": [
+        {
+          "id": "az-maricopa",
+          "agency": "Maricopa County Environmental Health",
+          "coverage": "Maricopa County (~4.6M, incl. Phoenix)",
+          "access": "html",
+          "website": "https://envapp.maricopa.gov/EnvironmentalHealth/FoodInspections",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "LETTER_GRADE",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Fetched 200 OK; letter grade cards ('A' for Food Safety) + full reports — NOT a numeric-score jurisdiction."
+        },
+        {
+          "id": "az-pima",
+          "agency": "Pima County Health",
+          "coverage": "Pima County (Tucson)",
+          "access": "html",
+          "website": "https://healthinspect.pima.gov/portal/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Fetched 200 OK; JS portal app."
+        },
+        {
+          "id": "az-rest",
+          "agency": "Arizona ADHS + smaller counties",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://www.azdhs.gov/preparedness/epidemiology-disease-control/food-safety-environmental-services/index.php",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "ADHS (fetched 200) has NO statewide results search — records requests only; ~15 county/city departments publish separately (Coconino, Yavapai, …)."
+        }
+      ]
+    },
+    {
+      "regionId": "us-co",
+      "state": "CO",
+      "name": "Colorado",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Shared state platform + Denver's own program; risk-index points, no 0–100 score.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 39.0,
+        "lng": -105.55
+      },
+      "sources": [
+        {
+          "id": "co-cdphe",
+          "agency": "Colorado CDPHE + delegated counties (shared platform)",
+          "coverage": "Statewide (some counties opt out)",
+          "access": "html",
+          "website": "https://inspections.myhealthdepartment.com/colorado/",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Fetched 200 OK (linked from CDPHE page; CDPHE plain fetch is 403). Results are Pass / Re-Inspection Required / Closed with risk-index points (Pass 0–49; Re-inspect 50–109; Closed 110+) — NOT a 0–100 score or letter grade."
+        },
+        {
+          "id": "co-denver",
+          "agency": "Denver Department of Public Health & Environment",
+          "coverage": "City & County of Denver",
+          "access": "html",
+          "website": "https://www.denvergov.org/restaurantinspections",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Fetched 200 OK. Inspections after 9/6/24 moved to Accela (aca-prod.accela.com/DENVER); Denver self-inspects."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ak",
+      "state": "AK",
+      "name": "Alaska",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "State portal verified (safefood platform); Anchorage excluded.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 61.28,
+        "lng": -154.99
+      },
+      "sources": [
+        {
+          "id": "ak-dec",
+          "agency": "Alaska DEC — Food Safety & Sanitation",
+          "coverage": "Statewide (excl. Anchorage)",
+          "access": "html",
+          "website": "https://adec.safefoodinspection.com/Inspection/PublicInspectionSearch.aspx",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "Municipality of Anchorage runs its own program and is NOT in the state portal.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "DEC-run ASP.NET portal fetched 200 OK; FDA Food Code citations, no score/grade. dec.alaska.gov program page 403s automated fetches."
+        }
+      ]
+    },
+    {
+      "regionId": "us-hi",
+      "state": "HI",
+      "name": "Hawaii",
+      "type": "state",
+      "result_model": "PASS_FAIL",
+      "summary": "Statewide placard system; no numeric score.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 20.58,
+        "lng": -157.53
+      },
+      "sources": [
+        {
+          "id": "hi-doh",
+          "agency": "Hawaii DOH — Food Safety Branch (Sanitation)",
+          "coverage": "Statewide (all islands)",
+          "access": "html",
+          "website": "https://inspections.myhealthdepartment.com/soh",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "PASS_FAIL",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "DOH-branded portal fetched 200 (linked from health.hawaii.gov/san, 200). Results are condition placards: green pass / yellow conditional / red closure, with cited violations in reports — there is NO numeric score; Alabama bands do NOT apply."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ct",
+      "state": "CT",
+      "name": "Connecticut",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "No statewide portal (verified negative finding); town-by-town.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 41.52,
+        "lng": -72.76
+      },
+      "sources": [
+        {
+          "id": "ct-dph",
+          "agency": "Connecticut DPH Food Protection Program",
+          "coverage": "Statewide program page",
+          "access": "official-link-only",
+          "website": "https://portal.ct.gov/dph/food-protection-program/food-service-inspections",
+          "violations": "none",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "Publication left to ~60 local health departments.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Page fetched 200 contains only the blank inspection form — NO statewide results portal; consumers go town-by-town. ~60 local departments; some towns (e.g. Farmington Valley HD) publish 0–100 scores higher-is-better."
+        }
+      ]
+    },
+    {
+      "regionId": "us-de",
+      "state": "DE",
+      "name": "Delaware",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Pack built + validated locally (datasetVersion 2026-10-23.1; window 2024-10-14..2026-12-03); staged — blocked on publishing infrastructure. No scores exist in this data (violations-only model).",
+      "pack_status": "built",
+      "pack_manifest_url": null,
+      "pack_availability": "staged-local",
+      "artifact_verified": "2026-10-22",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 39.15,
+        "lng": -75.42
+      },
+      "sources": [
+        {
+          "id": "de-dph",
+          "agency": "Delaware Division of Public Health — Office of Food Protection",
+          "coverage": "Statewide",
+          "access": "api",
+          "website": "https://data.delaware.gov/Health/Food-Establishment-Inspection-Violations/384s-wygj",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "pack-built",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "Harvest pipeline harvest/de_socrata",
+          "last_refresh": "2026-10-22",
+          "notes": "Socrata open-data API (resource 384s-wygj): one row per violation, geocoded, ~2-year rolling window. Pack BUILT and validated locally (3,731 places / 9,202 inspections / 32,570 violations; sha256 536e54a6…92835); staged, NOT published. Violations-ONLY extract: zero-violation establishments are absent from the source dataset."
+        }
+      ]
+    },
+    {
+      "regionId": "us-id",
+      "state": "ID",
+      "name": "Idaho",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "7 independent district portals; state page verified without results.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 45.5,
+        "lng": -114.14
+      },
+      "sources": [
+        {
+          "id": "id-dhw",
+          "agency": "Idaho DHW + 7 Public Health Districts",
+          "coverage": "Statewide via 7 districts",
+          "access": "official-link-only",
+          "website": "https://healthandwelfare.idaho.gov/health-wellness/community-health/food-safety",
+          "violations": "none",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "Seven independent districts; Central District Health (Boise ~700k) is the biggest.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "State page (fetched 200) has no results tool; the 7 independent district portals are the publishers — pages verified: phd5.idaho.gov/inspections (200), eiph.id.gov program page (200), cdh.idaho.gov program page (fetch 200, portal 403 Cloudflare); the underlying search apps are cited, not fetch-verified. ~7 integrations."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ia",
+      "state": "IA",
+      "name": "Iowa",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Statewide agency; two live portals in an Oct 2026 transition.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 41.94,
+        "lng": -93.83
+      },
+      "sources": [
+        {
+          "id": "ia-dial",
+          "agency": "Iowa Department of Inspections, Appeals & Licensing (DIAL)",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://iowa.safefoodinspection.com/Inspection/PublicInspectionSearch.aspx",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "BOTH portals fetched 200: legacy USFS search (reports through Oct 14, 2026) and the going-forward SAFHER SPA (safher-portal.dial.iowa.gov/safher-portal). MID-TRANSITION Oct 2026 — archive coverage must be confirmed before relying on history."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ks",
+      "state": "KS",
+      "name": "Kansas",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Statewide nightly-updated public record search (new portal).",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 38.5,
+        "lng": -98.32
+      },
+      "sources": [
+        {
+          "id": "ks-kda",
+          "agency": "Kansas Department of Agriculture — Food Safety & Lodging",
+          "coverage": "Statewide",
+          "access": "html",
+          "website": "https://portal.kda.ks.gov/Food/FoodInspectionSearch",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "New portal fetched 200 (launched ~Jul 2026): 'updated nightly, free & no sign-in'; In/Out-of-compliance + cited violations, date-range filters. Old foodsafety.kda.ks.gov retired July 2026 (fetched 500)."
+        }
+      ]
+    },
+    {
+      "regionId": "us-me",
+      "state": "ME",
+      "name": "Maine",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Statewide search app; pass/fail via C/NC counts.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 45.26,
+        "lng": -69.02
+      },
+      "sources": [
+        {
+          "id": "me-hip",
+          "agency": "Maine DHHS / Maine CDC — Health Inspection Program",
+          "coverage": "Statewide (incl. MUN municipal licenses)",
+          "access": "html",
+          "website": "https://apps.web.maine.gov/online/hip_search/health-inspection-search.html",
+          "violations": "full",
+          "history": "some-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Search app fetched 200 (linked from maine.gov HIP page, 200): name/city/county/ZIP/type/date-range. Pass/fail via critical (C) and non-critical (NC) counts (failed >3 C or >10 NC); ~3-year history."
+        }
+      ]
+    },
+    {
+      "regionId": "us-ky",
+      "state": "KY",
+      "name": "Kentucky",
+      "type": "state",
+      "result_model": "SCORE_100_HIGH",
+      "summary": "County-fragmented (registry doc research).",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 37.9,
+        "lng": -85.77
+      },
+      "sources": [
+        {
+          "id": "ky-fragmented",
+          "agency": "Kentucky local health departments",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://www.fdacs.gov/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Fragmented (verified in US registry doc 2026-10-13): Louisville, Lexington, Northern Kentucky, Jessamine and others publish their own scores/violations on different sites."
+        }
+      ]
+    },
+    {
+      "regionId": "us-in",
+      "state": "IN",
+      "name": "Indiana",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "County-fragmented (registry doc research).",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 39.77,
+        "lng": -86.46
+      },
+      "sources": [
+        {
+          "id": "in-fragmented",
+          "agency": "Indiana local health departments",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://www.in.gov/health/food-protection/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Fragmented (registry doc 2026-10-13): counties use varied platforms; Marion County/Indianapolis publishes via hhcwebfood.hhcorp.org."
+        }
+      ]
+    },
+    {
+      "regionId": "us-oh",
+      "state": "OH",
+      "name": "Ohio",
+      "type": "state",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Local-district publication (registry doc research).",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 40.19,
+        "lng": -82.67
+      },
+      "sources": [
+        {
+          "id": "oh-odh",
+          "agency": "Ohio Department of Health + local health districts",
+          "coverage": "Statewide (not verified)",
+          "access": "official-link-only",
+          "website": "https://odh.ohio.gov/know-our-programs/food-safety/",
+          "violations": "unverified",
+          "history": "unverified",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "official-link-only",
+          "verified": "",
+          "blocker": "",
+          "restrictions": "No reproducible automated access verified; official link only — NOT integrated restaurant data.",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "Fragmented (registry doc 2026-10-13): a state database exists but public access is via ~local health districts, many on HealthSpace; many jurisdictions publish violations without an overall score."
+        }
+      ]
+    },
+    {
+      "regionId": "us-dc",
+      "state": "DC",
+      "name": "District of Columbia",
+      "type": "federal-district",
+      "result_model": "VIOLATIONS_ONLY",
+      "summary": "Registered as a jurisdiction, explicitly NOT one of the 50 states.",
+      "pack_status": "none",
+      "pack_manifest_url": null,
+      "pack_availability": "none",
+      "artifact_verified": "",
+      "pack_host_status": "",
+      "pack_host_checked": "",
+      "center": {
+        "lat": 38.9,
+        "lng": -77.03
+      },
+      "sources": [
+        {
+          "id": "dc-dchealth",
+          "agency": "DC Health — Food Safety & Hygiene Inspection Services Division",
+          "coverage": "District of Columbia (all inspections state-run)",
+          "access": "html",
+          "website": "https://dc.healthinspections.us/?a=Inspections",
+          "violations": "full",
+          "history": "full-history",
+          "result_model": "VIOLATIONS_ONLY",
+          "status": "source-verified",
+          "verified": "2026-10-22",
+          "blocker": "",
+          "restrictions": "",
+          "refresh": "",
+          "last_refresh": "",
+          "notes": "DC-run healthinspections.us instance fetched 200 OK: name/inspection-type search, FDA Food Code citation-level detail, history stated to cover 2007→current. Help page dchealth.dc.gov/service/understanding-food-establishment-inspections confirmed 200."
+        }
+      ]
+    }
+  ]
+}

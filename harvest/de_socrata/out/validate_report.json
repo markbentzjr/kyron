@@ -1,0 +1,23 @@
+{
+ "validated_at_datasetVersion": "2026-10-23.1",
+ "checks": [
+  "pack_meta region/schema/datasetVersion/place_count OK",
+  "places all us-de/DE/de-dph OK",
+  "no numeric scores (places+inspections) OK",
+  "result_text empty everywhere OK",
+  "0 orphan inspections OK",
+  "32,570 violations in app {p,c,r} shape OK"
+ ],
+ "totals": {
+  "places": 3731,
+  "inspections": 9202,
+  "violations": 32570,
+  "places_with_coords": 3657,
+  "places_without_coords": 74
+ },
+ "inspection_date_min": "2024-10-14",
+ "inspection_date_max": "2026-12-03",
+ "coverage_limitations": "captures Delaware DPH food inspections for rolling ~2-year window; zero-violation establishments are ABSENT from the source dataset; NO scores \u2014 the DE result model is violations-only",
+ "sha256": "536e54a6762f4861424ecd88d3eb08b204f24f3396789dd5bc3253dadbb92835",
+ "bytes": 828681
+}

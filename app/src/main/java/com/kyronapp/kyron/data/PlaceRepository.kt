@@ -218,22 +218,41 @@ class PlaceRepository(private val context: Context) {
     fun installedRegionVersion(regionId: String): String? =
         packs.installedVersion(catalog.readableDatabase, regionId)
 
+    // ------------------------------------------------- catalog meta passthrough
+    // LF-N alerts: baseline + per-place last-event keys live in the catalog
+    // meta table (same store the pack keys use), so dedupe state survives
+    // restarts, pack updates, and process rollbacks — but NOT region removal
+    // (a re-baselined region legitimately re-baselines its alert state).
+
+    fun metaGet(key: String): String? = catalog.metaGet(catalog.readableDatabase, key)
+
+    fun metaPut(key: String, value: String) =
+        catalog.metaPut(catalog.writableDatabase, key, value)
+
     /** FTS-backed structured search for Browse (LF-2/LF-3).
-     *  [regionId] scopes to the active region (LF-4); null = all regions. */
-    suspend fun searchPlaces(query: PlaceQuery, regionId: String? = null): List<Place> = withContext(Dispatchers.IO) {
+     *  [regionId] scopes to the active region (LF-4); null = all regions.
+     *  [resultModel] (LF-N) interprets [PlaceQuery.band] in the active
+     *  region's own result model — a "band" on a penalty scale is a
+     *  demerit range, and band bounds never touch the NO_SCORE sentinel.
+     *
+     *  LF-N hardening: a cross-region search (regionId == null) spans
+     *  jurisdictions with DIFFERENT result scales, so it MUST NOT pretend
+     *  there is one meaningful nationwide "best/worst" ranking: the band
+     *  filter is dropped (a 0–100 range would silently admit penalty
+     *  points) and the sort degrades to the neutral "most recent" order.
+     *  Sort/band logic lives in NationalCoverage.orderByFor for tests. */
+    suspend fun searchPlaces(
+        query: PlaceQuery,
+        regionId: String? = null,
+        resultModel: String = NationalCoverage.MODEL_SCORE_100_HIGH
+    ): List<Place> = withContext(Dispatchers.IO) {
+        // Mixed-scope search: neutral, model-agnostic semantics (the
+        // band range resolves to unconstrained under UNKNOWN, dropping
+        // the numeric filter without pretending every row shares a scale).
+        val model = if (regionId == null) NationalCoverage.MODEL_UNKNOWN else resultModel
+        val (minScore, maxScore) = NationalCoverage.bandRange(model, query.band)
+        val orderBy = NationalCoverage.orderByFor(model, query.sort)
         val db = catalog.readableDatabase
-        val (minScore, maxScore) = when (query.band) {
-            "Below 85" -> null to 84
-            "85–94" -> 85 to 94
-            "95+" -> 95 to null
-            else -> null to null
-        }
-        val orderBy = when (query.sort) {
-            "Best first" -> "score DESC, name_lc ASC"
-            "Most recent" -> "date_key DESC, name_lc ASC"
-            "Name A–Z" -> "name_lc ASC"
-            else -> "score ASC, name_lc ASC"
-        }
         val text = query.text.trim()
         var ftsIds = if (text.isNotEmpty()) catalog.ftsIds(db, text, 2000) else null
         // Workstream D / FIX5 (search defect a): the LIKE fallback used to
