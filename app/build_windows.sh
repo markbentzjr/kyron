@@ -111,7 +111,7 @@ done
   --extra-packages "$PKGS" \
   -A $W/assets_merged \
   --min-sdk-version 29 --target-sdk-version 34 \
-  --version-code 10 --version-name "2.0" \
+  --version-code 11 --version-name "2.0.1" \
   --auto-add-overlay \
   $W/res_compiled/*.zip
 echo "linked resources.apk"
@@ -168,6 +168,15 @@ if [ -d $W/services_stage/META-INF ]; then
   echo "merged services: $(find $W/services_stage -type f | wc -l) files"
 fi
 cd $W/dex && zipadd $W/kyron-unsigned.apk classes*.dex && cd $KB
+
+step "gate: APK dex audit (referenced classes must be packaged)"
+python $M/app/audit_apk.py $W/kyron-unsigned.apk || {
+  echo "BUILD FAILED: dex audit found packaged-but-referenced classes missing."
+  echo "The APK would crash with NoClassDefFoundError at runtime."
+  echo "Fix the dependency set (app/stage_aars.py re-stages the AAR work dir)."
+  exit 1
+}
+
 for d in $KB/manual/work/aars/*/; do
   if [ -d "$d/jni" ] && [ -n "$(find $d/jni -name '*.so' 2>/dev/null)" ]; then
     (cd "$d" && zipadd $W/kyron-unsigned.apk jni -i '*.so' && true)

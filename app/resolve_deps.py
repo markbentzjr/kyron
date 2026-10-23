@@ -122,6 +122,7 @@ def collect():
         'kotlinx-coroutines-android': 'org.jetbrains.kotlinx',
         'kotlinx-coroutines-core-jvm': 'org.jetbrains.kotlinx',
         'osmdroid-android': 'org.osmdroid', 'json': 'org.json',
+        'material': 'com.google.android.material',
     }
     for f in sorted(os.listdir(DEPS)):
         m = re.match(r'^(.+?)-(\d[\w.\-]*)\.(aar|jar)$', f)

@@ -307,6 +307,13 @@ class CoverageActivity : AppCompatActivity() {
                 showSources(jur)
             })
             if (actions.childCount > 0) row.addView(actions)
+            // LF-N UX hardening (Kyron-2.0 field report): the card itself is
+            // tappable — a tap on the name/status area opens the same honest
+            // info dialog ("official sources") as the card's action button,
+            // so a state never answers with dead silence. Child buttons keep
+            // their own clicks; this is the fallback affordance only.
+            card.isClickable = true
+            card.setOnClickListener { showSources(jur) }
             list.addView(card)
         }
     }
