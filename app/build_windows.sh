@@ -111,7 +111,7 @@ done
   --extra-packages "$PKGS" \
   -A $W/assets_merged \
   --min-sdk-version 29 --target-sdk-version 34 \
-  --version-code 9 --version-name "2.0" \
+  --version-code 10 --version-name "2.0" \
   --auto-add-overlay \
   $W/res_compiled/*.zip
 echo "linked resources.apk"
@@ -175,14 +175,27 @@ for d in $KB/manual/work/aars/*/; do
 done
 "$BT/zipalign.exe" -f -p 4 $W/kyron-unsigned.apk $W/kyron-aligned.apk
 
-step "8/8 sign (debug keystore only — no release identity is created or used)"
-if [ ! -f $KB/debug.keystore ]; then
-  $KB/jdk17/bin/keytool -genkeypair -keystore $KB/debug.keystore -storepass android -keypass android \
-    -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10950 \
-    -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+step "8/8 sign (release keystore when KYRON_RELEASE_KS is set; debug otherwise)"
+if [ -n "${KYRON_RELEASE_KS:-}" ] && [ -f "$KYRON_RELEASE_KS" ]; then
+  # OPT-IN release signing: caller supplies KYRON_RELEASE_KS (path to the
+  # keystore) and KYRON_RELEASE_PASS. The keystore and password are NEVER
+  # stored in the repo and never echoed here.
+  KYOUT=$M/app/Kyron-2.0-release.apk
+  "$BT/apksigner.bat" sign --ks "$(cygpath -w $KYRON_RELEASE_KS)" \
+    --ks-pass "pass:$KYRON_RELEASE_PASS" --key-pass "pass:$KYRON_RELEASE_PASS" \
+    --out "$(cygpath -w $KYOUT)" "$(cygpath -w $W/kyron-aligned.apk)"
+  "$BT/apksigner.bat" verify --print-certs "$(cygpath -w $KYOUT)" | head -n 3
+  ls -la $KYOUT
+  echo "BUILD OK (release-signed local build; distribution is a separate, explicit step)"
+else
+  if [ ! -f $KB/debug.keystore ]; then
+    $KB/jdk17/bin/keytool -genkeypair -keystore $KB/debug.keystore -storepass android -keypass android \
+      -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10950 \
+      -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+  fi
+  "$BT/apksigner.bat" sign --ks "$KB/debug.keystore" --ks-pass pass:android --key-pass pass:android \
+    --out "$(cygpath -w $M/app/Kyron-2.0-windows-build.apk)" "$(cygpath -w $W/kyron-aligned.apk)"
+  "$BT/apksigner.bat" verify --print-certs "$(cygpath -w $M/app/Kyron-2.0-windows-build.apk)" | head -n 3
+  ls -la $M/app/Kyron-2.0-windows-build.apk
+  echo "BUILD OK (windows-local debug build for test rig; not for distribution)"
 fi
-"$BT/apksigner.bat" sign --ks "$KB/debug.keystore" --ks-pass pass:android --key-pass pass:android \
-  --out "$(cygpath -w $M/app/Kyron-2.0-windows-build.apk)" "$(cygpath -w $W/kyron-aligned.apk)"
-"$BT/apksigner.bat" verify --print-certs "$(cygpath -w $M/app/Kyron-2.0-windows-build.apk)" | head -n 3
-ls -la $M/app/Kyron-2.0-windows-build.apk
-echo "BUILD OK (windows-local debug build for test rig; not for distribution)"
