@@ -57,8 +57,8 @@ def fts_query(text):
 def main(argv):
     seed_path = argv[1] if len(argv) > 1 else DEFAULT_SEED
     can_path = argv[2] if len(argv) > 2 else DEFAULT_CANARIES
-    seed = json.load(open(seed_path))
-    doc = json.load(open(can_path))
+    seed = json.load(open(seed_path, encoding='utf-8'))
+    doc = json.load(open(can_path, encoding='utf-8'))
     by_id = {p['id']: p for p in seed}
     failures = []
 
