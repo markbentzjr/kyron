@@ -1,5 +1,6 @@
 # Build outputs and local toolchain (see app/fetch_deps.sh and docs)
 *.apk
+*.aab
 *.idsig
 *.keystore
 app/work/

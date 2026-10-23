@@ -6,6 +6,9 @@ set -o pipefail
 KB=$HOME/kyron-build
 M=$KB/manual
 W=$M/work
+# Single source of build metadata (plain KEY=VALUE lines), shared with
+# build_windows.sh and tools/build_release_app.py.
+source $M/app/version.properties
 SDK=$KB/android-sdk
 BT=$SDK/build-tools/34.0.0
 AJAR=$SDK/platforms/android-34/android.jar
@@ -110,8 +113,8 @@ $BT/aapt2 link \
   --java $W/gen \
   --extra-packages "$PKGS" \
   -A $W/assets_merged \
-  --min-sdk-version 29 --target-sdk-version 34 \
-  --version-code 11 --version-name "2.0.1" \
+  --min-sdk-version "$MIN_SDK" --target-sdk-version "$TARGET_SDK" \
+  --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" \
   --auto-add-overlay \
   $W/res_compiled/*.zip
 echo "linked resources.apk"

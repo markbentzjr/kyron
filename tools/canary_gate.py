@@ -34,7 +34,7 @@ the normalizer, or re-curate with a documented reason.
 import json, os, re, sqlite3, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_SEED = os.path.join(HERE, '..', 'src', 'main', 'assets', 'places_seed_geocoded.json')
+DEFAULT_SEED = os.path.join(HERE, '..', 'app', 'src', 'main', 'assets', 'places_seed_geocoded.json')
 DEFAULT_CANARIES = os.path.join(HERE, 'canaries.json')
 
 

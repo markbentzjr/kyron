@@ -34,6 +34,9 @@ R8JAR=$KB/android-sdk/cmdline-tools/latest/lib/r8.jar
 export TMPDIR=$KB/tmp
 export PATH=$KB/jdk17/bin:$PATH
 export KB
+# Single source of build metadata, shared with build_manual.sh and
+# tools/build_release_app.py (plain KEY=VALUE lines).
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/version.properties"
 mkdir -p $W $KB/tmp
 
 step() { echo; echo "=== $1 ==="; }
@@ -110,8 +113,8 @@ done
   --java $W/gen \
   --extra-packages "$PKGS" \
   -A $W/assets_merged \
-  --min-sdk-version 29 --target-sdk-version 34 \
-  --version-code 11 --version-name "2.0.1" \
+  --min-sdk-version "$MIN_SDK" --target-sdk-version "$TARGET_SDK" \
+  --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" \
   --auto-add-overlay \
   $W/res_compiled/*.zip
 echo "linked resources.apk"
@@ -189,7 +192,7 @@ if [ -n "${KYRON_RELEASE_KS:-}" ] && [ -f "$KYRON_RELEASE_KS" ]; then
   # OPT-IN release signing: caller supplies KYRON_RELEASE_KS (path to the
   # keystore) and KYRON_RELEASE_PASS. The keystore and password are NEVER
   # stored in the repo and never echoed here.
-  KYOUT=$M/app/Kyron-2.0-release.apk
+  KYOUT=$M/app/Kyron-${VERSION_NAME}-release.apk
   "$BT/apksigner.bat" sign --ks "$(cygpath -w $KYRON_RELEASE_KS)" \
     --ks-pass "pass:$KYRON_RELEASE_PASS" --key-pass "pass:$KYRON_RELEASE_PASS" \
     --out "$(cygpath -w $KYOUT)" "$(cygpath -w $W/kyron-aligned.apk)"
@@ -203,8 +206,8 @@ else
       -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
   fi
   "$BT/apksigner.bat" sign --ks "$KB/debug.keystore" --ks-pass pass:android --key-pass pass:android \
-    --out "$(cygpath -w $M/app/Kyron-2.0-windows-build.apk)" "$(cygpath -w $W/kyron-aligned.apk)"
-  "$BT/apksigner.bat" verify --print-certs "$(cygpath -w $M/app/Kyron-2.0-windows-build.apk)" | head -n 3
-  ls -la $M/app/Kyron-2.0-windows-build.apk
+    --out "$(cygpath -w $M/app/Kyron-${VERSION_NAME}-windows-build.apk)" "$(cygpath -w $W/kyron-aligned.apk)"
+  "$BT/apksigner.bat" verify --print-certs "$(cygpath -w $M/app/Kyron-${VERSION_NAME}-windows-build.apk)" | head -n 3
+  ls -la $M/app/Kyron-${VERSION_NAME}-windows-build.apk
   echo "BUILD OK (windows-local debug build for test rig; not for distribution)"
 fi

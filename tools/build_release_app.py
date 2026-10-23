@@ -30,6 +30,19 @@ def main():
     dst_src = os.path.join(M, 'src')
     os.makedirs(dst_src, exist_ok=True)
 
+    # Single source of build metadata (plain KEY=VALUE lines; shared with
+    # app/build_manual.sh and app/build_windows.sh).
+    app_meta = {}
+    with open(os.path.join(src_app, 'version.properties'), encoding='utf-8') as vf:
+        for val_line in vf:
+            val_line = val_line.strip()
+            if val_line and not val_line.startswith('#') and '=' in val_line:
+                key, _, val = val_line.partition('=')
+                app_meta[key.strip()] = val.strip()
+    version_code, version_name = app_meta['VERSION_CODE'], app_meta['VERSION_NAME']
+    min_sdk, target_sdk = app_meta['MIN_SDK'], app_meta['TARGET_SDK']
+    print(f"version: {version_name} (code {version_code}), minSdk {min_sdk}, targetSdk {target_sdk}")
+
     app_src = os.path.join(src_app, 'src')
     if os.path.exists(app_src):
         for item in os.listdir(app_src):
@@ -151,10 +164,10 @@ def main():
         '--manifest', merged_manifest,
         '--java', gen_dir,
         '-A', assets_merged,
-        '--min-sdk-version', '29',
-        '--target-sdk-version', '36',
-        '--version-code', '9',
-        '--version-name', '2.0',
+        '--min-sdk-version', min_sdk,
+        '--target-sdk-version', target_sdk,
+        '--version-code', version_code,
+        '--version-name', version_name,
         '--auto-add-overlay',
     ]
     if extra_pkgs:
@@ -251,6 +264,11 @@ def main():
         for dex_f in glob.glob(os.path.join(dex_dir, 'classes*.dex')):
             z_apk.write(dex_f, os.path.basename(dex_f))
 
+    step("gate: APK dex audit (referenced classes must be packaged)")
+    subprocess.run(
+        [sys.executable, os.path.join(dst_src, 'audit_apk.py'), unsigned_apk],
+        check=True)
+
     aligned_apk = os.path.join(W, 'kyron-aligned.apk')
     subprocess.run([ZIPALIGN, '-f', '-p', '4', unsigned_apk, aligned_apk], check=True)
     print("Zipaligned APK")
@@ -267,7 +285,7 @@ def main():
             '-dname', 'CN=Android Debug,O=Android,C=US'
         ], check=True)
 
-    final_apk = os.path.join(M, 'Kyron-2.0.apk')
+    final_apk = os.path.join(M, f'Kyron-{version_name}.apk')
     sign_cmd = [
         JAVA, '-jar', APKSIGNER, 'sign',
         '--ks', keystore,
