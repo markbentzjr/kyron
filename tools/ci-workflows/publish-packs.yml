@@ -1,0 +1,50 @@
+name: Publish region packs
+
+# Weekly: re-harvest the open-data sources, rebuild region packs and publish
+# them (plus a signed index.json) as assets on the rolling `data-packs`
+# GitHub Release. The app downloads packs from
+#   https://github.com/<owner>/kyron/releases/download/data-packs/<file>
+# No user data is involved; packs are public inspection records only.
+on:
+  schedule:
+    - cron: "17 9 * * 1"   # Mondays 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: publish-packs
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Harvest + build Socrata packs
+        run: |
+          for s in nyc chicago kingco; do
+            python3 harvest/socrata_cities/harvest.py "$s"
+            python3 tools/packs/build_pack_socrata.py "$s"
+          done
+      - name: Harvest + build Delaware pack
+        run: |
+          cd harvest/de_socrata
+          python3 fetch_de.py && python3 normalize_de.py && python3 validate_de.py
+          python3 ../../tools/packs/build_pack_de.py --source out/places.json \
+            --region us-de --state DE --name Delaware --out out
+      - name: Index + sign
+        env:
+          PACK_SIGNING_KEY: ${{ secrets.PACK_SIGNING_KEY }}
+        run: python3 tools/packs/publish_index.py
+      - name: Upload to data-packs release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view data-packs >/dev/null 2>&1 || \
+            gh release create data-packs --prerelease --title "Region data packs" \
+              --notes "Rolling public inspection-data packs (auto-updated weekly). Source attribution in each manifest."
+          gh release upload data-packs dist/* --clobber
