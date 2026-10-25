@@ -1,6 +1,6 @@
 # Kyron National Coverage Matrix
 
-Generated from `tools/coverage/coverage_pipeline.py` on 2026-10-22.
+Generated from `tools/coverage/coverage_pipeline.py` on 2026-10-25.
 
 **Status vocabulary (distinct, do not conflate):**
 - **integrated** — data ships in the app (bundled seed and/or live sync).
@@ -136,24 +136,24 @@ Pass/fail with published violation reports.
 
 ## New York (NY) — `us-ny`
 
-**Primary tier:** Source verified (no ingestion yet) · **Result model:** SCORE_100_HIGH · **Pack:** none (none)
+**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** PENALTY_LOW · **Pack:** built (staged-local) · **Artifact verified:** 2026-10-25
 
-NYC has one of the country's best open-data feeds; upstate is county-fragmented.
+NYC pack built + validated locally (penalty points + letter grade); upstate is county-fragmented.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| ny-nyc-dohmh | NYC Department of Health & Mental Hygiene | New York City | api | full | full-history | source-verified | 2026-10-13 | Socrata API (resource/43nn-pn8j.json): one row per violation citation; numeric score + letter grade. |
+| ny-nyc-dohmh | NYC Department of Health & Mental Hygiene | New York City | api | full | full-history | pack-built | 2026-10-25 | Socrata API (resource/43nn-pn8j.json): one row per violation citation; score = violation points (LOWER is better; A=0-13, B=14-27, C=28+), letter grade carried as result text. Pack BUILT locally 2026-10-25 (31,368 places / 92,713 inspections / 287,206 violations). Attribution: NYC DOHMH via NYC Open Data. |
 | ny-statewide | Rest of New York State (county health departments) | Statewide (not verified) | official-link-only | unverified | unverified | official-link-only | — | No statewide public portal verified; county-level publication. |
 
 ## Illinois (IL) — `us-il`
 
-**Primary tier:** Source verified (no ingestion yet) · **Result model:** PASS_FAIL · **Pack:** none (none)
+**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** PASS_FAIL · **Pack:** built (staged-local) · **Artifact verified:** 2026-10-25
 
-Chicago's feed is excellent; statewide coverage is county-by-county.
+Chicago pack built + validated locally (pass/fail); statewide coverage is county-by-county.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| il-chicago | Chicago Department of Public Health | Chicago | api | full | full-history | source-verified | 2026-10-13 | Socrata (SODA) API; pass / pass-with-conditions / fail; violations field with codes and inspector comments. |
+| il-chicago | Chicago Department of Public Health | Chicago | api | full | some-history | pack-built | 2026-10-25 | Socrata (SODA) API; pass / pass-with-conditions / fail; violations field with codes and inspector comments. Pack BUILT locally 2026-10-25 over a 2-year window (14,823 places / 36,070 inspections). Attribution: City of Chicago Data Portal. |
 | il-statewide | Rest of Illinois (local health departments) | Statewide (not verified) | official-link-only | unverified | unverified | official-link-only | — | No statewide results portal verified. |
 
 ## California (CA) — `us-ca`
@@ -181,13 +181,13 @@ Boston has a strong open dataset; the rest is municipal.
 
 ## Washington (WA) — `us-wa`
 
-**Primary tier:** Source verified (no ingestion yet) · **Result model:** SCORE_100_HIGH · **Pack:** none (none)
+**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** PENALTY_LOW · **Pack:** built (staged-local) · **Artifact verified:** 2026-10-25
 
-King County covers the Seattle metro; statewide is fragmented.
+King County pack built + validated locally (penalty points + rating); statewide is fragmented.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| wa-kingcounty | Public Health — Seattle & King County | King County (incl. Seattle) | api | full | full-history | source-verified | 2026-10-13 | One row per violation, red (critical)/blue points; inspection point totals from last 4 inspections. |
+| wa-kingcounty | Public Health — Seattle & King County | King County (incl. Seattle) | api | full | some-history | pack-built | 2026-10-25 | Socrata r878-4sxa (old gkhn-e8mn now requires login): one row per violation, red (critical)/blue points; score = inspection points (LOWER is better); result + Excellent/Good/Okay/Needs to Improve rating as result text. No coordinates published. Pack BUILT locally 2026-10-25 (12,167 places / 32,971 inspections, 2-year window). |
 | wa-statewide | Washington State DOH + county health departments | Statewide (not verified) | official-link-only | unverified | unverified | official-link-only | — | No statewide results portal verified. |
 
 ## Oregon (OR) — `us-or`
@@ -551,8 +551,8 @@ Registered as a jurisdiction, explicitly NOT one of the 50 states.
 ## Tier tally (50 states, each assigned once)
 
 - Integrated (live in app): **1**
-- Pack built/declared — NOT verified downloadable: **5**
-- Source verified (no ingestion yet): **32**
+- Pack built/declared — NOT verified downloadable: **8**
+- Source verified (no ingestion yet): **29**
 - Official-link-only / blocked: **12**
 - **States total: 50** (must equal 50)
 

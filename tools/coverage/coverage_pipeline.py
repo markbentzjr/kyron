@@ -329,33 +329,43 @@ def registry():
     ], summary="Pass/fail with published violation reports.")
 
     # ------------------------------------------------------- verified cities
-    add("NY", "New York", "SCORE_100_HIGH", [
+    add("NY", "New York", "PENALTY_LOW", [
         src("ny-nyc-dohmh", "NYC Department of Health & Mental Hygiene",
             "New York City", "api",
             "https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j",
-            "full", "full-history", "source-verified", "SCORE_100_HIGH",
-            verified="2026-10-13",
+            "full", "full-history", "pack-built", "PENALTY_LOW",
+            verified="2026-10-25", last_refresh="2026-10-25",
+            refresh="Harvest pipeline harvest/socrata_cities (nyc)",
             notes="Socrata API (resource/43nn-pn8j.json): one row per violation "
-                  "citation; numeric score + letter grade.",
+                  "citation; score = violation points (LOWER is better; A=0-13, "
+                  "B=14-27, C=28+), letter grade carried as result text. Pack BUILT "
+                  "locally 2026-10-25 (31,368 places / 92,713 inspections / "
+                  "287,206 violations). Attribution: NYC DOHMH via NYC Open Data.",
             restrictions="NYC only — the rest of New York State is fragmented by county."),
         link_only("ny-statewide", "Rest of New York State (county health departments)",
                   "https://www.health.ny.gov/food_safety/",
                   "No statewide public portal verified; county-level publication."),
-    ], summary="NYC has one of the country's best open-data feeds; upstate is "
-               "county-fragmented.")
+    ], pack="built", availability="staged-local", artifact_verified="2026-10-25",
+        summary="NYC pack built + validated locally (penalty points + letter grade); "
+               "upstate is county-fragmented.")
 
     add("IL", "Illinois", "PASS_FAIL", [
         src("il-chicago", "Chicago Department of Public Health", "Chicago", "api",
             "https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5",
-            "full", "full-history", "source-verified", "PASS_FAIL",
-            verified="2026-10-13",
+            "full", "some-history", "pack-built", "PASS_FAIL",
+            verified="2026-10-25", last_refresh="2026-10-25",
+            refresh="Harvest pipeline harvest/socrata_cities (chicago)",
             notes="Socrata (SODA) API; pass / pass-with-conditions / fail; violations "
-                  "field with codes and inspector comments.",
+                  "field with codes and inspector comments. Pack BUILT locally "
+                  "2026-10-25 over a 2-year window (14,823 places / 36,070 "
+                  "inspections). Attribution: City of Chicago Data Portal.",
             restrictions="Chicago only; the rest of Illinois is fragmented."),
         link_only("il-statewide", "Rest of Illinois (local health departments)",
                   "https://dph.illinois.gov/topics-services/food-safety.html",
                   "No statewide results portal verified."),
-    ], summary="Chicago's feed is excellent; statewide coverage is county-by-county.")
+    ], pack="built", availability="staged-local", artifact_verified="2026-10-25",
+        summary="Chicago pack built + validated locally (pass/fail); statewide coverage "
+                "is county-by-county.")
 
     add("CA", "California", "SCORE_100_HIGH", [
         src("ca-lacounty", "Los Angeles County Department of Public Health",
@@ -395,18 +405,24 @@ def registry():
             notes="~350 municipal health boards are the real publishers."),
     ], summary="Boston has a strong open dataset; the rest is municipal.")
 
-    add("WA", "Washington", "SCORE_100_HIGH", [
+    add("WA", "Washington", "PENALTY_LOW", [
         src("wa-kingcounty", "Public Health — Seattle & King County", "King County (incl. Seattle)", "api",
-            "https://dev.socrata.com/foundry/data.kingcounty.gov/gkhn-e8mn",
-            "full", "full-history", "source-verified", "SCORE_100_HIGH",
-            verified="2026-10-13",
-            notes="One row per violation, red (critical)/blue points; inspection "
-                  "point totals from last 4 inspections.",
+            "https://data.kingcounty.gov/Health-Wellness/Food-Establishment-Inspection-Data/r878-4sxa",
+            "full", "some-history", "pack-built", "PENALTY_LOW",
+            verified="2026-10-25", last_refresh="2026-10-25",
+            refresh="Harvest pipeline harvest/socrata_cities (kingco)",
+            notes="Socrata r878-4sxa (old gkhn-e8mn now requires login): one row per "
+                  "violation, red (critical)/blue points; score = inspection points "
+                  "(LOWER is better); result + Excellent/Good/Okay/Needs to Improve "
+                  "rating as result text. No coordinates published. Pack BUILT "
+                  "locally 2026-10-25 (12,167 places / 32,971 inspections, 2-year window).",
             restrictions="King County only; other counties publish separately."),
         link_only("wa-statewide", "Washington State DOH + county health departments",
                   "https://doh.wa.gov/you-and-your-family/food-safety",
                   "No statewide results portal verified."),
-    ], summary="King County covers the Seattle metro; statewide is fragmented.")
+    ], pack="built", availability="staged-local", artifact_verified="2026-10-25",
+        summary="King County pack built + validated locally (penalty points + rating); "
+                "statewide is fragmented.")
 
     # ------------------------------------------------- verified statewide (LF-N research pass)
     add("OR", "Oregon", "SCORE_100_HIGH", [
