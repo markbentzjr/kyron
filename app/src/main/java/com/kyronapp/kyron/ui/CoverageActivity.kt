@@ -418,7 +418,7 @@ class CoverageActivity : AppCompatActivity() {
      *  place count disagrees with the manifest — a bad download changes
      *  nothing on the device. */
     private fun downloadRegion(regionId: String) {
-        val info = Regions.byId(regionId) ?: return
+        val info = Regions.byIdOrRegistry(this, regionId) ?: return
         val manifestUrl = info.manifestUrl ?: return
         if (busy) return
         busy = true
@@ -431,7 +431,18 @@ class CoverageActivity : AppCompatActivity() {
                     if (manifest.regionId != regionId) {
                         throw IllegalStateException("Manifest is for ${manifest.regionId}, not $regionId")
                     }
-                    val packUrl = manifestUrl.substringBeforeLast('/') + "/" + manifest.fullFile
+                    val base = manifestUrl.substringBeforeLast('/')
+                    // Packs hosted on the GitHub Release MUST verify against the
+                    // signed index (bundled public key); legacy hosts keep the
+                    // manifest-sha256 check below.
+                    if (manifestUrl.contains("/releases/download/")) {
+                        val key = com.kyronapp.kyron.data.PackIndex.loadPublicKey(this@CoverageActivity)
+                            ?: throw IllegalStateException("No pack-index public key bundled")
+                        val idx = fetchBytes("$base/index.json")
+                        val sig = String(fetchBytes("$base/index.json.sig"), Charsets.UTF_8)
+                        com.kyronapp.kyron.data.PackIndex.requireListed(idx, sig, key, regionId, manifest.fullSha256)
+                    }
+                    val packUrl = base + "/" + manifest.fullFile
                     val packFile = File(cacheDir, manifest.fullFile)
                     fetchToFile(packUrl, packFile)
                     app.repository.installPack(packFile, manifest)
@@ -454,6 +465,13 @@ class CoverageActivity : AppCompatActivity() {
         conn.connectTimeout = 15_000
         conn.readTimeout = 30_000
         return conn.inputStream.bufferedReader().use { it.readText() }
+    }
+
+    private fun fetchBytes(url: String): ByteArray {
+        val conn = URL(url).openConnection() as HttpURLConnection
+        conn.connectTimeout = 15_000
+        conn.readTimeout = 30_000
+        return conn.inputStream.use { it.readBytes() }
     }
 
     private fun fetchToFile(url: String, out: File) {

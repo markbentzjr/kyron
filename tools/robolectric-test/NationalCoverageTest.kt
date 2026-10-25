@@ -128,10 +128,10 @@ class NationalCoverageTest {
         assertFalse(NationalCoverage.bandMatches("SCORE_100_HIGH", "Below 85", 85))
         assertTrue(NationalCoverage.bandMatches("SCORE_100_HIGH", "95+", 95))
         // Penalty scale: low points = good; NO_SCORE never banded either.
-        assertTrue(NationalCoverage.bandMatches("PENALTY_LOW", "0–9", 7))
-        assertFalse(NationalCoverage.bandMatches("PENALTY_LOW", "0–9", 12))
-        assertTrue(NationalCoverage.bandMatches("PENALTY_LOW", "20+", 25))
-        assertFalse(NationalCoverage.bandMatches("PENALTY_LOW", "20+", Place.NO_SCORE))
+        assertTrue(NationalCoverage.bandMatches("PENALTY_LOW", "0–13", 7))
+        assertFalse(NationalCoverage.bandMatches("PENALTY_LOW", "0–13", 14))
+        assertTrue(NationalCoverage.bandMatches("PENALTY_LOW", "28+", 30))
+        assertFalse(NationalCoverage.bandMatches("PENALTY_LOW", "28+", Place.NO_SCORE))
     }
 
     @Test

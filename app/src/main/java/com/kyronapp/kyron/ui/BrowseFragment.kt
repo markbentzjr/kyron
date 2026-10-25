@@ -224,7 +224,7 @@ class BrowseFragment : Fragment() {
 
     private fun bandLabel(id: Int): String {
         // LF-N: chip labels come from the ACTIVE region's own result
-        // model ("Below 85" on a 0–100 scale; "10–19" penalty points on
+        // model ("Below 85" on a 0–100 scale; "14–27" penalty points on
         // an Alabama-forbidden demerit scale, etc.). The band vocabulary
         // is shared with PlaceRepository.searchPlaces and MapFragment.
         val bands = NationalCoverage.bands(regionModel)

@@ -26,3 +26,4 @@ __pycache__/
 harvest/socrata_cities/out/
 dist/
 /kyron-keys/
+.kotlin/

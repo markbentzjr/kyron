@@ -406,19 +406,75 @@ def convert_sc_place(raw: dict) -> dict:
     }
 
 
+def _nc_score_text(s, grade):
+    """NC publishes half-point scores (95.5) and a letter grade. The pack's
+    score column is INTEGER, so the integer part ships in `score` (floor —
+    never rounded UP into a better score) and the VERBATIM score + grade
+    ship in result_text, e.g. "95.5 · Grade A"."""
+    parts = []
+    if s is not None:
+        parts.append(f"{s:g}")
+    if grade and grade != "N/A":
+        parts.append(f"Grade {grade}")
+    return " · ".join(parts)
+
+
+def convert_nc_place(raw: dict) -> dict:
+    """NC CDPEHS (harvest/nc, places_nc.json — TN-mirrored shape) ->
+    canonical Kyron place row. SCORE_100_HIGH model; demerits -> p."""
+    import math as _m
+    inspections = []
+    for insp in raw.get("insp") or []:
+        viols = []
+        for v in insp.get("v") or []:
+            head = f"{v.get('item', '')} {v.get('title', '')}".strip()
+            if v.get("rule"):
+                head = f"{head} — {v['rule']}"
+            notes = (v.get("notes") or "").strip()
+            pts = v.get("points") or 0
+            viols.append({"p": int(_m.floor(pts)) if isinstance(pts, (int, float)) else 0,
+                          "c": False, "r": head + (f" // {notes}" if notes else "")})
+        s = insp.get("s")
+        inspections.append({
+            "score": int(_m.floor(s)) if isinstance(s, (int, float)) else -1,
+            "date": iso_to_mdy(insp.get("d") or ""),
+            "type": insp.get("t") or "",
+            "violations": viols,
+            "result_text": _nc_score_text(s, insp.get("grade")),
+        })
+    s = raw.get("s")
+    return {
+        "id": raw["id"], "name": raw.get("n") or "", "address": raw.get("a") or "",
+        "city": raw.get("c") or "", "zip": (raw.get("z") or "")[:5],
+        "county": raw.get("ct") or "",
+        "score": int(_m.floor(s)) if isinstance(s, (int, float)) else -1,
+        "date": iso_to_mdy(raw.get("d") or ""), "source": "NC-CDPEHS",
+        "lat": raw.get("lat"), "lng": raw.get("lng"), "detail_url": raw.get("du"),
+        "geo_status": raw.get("gs") or "UNRESOLVED", "geo_acc": raw.get("ga") or "NONE",
+        "geo_prov": raw.get("gp") or "", "geo_match": raw.get("gm") or "",
+        "state": "NC", "jurisdiction": raw.get("jur") or "NC-CDPEHS",
+        "region_id": "us-nc", "result_text": _nc_score_text(s, raw.get("grade")),
+        "inspections": inspections,
+    }
+
+
 CONVERTERS = {"us-fl": convert_fl_place, "us-ga": convert_ga_place,
-              "us-tn": convert_tn_place, "us-sc": convert_sc_place}
+              "us-tn": convert_tn_place, "us-sc": convert_sc_place,
+              "us-nc": convert_nc_place}
 SCORE_MODELS = {"us-fl": "DISPOSITION", "us-ga": "SCORE_100",
-                "us-tn": "SCORE_100", "us-sc": "DISPOSITION"}
+                "us-tn": "SCORE_100", "us-sc": "DISPOSITION",
+                "us-nc": "SCORE_100"}
 JURISDICTIONS = {
     "us-fl": [{"jurisdictionId": "FL-DBPR", "name": "Florida DBPR (statewide)"}],
     "us-ga": [{"jurisdictionId": "GA-DPH", "name": "Georgia DPH (statewide)"}],
     "us-tn": [{"jurisdictionId": "TN-DOH", "name": "Tennessee Dept. of Health (statewide)"}],
     "us-sc": [{"jurisdictionId": "SCDA", "name": "South Carolina Dept. of Agriculture (statewide)"}],
+    "us-nc": [{"jurisdictionId": "NC-CDPEHS", "name": "NC county health depts via CDPEHS (98 counties)"}],
 }
 SOURCE_DEFAULTS = {"us-fl": "Florida DBPR", "us-ga": "Georgia DPH",
                    "us-tn": "Tennessee Dept. of Health",
-                   "us-sc": "South Carolina Dept. of Agriculture"}
+                   "us-sc": "South Carolina Dept. of Agriculture",
+                   "us-nc": "NC DHHS / county health departments (CDPEHS)"}
 
 
 def main() -> int:

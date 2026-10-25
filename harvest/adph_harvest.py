@@ -1,6 +1,6 @@
 import requests, json, os, time, sys
 from bs4 import BeautifulSoup
-OUT = '/home/hatch/kyron-build/harvest/adph'
+OUT = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/adph'
 os.makedirs(OUT, exist_ok=True)
 UA = {"User-Agent": "KyronHealthApp/2.0 (statewide data harvest)"}
 

@@ -14,13 +14,26 @@ import urllib.request, urllib.parse, json
 
 COLUMNS = ["EST_NAME", "EST_ADDRESS", "EST_CSZ", "INS_ONE", "INS_TWO", "INS_THREE", "INS_FOUR"]
 ENDPOINT = "https://mchd.org/wp-admin/admin-ajax.php"
-PUB_NONCE = "e3fc94ab8e"  # publication id from the public ratings page
+PUB_NONCE = "e3fc94ab8e"  # fallback; refreshed from the public ratings page below
+
+
+def _live_nonce():
+    """The publication nonce rotates; read the current one from the page."""
+    import re
+    try:
+        req = urllib.request.Request("https://mchd.org/restaurant-ratings-mobile/",
+                                     headers={"User-Agent": "Mozilla/5.0"})
+        html = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace")
+        m = re.search(r'geosearch_options,\s*"([0-9a-f]{10})"', html)
+        return m.group(1) if m else PUB_NONCE
+    except Exception:  # noqa: BLE001
+        return PUB_NONCE
 PUB_ID = "1"
 
 
 def fetch_all():
     data = {
-        "action": "wpda_datatables", "wpnonce": PUB_NONCE, "pubid": PUB_ID,
+        "action": "wpda_datatables", "wpnonce": _live_nonce(), "pubid": PUB_ID, "pub_id": PUB_ID,
         "filter_field_name": "", "filter_field_value": "", "nl2br": "",
         "draw": "1", "start": "0", "length": "5000",
         "search[value]": "", "search[regex]": "false",
@@ -36,7 +49,7 @@ def fetch_all():
     req = urllib.request.Request(
         ENDPOINT,
         data=urllib.parse.urlencode(data).encode(),
-        headers={"User-Agent": "KyronHealthApp/2.0",
+        headers={"User-Agent": "Mozilla/5.0",
                  "Content-Type": "application/x-www-form-urlencoded"},
     )
     body = urllib.request.urlopen(req, timeout=90).read().decode("utf-8", "replace")

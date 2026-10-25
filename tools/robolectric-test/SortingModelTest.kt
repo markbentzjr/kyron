@@ -89,21 +89,21 @@ class SortingModelTest {
         )
     }
 
-    /** End-to-end fixture check: three penalty rows 25/10/2 admitted into
+    /** End-to-end fixture check: three penalty rows 30/20/2 admitted into
      *  the penalty band vocabulary in-band, with NO_SCORE excluded. */
     @Test
     fun penaltyRows25_10_2BandCleanOrder() {
-        val a = scoredPenalty("pen25", 25)
-        val b = scoredPenalty("pen10", 10)
+        val a = scoredPenalty("pen30", 30)
+        val b = scoredPenalty("pen20", 20)
         val c = scoredPenalty("pen2", 2)
-        for ((p, band) in listOf(a to "20+", b to "10–19", c to "0–9")) {
+        for ((p, band) in listOf(a to "28+", b to "14–27", c to "0–13")) {
             assertTrue(
                 "${p.id} must land in '$band'",
                 NationalCoverage.bandMatches(NationalCoverage.MODEL_PENALTY_LOW, band, p.score)
             )
         }
         // No score never masquerades in ANY penalty band:
-        for (band in listOf("0–9", "10–19", "20+")) {
+        for (band in listOf("0–13", "14–27", "28+")) {
             assertFalse(
                 NationalCoverage.bandMatches(NationalCoverage.MODEL_PENALTY_LOW, band, Place.NO_SCORE)
             )
