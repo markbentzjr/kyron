@@ -1,3 +1,5 @@
+# STAGED HERE: move to .github/workflows/ to activate (the token used to push
+# this branch lacked the GitHub `workflow` scope).
 name: Publish region packs
 
 # Weekly: re-harvest the open-data sources, rebuild region packs and publish
