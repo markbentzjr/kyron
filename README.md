@@ -98,6 +98,44 @@ so Tallapoosa backfills automatically once ADPH fixes their page.
   `tools/packs/build_pack.py` → publish the manifest at the pack host →
   register the pack region. See CONTRIBUTING.md and the matrix doc.
 
+## Publishing, verifying and installing packs
+
+Packs are published by CI, never by hand-editing the registry:
+
+1. **Build** — `harvest/<state>/` harvests the official portal; 
+   `tools/packs/build_pack.py` (or `build_pack_socrata.py` for open-data
+   APIs) produces `<regionId>-<version>.db.gz` + `<regionId>.manifest.json`
+   (checksummed, schema-validated).
+2. **Publish** — `.github/workflows/publish-state-packs.yml` (weekly, or
+   `workflow_dispatch`) runs each harvestable state as its own CI job —
+   FL, GA, TN, SC, NC, DE plus the open-data city/county packs NY (NYC),
+   IL (Chicago), WA (King County) — and uploads pack + manifest to the
+   rolling `data-packs` GitHub Release.
+3. **Index + sign** — the workflow rebuilds `index.json` from every
+   manifest on the release and signs it (ECDSA P-256) with the
+   `PACK_SIGNING_KEY` secret. The app verifies that signature against the
+   bundled public key (`assets/pack_index_pub.pem`, `data/PackIndex.kt`)
+   **before** installing any release-hosted pack; an unsigned or
+   checksum-mismatched index is refused with an error, never installed.
+4. **Register honestly** — a state's registry row says
+   `downloadable-verified` (and only then the app shows a Download
+   button) **only after** someone has fetched the published artifact and
+   matched its sha256. Editing `tools/coverage/coverage_pipeline.py`,
+   then run:
+   ```bash
+   python tools/coverage/coverage_pipeline.py build   # regenerate JSON asset
+   python tools/coverage/coverage_pipeline.py gate    # 50 states + D.C. gate
+   python tools/coverage/coverage_pipeline.py matrix  # regenerate docs matrix
+   ```
+   The gate also cross-checks the hand-maintained `Regions.kt`
+   `US_STATES`/`STATE_BOUNDS` lists against the canonical state list, so
+   the Kotlin registry cannot silently drift.
+5. **Verify in-app** — `.github/workflows/emulator-smoke.yml` boots an
+   Android SDK emulator, installs the app, opens the Coverage screen and
+   filters by **every one of the 50 state codes plus D.C.**, requiring each
+   state card to render from the bundled registry. It is the automated
+   check that a state is select-able — not merely listed.
+
 ## Repository layout
 
 - `app/` — the Android app (Kotlin). Note on the build: Kyron is currently

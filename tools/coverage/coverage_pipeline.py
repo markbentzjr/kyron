@@ -879,11 +879,53 @@ def primary_tier(j: dict) -> str:
     return "Official-link-only / blocked"
 
 
+# Kotlin canonical lists (Regions.kt) are hand-maintained and must stay in
+# lockstep with STATES above; the gate cross-checks them so a typo in one
+# cannot silently diverge from the registry.
+def check_kotlin_canonical_lists(errors: list) -> None:
+    """Cross-check Regions.kt US_STATES ('code to name') and STATE_BOUNDS
+    keys (code to doubleArrayOf) against the canonical STATES list."""
+    import re
+    regions_kt = (REPO / "app" / "src" / "main" / "java" / "com" /
+                  "kyronapp" / "kyron" / "data" / "Regions.kt")
+    text = regions_kt.read_text(encoding="utf-8")
+
+    pos_us, pos_bounds = text.index("US_STATES"), text.index("STATE_BOUNDS")
+    us_pairs = re.findall(r'"([A-Z]{2})" to "([^"]+)"', text[pos_us:pos_bounds])
+    bound_keys = re.findall(r'"([A-Z]{2})" to doubleArrayOf\(', text[pos_bounds:])
+
+    canonical = [(c, n) for c, n in STATES if c != "DC"]
+    seen = {}
+    for code, name in us_pairs:
+        if code in seen:
+            errors.append(f"Regions.kt US_STATES: duplicate state code {code}")
+        seen[code] = name
+    if len(us_pairs) != 50:
+        errors.append(f"Regions.kt US_STATES: expected 50 entries, got {len(us_pairs)}")
+    for code, name in canonical:
+        got = seen.get(code)
+        if got != name:
+            errors.append(f"Regions.kt US_STATES: {code} is {got!r}, "
+                          f"canonical registry says {name!r}")
+    for code, name in us_pairs:
+        if not any(c == code and requested == name for c, requested in canonical):
+            errors.append(f"Regions.kt US_STATES: entry {code}={name!r} does not match "
+                          "the canonical state registry (name typo or non-state entry; "
+                          "D.C. must NOT be in US_STATES)")
+
+    if sorted(bound_keys) != sorted(c for c, n in canonical):
+        errors.append("Regions.kt STATE_BOUNDS keys do not match the 50 states "
+                      f"(got {len(bound_keys)}: {sorted(bound_keys)})")
+    if len(bound_keys) != len(set(bound_keys)):
+        errors.append(f"Regions.kt STATE_BOUNDS: duplicate keys {[k for k in bound_keys if bound_keys.count(k) > 1]}")
+
+
 def gate(payload: dict) -> int:
     errors = []
     js = payload.get("jurisdictions", [])
     states = [j for j in js if j.get("type") == "state"]
     dcs = [j for j in js if j.get("type") == "federal-district"]
+    check_kotlin_canonical_lists(errors)
 
     if len(js) != 51:
         errors.append(f"expected 51 jurisdictions (50 states + D.C.), got {len(js)}")
@@ -967,7 +1009,8 @@ def gate(payload: dict) -> int:
         print("FAIL:", e)
     if not errors:
         print(f"GATE PASS: {len(states)} unique states + 1 D.C.; "
-              f"{len(seen_sources)} unique sources; all vocabularies valid.")
+              f"{len(seen_sources)} unique sources; all vocabularies valid; "
+              f"Regions.kt canonical lists in lockstep.")
         return 0
     return 1
 

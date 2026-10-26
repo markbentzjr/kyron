@@ -252,4 +252,68 @@ class NationalCoverageTest {
         assertEquals(NationalCoverage.MODEL_SCORE_100_HIGH, Regions.nationalModel(Regions.ALABAMA))
         assertEquals(NationalCoverage.MODEL_DISPOSITION, Regions.nationalModel(Regions.FLORIDA))
     }
+
+    // 7 ------------------------------------------------------------------
+    // Invalid / unregistered state values must fail SAFE: never resolve to
+    // a jurisdiction, never inherit Alabama's 0–100 scale.
+
+    @Test
+    fun unknownStateCodesResolveToUnknownModelAndNeverToAlabama() {
+        val coverage = coverage()
+        // "XX" is not a USPS state (nor DC): a place tagged with it must get
+        // MODEL_UNKNOWN — no bands, no score sorts, no threshold alerts —
+        // and byState/byRegionId must not resolve to any jurisdiction.
+        val ghost = Place(
+            id = "test_xx_ghost", name = "Ghost Diner", address = "9 Nowhere St",
+            city = "Gotham", zip = "00000", county = "Unknown",
+            score = 88, date = "10/1/2026", source = "TEST",
+            state = "XX"
+        )
+        assertEquals(NationalCoverage.MODEL_UNKNOWN,
+            NationalCoverage.modelForPlace(coverage, ghost))
+        assertEquals(NationalCoverage.MODEL_UNKNOWN,
+            NationalCoverage.modelForSource(coverage, "us-xx", "TEST"))
+        assertNull(NationalCoverage.byState(coverage, "XX"))
+        assertNull(NationalCoverage.byRegionId(coverage, "us-xx"))
+        // UNKNOWN only admits the scale-free "All scores" label — never a
+        // numeric band from another scale.
+        assertTrue(NationalCoverage.bandMatches(NationalCoverage.MODEL_UNKNOWN, "All scores", 42))
+        assertFalse(NationalCoverage.bandMatches(NationalCoverage.MODEL_UNKNOWN, "Below 85", 42))
+        assertFalse(NationalCoverage.bandMatches(NationalCoverage.MODEL_UNKNOWN, "0–13", 42))
+    }
+
+    @Test
+    fun malformedStateValuesAreRejectedWithoutResolution() {
+        val coverage = coverage()
+        for (bad in listOf("", " ", "usa", "USA", "Alabama")) {
+            assertNull("code $bad must not resolve to a jurisdiction",
+                NationalCoverage.byState(coverage, bad))
+        }
+        for (bad in listOf("", "alabama", "US-AL ", "us", "us-alx")) {
+            assertNull("regionId $bad must not resolve",
+                NationalCoverage.byRegionId(coverage, bad))
+        }
+        // Conversely every registered jurisdiction (50 states + DC) must
+        // resolve BY its own recorded code.
+        for (j in coverage) {
+            assertNotNull("state ${j.state} must resolve",
+                NationalCoverage.byState(coverage, j.state))
+        }
+    }
+
+    @Test
+    fun registeredStateCodesAreCaseInsensitive() {
+        val coverage = coverage()
+        val low = Place(
+            id = "test_al_lower", name = "Lower Case Diner", address = "5 Test St",
+            city = "Birmingham", zip = "35203", county = "Jefferson",
+            score = 90, date = "10/1/2026", source = "JCDH", state = "al"
+        )
+        assertEquals("us-al", NationalCoverage.byState(coverage, "al")!!.regionId)
+        // A place with a purposely lower-cased valid code still resolves to
+        // its registry jurisdiction's REAL model (not Alabama's as a
+        // fallback): byState is case-insensitive by design.
+        assertEquals(NationalCoverage.MODEL_SCORE_100_HIGH,
+            NationalCoverage.modelForPlace(coverage, low))
+    }
 }
