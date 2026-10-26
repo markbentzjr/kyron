@@ -21,3 +21,6 @@ harvest/*.log
 harvest/mchd_rows.json
 harvest/jcdh_enum*.json
 __pycache__/
+
+# Socrata city/county harvest outputs + packs (regenerate with harvest/socrata_cities)
+harvest/socrata_cities/out/
