@@ -1,0 +1,32 @@
+# STAGED HERE: move to .github/workflows/ to activate (needs `workflow` scope to push).
+name: Android release build
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: android-actions/setup-android@v3
+      - name: Decode upload keystore
+        env: { KEYSTORE_B64: "${{ secrets.KYRON_KEYSTORE_B64 }}" }
+        run: echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Build signed APK + AAB
+        env:
+          KYRON_KEYSTORE: ${{ runner.temp }}/upload.jks
+          KYRON_KEYSTORE_PASSWORD: ${{ secrets.KYRON_KEYSTORE_PASSWORD }}
+          KYRON_KEY_ALIAS: ${{ secrets.KYRON_KEY_ALIAS }}
+          KYRON_KEY_PASSWORD: ${{ secrets.KYRON_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon :app:assembleRelease :app:bundleRelease
+      - name: Draft GitHub release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --draft --generate-notes \
+            app/build/outputs/apk/release/app-release.apk \
+            app/build/outputs/bundle/release/app-release.aab

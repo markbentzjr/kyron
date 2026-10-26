@@ -75,9 +75,10 @@ object NationalCoverage {
         }
         MODEL_PENALTY_LOW -> when (band) {
             // Penalty points build up: a low count is the GOOD side.
-            "0–9" -> 0 to 9
-            "10–19" -> 10 to 19
-            "20+" -> 20 to null
+            // Cut-offs follow NYC DOHMH grades: A = 0–13, B = 14–27, C = 28+.
+            "0–13" -> 0 to 13
+            "14–27" -> 14 to 27
+            "28+" -> 28 to null
             else -> null to null
         }
         else -> null to null
@@ -89,7 +90,7 @@ object NationalCoverage {
      * specific band in ANY model — missing data is not a result.
      *
      * LF-N hardening: UNKNOWN is NOT "match anything". A model-specific
-     * band label ("85–94", "20+") carries scale semantics the unknown
+     * band label ("85–94", "28+") carries scale semantics the unknown
      * model cannot interpret, so under UNKNOWN it must admit NOTHING —
      * otherwise a 0–100 band silently swallows penalty points the way
      * the old hard-coded defaults did. Only the scale-free "All scores"
@@ -117,7 +118,7 @@ object NationalCoverage {
      *  numeric bands (chips hidden). */
     fun bands(model: String): List<String> = when (model) {
         MODEL_SCORE_100_HIGH -> listOf("All scores", "Below 85", "85–94", "95+")
-        MODEL_PENALTY_LOW -> listOf("All scores", "0–9", "10–19", "20+")
+        MODEL_PENALTY_LOW -> listOf("All scores", "0–13", "14–27", "28+")
         else -> emptyList()
     }
 
@@ -141,8 +142,8 @@ object NationalCoverage {
             else -> 3
         }
         model == MODEL_PENALTY_LOW -> when {
-            score <= 9 -> 1
-            score <= 19 -> 2
+            score <= 13 -> 1
+            score <= 27 -> 2
             else -> 3
         }
         else -> 0

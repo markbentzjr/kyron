@@ -310,8 +310,8 @@ class MapFragment : Fragment() {
     private fun bandColor(score: Int, model: String): Int = when {
         score < 0 -> toneColor(0)
         model == com.kyronapp.kyron.data.NationalCoverage.MODEL_PENALTY_LOW -> when {
-            score <= 9 -> 0xFF2E9E4F.toInt()
-            score <= 19 -> 0xFFE8A13A.toInt()
+            score <= 13 -> 0xFF2E9E4F.toInt()
+            score <= 27 -> 0xFFE8A13A.toInt()
             else -> 0xFFD9534F.toInt()
         }
         model == com.kyronapp.kyron.data.NationalCoverage.MODEL_SCORE_100_HIGH -> when {

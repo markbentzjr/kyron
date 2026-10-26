@@ -24,3 +24,6 @@ __pycache__/
 
 # Socrata city/county harvest outputs + packs (regenerate with harvest/socrata_cities)
 harvest/socrata_cities/out/
+dist/
+/kyron-keys/
+.kotlin/
