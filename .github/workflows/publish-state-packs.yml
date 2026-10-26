@@ -1,16 +1,32 @@
-# STAGED HERE: move to .github/workflows/ to activate (needs `workflow` scope to push).
-name: Publish statewide packs (FL, GA, TN, SC, NC, DE)
+# Publish region packs for every jurisdiction with a tracked harvest
+# pipeline: 50-state registry regions FL, GA, TN, SC, NC, DE plus the
+# Socrata city/county packs NY (NYC), IL (Chicago) and WA (King County).
+#
+# Weekly (each state its own job — portal harvests can run for hours; a
+# GitHub job is capped at 6 h). Each job uploads its pack + manifest to
+# the rolling `data-packs` release; the final job rebuilds and re-signs
+# index.json from every manifest attached to the release.
+#
+# Downstream honesty rule: a pack is NOT "verified downloadable" in the
+# registry until a human/CI has fetched the artifact and matched its
+# sha256 — publishing alone never flips a state's registry status. See
+# tools/coverage/coverage_pipeline.py.
+#
+# Signing note: index.json is signed with the PACK_SIGNING_KEY secret
+# (ECDSA P-256). If the secret is absent, an UNSIGNED index is published
+# and the app deliberately REFUSES release-hosted pack installs
+# (data/PackIndex.kt) — set the secret before treating a release-hosted
+# state as usable.
+name: Publish region packs (statewide + city)
 
-# Weekly. Each state is its own job (portal harvests run for hours; GitHub
-# caps a job at 6 h). Each job uploads its pack + manifest to the rolling
-# `data-packs` release; the final job rebuilds and re-signs index.json from
-# every manifest attached to the release.
 on:
   schedule:
     - cron: "41 6 * * 0"   # Sundays 06:41 UTC
   workflow_dispatch:
     inputs:
-      states: { description: "comma list (fl,ga,tn,sc,nc,de) or all", default: "all" }
+      states:
+        description: "comma list (fl,ga,tn,sc,nc,de,nyc,chicago,kingco) or all"
+        default: "all"
 
 permissions:
   contents: write
@@ -26,6 +42,7 @@ jobs:
           - st: fl
             region: us-fl
             name: Florida
+            packs: "out/us-fl-*.db.gz out/us-fl.manifest.json"
             run: |
               harvest/fl_dbpr/fl_fetch.sh
               python3 harvest/fl_dbpr/fl_dbpr_build.py
@@ -33,33 +50,59 @@ jobs:
           - st: ga
             region: us-ga
             name: Georgia
+            packs: "out/us-ga-*.db.gz out/us-ga.manifest.json"
             run: |
               python3 harvest/ga/ga_fetch.py && python3 harvest/ga/ga_build.py
               python3 tools/packs/build_pack.py --source harvest/ga/OUTPUT/places_ga.json --region us-ga --state GA --name Georgia --out out
           - st: tn
             region: us-tn
             name: Tennessee
+            packs: "out/us-tn-*.db.gz out/us-tn.manifest.json"
             run: |
               python3 harvest/tn/tn_fetch.py && python3 harvest/tn/tn_fetch_details.py && python3 harvest/tn/tn_build.py
               python3 tools/packs/build_pack.py --source harvest/tn/OUTPUT/places_tn.json --region us-tn --state TN --name Tennessee --out out
           - st: sc
             region: us-sc
             name: South Carolina
+            packs: "out/us-sc-*.db.gz out/us-sc.manifest.json"
             run: |
               python3 harvest/sc/sc_fetch_gis.py && python3 harvest/sc/sc_fetch_rate.py && python3 harvest/sc/sc_build.py
               python3 tools/packs/build_pack.py --source harvest/sc/OUTPUT/places_sc.json --region us-sc --state SC --name "South Carolina" --out out
           - st: nc
             region: us-nc
             name: North Carolina
+            packs: "out/us-nc-*.db.gz out/us-nc.manifest.json"
             run: |
               python3 harvest/nc/nc_fetch.py && python3 harvest/nc/nc_build.py
               python3 tools/packs/build_pack.py --source harvest/nc/OUTPUT/places_nc.json --region us-nc --state NC --name "North Carolina" --out out
           - st: de
             region: us-de
             name: Delaware
+            packs: "out/us-de-*.db.gz out/us-de.manifest.json"
             run: |
               cd harvest/de_socrata && python3 fetch_de.py && python3 normalize_de.py && python3 validate_de.py && cd ../..
               python3 tools/packs/build_pack_de.py --source harvest/de_socrata/out/places.json --region us-de --state DE --name Delaware --out out
+          - st: nyc
+            region: us-ny
+            name: New York City
+            packs: "harvest/socrata_cities/out/us-ny/us-ny-*.db.gz harvest/socrata_cities/out/us-ny/us-ny.manifest.json"
+            run: |
+              python3 harvest/socrata_cities/harvest.py nyc
+              python3 tools/packs/build_pack_socrata.py nyc
+          - st: chicago
+            region: us-il
+            name: Chicago
+            packs: "harvest/socrata_cities/out/us-il/us-il-*.db.gz harvest/socrata_cities/out/us-il/us-il.manifest.json"
+            run: |
+              python3 harvest/socrata_cities/harvest.py chicago
+              python3 tools/packs/build_pack_socrata.py chicago
+          - st: kingco
+            region: us-wa
+            name: King County (WA)
+            packs: "harvest/socrata_cities/out/us-wa/us-wa-*.db.gz harvest/socrata_cities/out/us-wa/us-wa.manifest.json"
+            run: |
+              python3 harvest/socrata_cities/harvest.py kingco
+              python3 tools/packs/build_pack_socrata.py kingco
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
@@ -73,12 +116,20 @@ jobs:
           mkdir -p out
           ${{ matrix.run }}
       - name: Upload pack
-        if: hashFiles('out/*.manifest.json') != ''
+        if: github.event_name == 'schedule' || inputs.states == 'all' || contains(inputs.states, matrix.st)
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
+          files=""
+          for f in ${{ matrix.packs }}; do
+            [ -e "$f" ] && files="$files $f"
+          done
+          if [ -z "$files" ]; then
+            echo "No pack artifacts produced for ${{ matrix.region }} — nothing to upload (this DOES NOT change the registry)."
+            exit 1
+          fi
           gh release view data-packs >/dev/null 2>&1 || gh release create data-packs --prerelease \
-            --title "Region data packs" --notes "Rolling public inspection-data packs."
-          gh release upload data-packs out/${{ matrix.region }}-*.db.gz out/${{ matrix.region }}.manifest.json --clobber
+            --title "Region data packs" --notes "Rolling public inspection-data packs. Source attribution in each manifest."
+          gh release upload data-packs $files --clobber
 
   index:
     needs: state
@@ -94,4 +145,7 @@ jobs:
           mkdir -p harvest/_release && cd harvest/_release
           gh release download data-packs --pattern '*.manifest.json' --pattern '*.db.gz' --clobber
           cd ../.. && python3 tools/packs/publish_index.py
+          if [ ! -f dist/index.json.sig ]; then
+            echo "::warning::PACK_SIGNING_KEY not set — index.json is UNSIGNED; the app will refuse release-hosted pack installs until the secret is configured."
+          fi
           gh release upload data-packs dist/index.json dist/index.json.sig --clobber

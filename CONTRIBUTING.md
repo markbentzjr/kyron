@@ -83,6 +83,36 @@ cd tools/robolectric-test
 
 **Note:** Robolectric tests in this project have known limitations due to the large Material 3 resource table. Some tests may be limited by binary resource parsing in the Robolectric runtime. On-device testing is recommended for full verification.
 
+### CI Workflows and the Android SDK emulator
+
+`.github/workflows/` carries the automation; nothing needs to be run by
+hand:
+
+- **`ci.yml`** — data-validation gates on every PR: pathData, the
+  50-state coverage registry gate (`coverage_pipeline.py gate`, incl. its
+  cross-check that `Regions.kt`'s hand-maintained `US_STATES` /
+  `STATE_BOUNDS` lists stay in lockstep), seed gates when a seed exists,
+  license check and a security scan.
+- **`emulator-smoke.yml`** — boots an Android SDK emulator (API 34,
+  x86_64), installs the debug APK, opens the Coverage screen and filters
+  by every one of the 50 state codes **plus D.C.**, requiring each state's
+  card to render from the bundled national registry (screenshots + a
+  per-state report are uploaded as artifacts). This is how "a state can be
+  selected in the app" is verified across all 50 states, since the
+  registry is data-driven and the Coverage screen renders it.
+- **`publish-state-packs.yml`** — weekly / on-dispatch harvest + build +
+  publish of region packs for FL, GA, TN, SC, NC, DE and the Socrata
+  city/county packs NY (NYC), IL (Chicago), WA (King County) to the
+  rolling `data-packs` GitHub Release, ending with a signed `index.json`.
+- **`android-release.yml`** — tag-driven signed APK/AAB release build.
+
+Required repository secrets (owner action, set once in repo settings):
+
+| Secret | Used by | Purpose |
+|---|---|---|
+| `PACK_SIGNING_KEY` | publish-state-packs | EC P-256 private key (PEM) that signs `index.json`; if absent the index is left unsigned and the app refuses release-hosted pack installs |
+| `KYRON_KEYSTORE_B64` / `KYRON_KEYSTORE_PASSWORD` / `KYRON_KEY_ALIAS` / `KYRON_KEY_PASSWORD` | android-release | upload keystore for signed releases |
+
 ## Data Validation Gates
 
 The build includes three critical data validation gates that protect data quality:

@@ -1,11 +1,20 @@
-# STAGED HERE: move to .github/workflows/ to activate (needs `workflow` scope to push).
+# Tag-driven signed release build (Gradle): builds a signed APK + AAB and
+# opens a draft GitHub release. Set the release secrets once in repo
+# settings:
+#   KYRON_KEYSTORE_B64       base64 of the upload keystore
+#   KYRON_KEYSTORE_PASSWORD  keystore password
+#   KYRON_KEY_ALIAS          upload key alias
+#   KYRON_KEY_PASSWORD       key password
 name: Android release build
+
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,6 +36,7 @@ jobs:
       - name: Draft GitHub release
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
-          gh release create "${GITHUB_REF_NAME}" --draft --generate-notes \
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 || \
+            gh release create "${GITHUB_REF_NAME}" --draft --generate-notes \
             app/build/outputs/apk/release/app-release.apk \
             app/build/outputs/bundle/release/app-release.aab

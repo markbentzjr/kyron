@@ -90,7 +90,8 @@ class PlaceRepository(private val context: Context) {
      *  its SHA-256 fingerprint. Null when unreadable. */
     private fun bundledSeed(): Pair<String, String>? = runCatching {
         val stagedSeed = File(appContext.filesDir, "places_seed_geocoded.json")
-        val text = if (stagedSeed.exists()) stagedSeed.readText() else readAssetSeed()
+        val text = if (stagedSeed.exists()) stagedSeed.readText() else readAssetSeedOrNull()
+            ?: return null
         val sha = java.security.MessageDigest.getInstance("SHA-256")
             .digest(text.toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it) }
@@ -155,10 +156,14 @@ class PlaceRepository(private val context: Context) {
         val stagedSeed = File(filesDir, "places_seed_geocoded.json")
         val legacy = File(filesDir, "places.json")
         var usedBundled = true
-        val text: String = when {
+        val text: String? = when {
             stagedSeed.exists() -> stagedSeed.readText()
             legacy.exists() -> { usedBundled = false; legacy.readText() }
-            else -> readAssetSeed()
+            else -> readAssetSeedOrNull()
+        }
+        if (text == null) {
+            android.util.Log.w("PlaceRepository", "No bundled seed asset present; catalog left empty.")
+            return usedBundled
         }
         catalog.importSeed(db, JSONArray(text))
 
@@ -193,12 +198,16 @@ class PlaceRepository(private val context: Context) {
         return usedBundled
     }
 
-    private fun readAssetSeed(): String {
+    private fun readAssetSeedOrNull(): String? = runCatching {
         val assets = appContext.assets
         val names = runCatching { assets.list("")?.toList() }.getOrNull() ?: emptyList()
-        val asset = if ("places_seed_geocoded.json" in names) "places_seed_geocoded.json" else "places_seed.json"
-        return assets.open(asset).bufferedReader().readText()
-    }
+        val asset = when {
+            "places_seed_geocoded.json" in names -> "places_seed_geocoded.json"
+            "places_seed.json" in names -> "places_seed.json"
+            else -> return null
+        }
+        assets.open(asset).bufferedReader().readText()
+    }.getOrNull()
 
     fun byId(id: String): Place? = catalog.placeById(catalog.readableDatabase, id)
 
