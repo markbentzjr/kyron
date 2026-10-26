@@ -24,7 +24,16 @@ jobs:
         with: { distribution: temurin, java-version: "17" }
       - name: Decode upload keystore
         env: { KEYSTORE_B64: "${{ secrets.KYRON_KEYSTORE_B64 }}" }
-        run: echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+        run: |
+          # Accept either raw base64 or a PEM-wrapped value: strip any
+          # PEM headers/footers and whitespace, then decode.
+          printf '%s' "$KEYSTORE_B64" | tr -d '\r\n' | sed 's/-----BEGIN[^-]*-----//g; s/-----END[^-]*-----//g' | base64 -d > "$RUNNER_TEMP/upload.jks"
+          # Sanity check: a JKS/PKCS12 keystore starts with the magic bytes
+          # 0xFE 0xED (JKS) or 0x30 0x82 (PKCS12 DER). Anything starting
+          # with '-' (0x2D) means PEM headers survived.
+          first=$(od -An -tx1 -N1 "$RUNNER_TEMP/upload.jks" | tr -d ' ')
+          echo "keystore first byte: 0x$first"
+          [ "$first" != "2d" ] || { echo "::error::Decoded keystore still starts with '-' (PEM header). Re-create the KYRON_KEYSTORE_B64 secret as raw base64."; exit 1; }
       - name: Build signed APK + AAB
         env:
           KYRON_KEYSTORE: ${{ runner.temp }}/upload.jks
