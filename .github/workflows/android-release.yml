@@ -22,7 +22,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: "17" }
-      - uses: android-actions/setup-android@v3
       - name: Decode upload keystore
         env: { KEYSTORE_B64: "${{ secrets.KYRON_KEYSTORE_B64 }}" }
         run: echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
