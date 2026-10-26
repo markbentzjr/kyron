@@ -127,7 +127,7 @@ def street_has_fused_tail(street):
 # --- ADPH statewide ---
 adph = {}
 adph_rejects = []
-for path in sorted(glob.glob('/home/hatch/kyron-build/harvest/adph/*.json')):
+for path in sorted(glob.glob(os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/adph/*.json')):
     for r in json.load(open(path)):
         # Workstream B gate rule: a score that cannot be attached to a
         # named place AT a street address must not ship. ADPH publishes a
@@ -148,13 +148,16 @@ for path in sorted(glob.glob('/home/hatch/kyron-build/harvest/adph/*.json')):
         }
 print("ADPH places:", len(adph))
 if adph_rejects:
-    rej_path = '/home/hatch/kyron-build/harvest/adph_rejects.json'
+    rej_path = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/adph_rejects.json'
     json.dump(adph_rejects, open(rej_path, 'w'), indent=1)
     print(f"ADPH REJECTS (score without name/street address): {len(adph_rejects)} -> {rej_path}")
 
 # --- JCDH detail-rich places ---
-proto = {p['permit']: p for p in json.load(open('/home/hatch/workspace/kyron-prototype/data.json'))}
-raw = json.load(open('/home/hatch/workspace/goals/kyron-free-food-safety-app-on-the-play-store/hidden_files/jcdh_dataset.json'))
+# Optional legacy JCDH detail extracts (not public); skipped when absent.
+_PROTO = os.environ.get('KYRON_JCDH_PROTO', '')
+_RAW = os.environ.get('KYRON_JCDH_RAW', '')
+proto = {p['permit']: p for p in json.load(open(_PROTO))} if os.path.exists(_PROTO) else {}
+raw = json.load(open(_RAW)) if os.path.exists(_RAW) else []
 merged = 0
 for rp in raw:
     permit = rp['permit']
@@ -194,7 +197,7 @@ for p in adph.values():
 
 # --- JCDH catalog enumeration (list-level: score/date + detail link) ---
 existing_ids = {p['id'] for p in adph.values()}
-enum_path = '/home/hatch/kyron-build/harvest/jcdh_enum.json'
+enum_path = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/jcdh_enum.json'
 n_enum = n_dup = n_bad = 0
 if os.path.exists(enum_path):
     for r in json.load(open(enum_path)):
@@ -245,7 +248,7 @@ if os.path.exists(enum_path):
 print(f"JCDH enum added: {n_enum} (dup permits skipped: {n_dup}, unparseable: {n_bad})")
 
 # --- MCHD (Mobile County) — scores + up to 4 dated inspections, no violations ---
-mchd_path = '/home/hatch/kyron-build/harvest/mchd_rows.json'
+mchd_path = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/mchd_rows.json'
 n_mchd = n_mchd_bad = 0
 if os.path.exists(mchd_path):
     insp_re = re.compile(r'^(\d{1,2}/\d{1,2}/\d{4}),\s*Score:\s*(\d+)')
@@ -281,7 +284,7 @@ print(f"MCHD added: {n_mchd} (skipped: {n_mchd_bad})")
 
 places = list(adph.values())
 places.sort(key=lambda p: (p['ct'], p['n'].lower()))
-out = '/home/hatch/kyron-build/manual/src/main/assets/places_seed.json'
+out = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/manual/src/main/assets/places_seed.json'
 os.makedirs(os.path.dirname(out), exist_ok=True)
 json.dump(places, open(out, 'w'), separators=(',', ':'))
 n_insp = sum(1 for p in places if p['insp'])

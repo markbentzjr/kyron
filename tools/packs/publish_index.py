@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Collect built region packs + manifests into dist/, write a pack index
 (index.json: regionId -> manifest file, pack file, bytes, sha256) and,
-when PACK_SIGNING_KEY (Ed25519 PEM) is set, a detached signature
-index.json.sig (raw Ed25519 over index.json bytes, base64) via openssl.
+when PACK_SIGNING_KEY (EC P-256 private key PEM) is set, a detached
+signature index.json.sig (ECDSA SHA-256, DER, base64) via openssl —
+verified in-app by data/PackIndex.kt (works on minSdk 29, unlike Ed25519).
 
 The app-side check is: fetch index.json + index.json.sig, verify with
 the bundled public key, then verify each pack's sha256 from the index.
@@ -41,8 +42,7 @@ def main():
     if key:
         with tempfile.NamedTemporaryFile("w", delete=False) as k:
             k.write(key)
-        sig = subprocess.run(["openssl", "pkeyutl", "-sign", "-inkey", k.name, "-rawin",
-                              "-in", ip], capture_output=True, check=True).stdout
+        sig = subprocess.run(["openssl", "dgst", "-sha256", "-sign", k.name, ip], capture_output=True, check=True).stdout
         os.unlink(k.name)
         open(ip + ".sig", "w").write(base64.b64encode(sig).decode())
         print("signed index.json")

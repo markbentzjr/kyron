@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 
 URL = "https://www.jcdh.org/SitePages/Programs-Services/Scores-Lists/Food/FoodServScores.aspx"
 UA = {"User-Agent": "KyronHealthApp/2.0 (Jefferson County catalog harvest)"}
-OUT = '/home/hatch/kyron-build/harvest/jcdh_enum.json'
-DONE = '/home/hatch/kyron-build/harvest/jcdh_enum_done.json'
+OUT = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/jcdh_enum.json'
+DONE = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/jcdh_enum_done.json'
 CAP = 52
 
 places = {}
