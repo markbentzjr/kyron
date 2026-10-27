@@ -1,0 +1,23 @@
+{
+ "regionId": "us-tn",
+ "displayName": "Tennessee",
+ "state": "TN",
+ "status": "available",
+ "datasetVersion": "2026-10-16.1",
+ "generatedAt": "2026-10-16T02:49:59Z",
+ "placeCount": 33262,
+ "schemaVersion": 2,
+ "minAppVersion": "2.0",
+ "full": {
+  "file": "us-tn-2026-10-16.1.db.gz",
+  "bytes": 18424434,
+  "sha256": "40ef34ce088a38f65069a45b9b9d8c457c60d0784ae7beadd1485c460e14ca38"
+ },
+ "delta": null,
+ "jurisdictions": [
+  {
+   "jurisdictionId": "TN-DOH",
+   "name": "Tennessee Dept. of Health (statewide)"
+  }
+ ]
+}

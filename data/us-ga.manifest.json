@@ -1,0 +1,23 @@
+{
+ "regionId": "us-ga",
+ "displayName": "Georgia",
+ "state": "GA",
+ "status": "available",
+ "datasetVersion": "2026-10-15.1",
+ "generatedAt": "2026-10-15T18:41:23Z",
+ "placeCount": 33514,
+ "schemaVersion": 2,
+ "minAppVersion": "2.0",
+ "full": {
+  "file": "us-ga-2026-10-15.1.db.gz",
+  "bytes": 33674322,
+  "sha256": "478105036ef2e833e3f2f3ab7a199c3beef897c4989192136c45fca312ba68df"
+ },
+ "delta": null,
+ "jurisdictions": [
+  {
+   "jurisdictionId": "GA-DPH",
+   "name": "Georgia DPH (statewide)"
+  }
+ ]
+}

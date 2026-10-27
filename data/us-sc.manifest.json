@@ -1,0 +1,23 @@
+{
+ "regionId": "us-sc",
+ "displayName": "South Carolina",
+ "state": "SC",
+ "status": "available",
+ "datasetVersion": "2026-10-16.1",
+ "generatedAt": "2026-10-16T03:54:38Z",
+ "placeCount": 35862,
+ "schemaVersion": 2,
+ "minAppVersion": "2.0",
+ "full": {
+  "file": "us-sc-2026-10-16.1.db.gz",
+  "bytes": 8419300,
+  "sha256": "0166b6ea7064023fa27b3f087f10016e58138532e0c32ed23d6a524948301347"
+ },
+ "delta": null,
+ "jurisdictions": [
+  {
+   "jurisdictionId": "SCDA",
+   "name": "South Carolina Dept. of Agriculture (statewide)"
+  }
+ ]
+}

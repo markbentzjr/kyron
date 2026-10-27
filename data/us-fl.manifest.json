@@ -1,0 +1,23 @@
+{
+ "regionId": "us-fl",
+ "displayName": "Florida",
+ "state": "FL",
+ "status": "available",
+ "datasetVersion": "2026-10-15.1",
+ "generatedAt": "2026-10-15T17:01:39.197143Z",
+ "placeCount": 70033,
+ "schemaVersion": 2,
+ "minAppVersion": "2.0",
+ "full": {
+  "file": "us-fl-2026-10-15.1.db.gz",
+  "bytes": 7900234,
+  "sha256": "2c47c3d53f0446e9330c9bb3af457fe1a8d9c8d4cee2f527d6ebe6c264523b8d"
+ },
+ "delta": null,
+ "jurisdictions": [
+  {
+   "jurisdictionId": "FL-DBPR",
+   "name": "Florida DBPR (statewide)"
+  }
+ ]
+}
