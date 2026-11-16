@@ -21,6 +21,8 @@
         android:elevation="4dp"
         android:ellipsize="end"
         android:maxLines="2"
+        android:drawableStart="@drawable/ic_dot_green"
+        android:drawablePadding="8dp"
         android:textAlignment="center"
         android:textColor="@color/ink_soft"
         android:textSize="12sp" />
@@ -180,8 +182,8 @@
                 android:layout_width="0dp"
                 android:layout_height="52dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_ghost"
-                android:textColor="@color/kyron_primary"
+                android:background="@drawable/btn_primary"
+                android:textColor="@color/white"
                 android:text="@string/action_full_details" />
 
             <Button
@@ -192,8 +194,8 @@
                 android:layout_height="52dp"
                 android:layout_weight="1"
                 android:layout_marginStart="10dp"
-                android:background="@drawable/btn_primary"
-                android:textColor="@color/white"
+                android:background="@drawable/btn_ghost"
+                android:textColor="@color/kyron_primary"
                 android:drawablePadding="6dp"
                 android:text="@string/action_watch" />
         </LinearLayout>

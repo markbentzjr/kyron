@@ -306,6 +306,8 @@ class MapFragment : Fragment() {
                 append("No verified locations in this view of ${region.displayName}")
                 if (region.regionId == "us-fl") {
                     append(" — Florida places are mostly Browse-only for now")
+                } else {
+                    append(" — places stay listed in Browse")
                 }
             } else {
                 if (showPins && places.size > MAX_OVERLAYS) {
@@ -624,7 +626,7 @@ class MapFragment : Fragment() {
         val icon = ContextCompat.getDrawable(
             fav.context, if (watching) R.drawable.ic_star else R.drawable.ic_star_border
         )?.mutate()
-        icon?.setTint(ContextCompat.getColor(fav.context, R.color.white))
+        icon?.setTint(ContextCompat.getColor(fav.context, R.color.kyron_primary))
         fav.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
     }
 
