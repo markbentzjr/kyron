@@ -8,6 +8,8 @@
     <string name="cd_watch">Watch this place (add to favorites)</string>
     <string name="cd_watching">Watching this place (tap to stop)</string>
     <string name="cd_my_location">Center the map on my area</string>
+    <string name="cd_zoom_in">Zoom in</string>
+    <string name="cd_zoom_out">Zoom out</string>
     <string name="cd_close_card">Close this place card</string>
     <string name="cd_back">Go back</string>
     <string name="cd_search">Search restaurants</string>

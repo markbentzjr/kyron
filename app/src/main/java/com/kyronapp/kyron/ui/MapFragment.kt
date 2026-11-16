@@ -96,6 +96,12 @@ class MapFragment : Fragment() {
             mv.controller.animateTo(GeoPoint(app.prefs.homeLat, app.prefs.homeLng))
             mv.controller.setZoom(13.0)
         }
+        v.findViewById<View>(R.id.map_zoom_in).setOnClickListener {
+            mv.controller.zoomIn()
+        }
+        v.findViewById<View>(R.id.map_zoom_out).setOnClickListener {
+            mv.controller.zoomOut()
+        }
         v.findViewById<Button>(R.id.sheet_open).setOnClickListener {
             selected?.let { (activity as? MainActivity)?.openPlace(it.id) }
         }
@@ -213,6 +219,7 @@ class MapFragment : Fragment() {
     private fun render(places: List<Place>, zoom: Double) {
         val mv = mapView ?: return
         mv.overlays.removeAll(mv.overlays.filterIsInstance<Marker>())
+        selectedMarker = null
 
         val showPins = zoom >= PIN_ZOOM || places.size <= 60
         var clusterCount = 0
@@ -250,11 +257,30 @@ class MapFragment : Fragment() {
             }
         }
 
+        // Home marker sits at the BOTTOM of the overlay stack (index 0)
+        // so place pins always draw above it.
         val home = Marker(mv)
         home.id = "__home__"
         home.position = GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
         home.title = "Your area center — ${app.prefs.homeLabel}"
-        mv.overlays.add(home)
+        home.icon = homeDotIcon()
+        home.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+        mv.overlays.add(0, home)
+
+        // Re-highlight the selected place if its pin survived the re-render.
+        selected?.let { sel ->
+            mv.overlays.filterIsInstance<Marker>()
+                .firstOrNull { it.id == sel.id }
+                ?.let { m ->
+                    m.relatedObject = sel
+                    selectedMarker = m
+                    m.icon = pillIcon(
+                        "pin",
+                        if (sel.hasNumericScore) sel.score.toString() else sel.badgeText,
+                        pinFill(sel), big = false, selected = true
+                    )
+                }
+        }
         mv.invalidate()
 
         val filtered = currentFilter.text.isNotBlank() || currentFilter.county != null ||
@@ -262,22 +288,19 @@ class MapFragment : Fragment() {
         val region = app.regions.activeInfo()
         statusView?.text = buildString {
             if (places.isEmpty()) {
-                append("No places with verified locations in this view of ${region.displayName}. ")
-                append("Places without a verified address aren't pinned — they're still in Browse with their address. ")
+                append("No verified locations in this view of ${region.displayName}")
                 if (region.regionId == "us-fl") {
-                    append("Florida's addresses haven't been through the verification pass yet, so most Florida places are Browse-only for now.")
+                    append(" — Florida places are mostly Browse-only for now")
                 }
             } else {
                 if (showPins && places.size > MAX_OVERLAYS) {
-                    append("Showing the first $MAX_OVERLAYS of ${places.size} places with verified locations in this view — zoom in to see the rest")
+                    append("First $MAX_OVERLAYS of ${places.size} verified places — zoom in")
                 } else {
-                    append("${places.size} places with verified locations in this view")
-                    if (clusterCount > 0) append(" (grouped into clusters — zoom in for individual places)")
+                    append("${places.size} verified places in view")
+                    if (clusterCount > 0) append(" · clustered — zoom in")
                 }
-                append(". Every pin is the place's real, verified address; ")
-                append("places without a verified location aren't pinned, but they're still in Browse with their address.")
             }
-            if (filtered) append(" Your Browse search filter is applied here too.")
+            if (filtered) append(" · filtered")
         }
     }
 
@@ -330,85 +353,124 @@ class MapFragment : Fragment() {
         else -> 0xFF8A97A5.toInt()
     }
 
-    private fun badgeIcon(
-        key: String, lines: List<String>, colorScore: Int, colorModel: String, big: Boolean
+    /**
+     * Modern pill marker: white rounded pill with a band-colored ring and
+     * text (Airbnb price-pill style). Selected pins invert to a filled
+     * colored pill with white text and render slightly larger.
+     */
+    private fun pillIcon(
+        key: String, text: String, band: Int, big: Boolean, selected: Boolean
     ): BitmapDrawable {
-        val fill = bandColor(colorScore, colorModel)
-        // Legibility: dark text only on the mid-amber fill (mirrors the
-        // legacy >=85/else split for 0–100 scales); green/red/gray keep
-        // white text in every model.
-        val text =
-            if (fill == 0xFFE8A13A.toInt()) 0xFF1D2733.toInt() else 0xFFFFFFFF.toInt()
-        return badgeIconColored(key, lines, fill, text, big)
-    }
-
-    private fun badgeIconColored(
-        key: String, lines: List<String>, fillColor: Int, textColor: Int, big: Boolean
-    ): BitmapDrawable {
-        // Canonical key: the caller's key plus every input that determines
-        // the rendering, so a key can never return a badge drawn for
-        // different text, colors, or size (pass-2 hardening).
-        val cacheKey = "$key|${lines.joinToString("/")}|$fillColor|$textColor|$big"
+        val cacheKey = "$key|$text|$band|$big|$selected"
         iconCache[cacheKey]?.let { return it }
-        val size = if (big) 120 else 96
-        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmp)
-        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = fillColor }
-        canvas.drawCircle(size / 2f, size / 2f, size / 2f - 4f, fill)
-        val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFFFFFFF.toInt(); style = Paint.Style.STROKE; strokeWidth = 5f
+        val w = if (big) 150 else 128
+        val h = if (big) 84 else 72
+        val bmp = Bitmap.createBitmap(w, h + 14, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp)
+        val cx = w / 2f
+        // Soft grounding shadow under the pill.
+        val shadow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0x33000000; style = Paint.Style.FILL
         }
-        canvas.drawCircle(size / 2f, size / 2f, size / 2f - 7f, ring)
+        c.drawOval(cx - w * 0.28f, h - 10f, cx + w * 0.28f, h + 10f, shadow)
+        val rect = android.graphics.RectF(4f, 2f, w - 4f, h.toFloat())
+        val radius = h / 2f - 2f
+        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = if (selected) band else 0xFFFFFFFF.toInt()
+            style = Paint.Style.FILL
+        }
+        c.drawRoundRect(rect, radius, radius, fillPaint)
+        val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = band; style = Paint.Style.STROKE
+            strokeWidth = if (selected) 0f else 5f
+        }
+        if (!selected) c.drawRoundRect(
+            android.graphics.RectF(6f, 4f, w - 6f, h - 2f), radius - 2f, radius - 2f, ring
+        )
         val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = textColor
+            color = if (selected) 0xFFFFFFFF.toInt() else band
             textAlign = Paint.Align.CENTER
             typeface = Typeface.DEFAULT_BOLD
         }
-        if (lines.size == 1) {
-            // Numbers are 1–3 chars at full size; word badges (native
-            // results like "Warning") shrink to fit the circle.
-            tp.textSize = when {
-                lines[0].length <= 3 -> if (big) 40f else 42f
-                lines[0].length <= 7 -> 26f
-                else -> 20f
-            }
-            val y = size / 2f - (tp.descent() + tp.ascent()) / 2f
-            canvas.drawText(lines[0], size / 2f, y, tp)
-        } else {
-            tp.textSize = 38f
-            var y = size / 2f - (tp.descent() + tp.ascent()) / 2f - 18f
-            canvas.drawText(lines[0], size / 2f, y, tp)
-            tp.textSize = 26f
-            y += 32f
-            canvas.drawText(lines[1], size / 2f, y, tp)
+        tp.textSize = when {
+            text.length <= 3 -> if (big) 40f else 34f
+            text.length <= 7 -> 24f
+            else -> 19f
         }
-        val drawable = BitmapDrawable(resources, bmp)
-        iconCache[cacheKey] = drawable
-        return drawable
+        val ty = h / 2f - (tp.descent() + tp.ascent()) / 2f
+        c.drawText(text, cx, ty, tp)
+        val d = BitmapDrawable(resources, bmp)
+        iconCache[cacheKey] = d
+        return d
     }
+
+    private fun pinFill(p: Place): Int =
+        if (p.hasNumericScore) bandColor(p.score, modelFor(p)) else toneColor(p.resultTone)
+
+    /** Small branded dot for the user's area center — pulsing-halo style,
+     *  visually distinct from place pills. */
+    private fun homeDotIcon(): BitmapDrawable {
+        iconCache["__home_dot__"]?.let { return it }
+        val size = 56
+        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp)
+        val cx = size / 2f
+        c.drawCircle(cx, cx, 22f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0x331E6B38
+        })
+        c.drawCircle(cx, cx, 13f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF1E6B38.toInt()
+        })
+        c.drawCircle(cx, cx, 10f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFFFFFFF.toInt(); style = Paint.Style.STROKE; strokeWidth = 4f
+        })
+        val d = BitmapDrawable(resources, bmp)
+        iconCache["__home_dot__"] = d
+        return d
+    }
+
+    private var selectedMarker: Marker? = null
 
     private fun pinMarker(p: Place): Marker {
         val mv = mapView!!
         val marker = Marker(mv)
         marker.id = p.id
         marker.position = GeoPoint(p.lat!!, p.lng!!)
-        marker.icon = if (p.hasNumericScore) {
-            badgeIcon("pin${p.score}", listOf(p.score.toString()), p.score, modelFor(p), big = false)
-        } else {
-            // Disposition regions pin the native result's short label,
-            // colored by its tone — never an invented number.
-            badgeIconColored(
-                "pinres${p.badgeText}_${p.resultTone}", listOf(p.badgeText),
-                toneColor(p.resultTone), 0xFFFFFFFF.toInt(), big = false
-            )
-        }
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+        marker.icon = pillIcon(
+            "pin", if (p.hasNumericScore) p.score.toString() else p.badgeText,
+            pinFill(p), big = false, selected = false
+        )
+        // Anchor the geo-point to the pill's center (the bitmap extends
+        // below the pill for its shadow strip).
+        marker.setAnchor(Marker.ANCHOR_CENTER, 0.44f)
         marker.title = p.name
-        marker.setOnMarkerClickListener { _, _ ->
-            showSheet(p)
+        marker.setOnMarkerClickListener { m, _ ->
+            selectPin(m, p)
             true
         }
         return marker
+    }
+
+    /** Highlight the tapped pin (filled pill, raised above others) and
+     *  open the place card. The previous selection reverts. */
+    private fun selectPin(m: Marker, p: Place) {
+        selectedMarker?.let { old ->
+            old.relatedObject?.let { oldPlace ->
+                if (oldPlace is Place) old.icon = pillIcon(
+                    "pin",
+                    if (oldPlace.hasNumericScore) oldPlace.score.toString() else oldPlace.badgeText,
+                    pinFill(oldPlace), big = false, selected = false
+                )
+            }
+        }
+        m.relatedObject = p
+        selectedMarker = m
+        m.icon = pillIcon(
+            "pin", if (p.hasNumericScore) p.score.toString() else p.badgeText,
+            pinFill(p), big = false, selected = true
+        )
+        mapView?.invalidate()
+        showSheet(p)
     }
 
     private fun clusterMarker(cluster: Cluster): Marker {
@@ -428,20 +490,19 @@ class MapFragment : Fragment() {
         marker.id = "__cluster__"
         marker.position = GeoPoint(cluster.centerLat, cluster.centerLng)
         marker.icon = if (worst != Place.NO_SCORE) {
-            badgeIcon(
-                "clu${cluster.members.size}_$worst",
-                listOf(cluster.members.size.toString(), "low $worst"),
-                worst, worstModel, big = true
+            pillIcon(
+                "clu", "${cluster.members.size} · $worst",
+                bandColor(worst, worstModel), big = true, selected = false
             )
         } else {
             // No numeric scores in this cluster (disposition region):
             // the badge is the count alone, in neutral gray.
-            badgeIconColored(
-                "clu${cluster.members.size}_res", listOf(cluster.members.size.toString()),
-                toneColor(0), 0xFFFFFFFF.toInt(), big = true
+            pillIcon(
+                "clures", cluster.members.size.toString(),
+                toneColor(0), big = true, selected = false
             )
         }
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+        marker.setAnchor(Marker.ANCHOR_CENTER, 0.44f)
         marker.title = if (worst != Place.NO_SCORE) {
             if (penaltyScale) "${cluster.members.size} places — highest penalty $worst"
             else "${cluster.members.size} places — lowest score $worst"
@@ -460,9 +521,18 @@ class MapFragment : Fragment() {
     // ---------------------------------------------------------------- sheet
 
     private fun showSheet(p: Place) {
+        val wasHidden = sheet?.visibility != View.VISIBLE
         selected = p
         val s = sheet ?: return
         s.visibility = View.VISIBLE
+        if (wasHidden) {
+            s.translationY = 60f
+            s.alpha = 0f
+            s.animate().translationY(0f).alpha(1f)
+                .setDuration(280).setInterpolator(
+                    android.view.animation.DecelerateInterpolator(1.6f)
+                ).start()
+        }
         val root = view ?: return
         val badge = root.findViewById<TextView>(R.id.sheet_badge)
         badge.text = p.badgeText
@@ -526,8 +596,29 @@ class MapFragment : Fragment() {
     }
 
     private fun hideSheet() {
-        sheet?.visibility = View.GONE
+        selectedMarker?.let { m ->
+            (m.relatedObject as? Place)?.let { p ->
+                m.icon = pillIcon(
+                    "pin",
+                    if (p.hasNumericScore) p.score.toString() else p.badgeText,
+                    pinFill(p), big = false, selected = false
+                )
+            }
+        }
+        selectedMarker = null
         selected = null
+        val s = sheet ?: return
+        if (s.visibility == View.VISIBLE) {
+            s.animate().translationY(80f).alpha(0f).setDuration(180)
+                .setInterpolator(android.view.animation.AccelerateInterpolator())
+                .withEndAction {
+                    s.visibility = View.GONE
+                    s.translationY = 0f
+                    s.alpha = 1f
+                }.start()
+        } else {
+            s.visibility = View.GONE
+        }
     }
 
     override fun onResume() {

@@ -9,16 +9,21 @@
         android:layout_height="match_parent" />
 
     <!-- Status line: what is on the map, and the honesty note that every
-         pin is a verified address location (LF-1). -->
+         pin is a verified address location (LF-1). Compact floating pill. -->
     <TextView
         android:id="@+id/map_status"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_margin="10dp"
-        android:background="@drawable/card_bg"
-        android:padding="10dp"
-        android:textSize="13sp" />
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="@drawable/status_pill"
+        android:elevation="4dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAlignment="center"
+        android:textColor="@color/ink_soft"
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/map_attribution"
@@ -26,20 +31,52 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="4dp"
+        android:background="#66FFFFFF"
         android:padding="2dp"
         android:text="@string/map_attribution"
         android:textColor="@color/muted"
         android:textSize="10sp" />
 
-    <ImageButton
-        android:id="@+id/map_locate"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+    <!-- Floating control column: zoom in / out / my-area. -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:background="@drawable/card_bg"
-        android:contentDescription="@string/cd_my_location"
-        android:src="@drawable/ic_my_location" />
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/map_zoom_in"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/fab_circle"
+            android:contentDescription="@string/cd_zoom_in"
+            android:elevation="6dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_add" />
+
+        <ImageButton
+            android:id="@+id/map_zoom_out"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/fab_circle"
+            android:contentDescription="@string/cd_zoom_out"
+            android:elevation="6dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_remove" />
+
+        <ImageButton
+            android:id="@+id/map_locate"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/fab_circle"
+            android:contentDescription="@string/cd_my_location"
+            android:elevation="8dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_crosshair" />
+    </LinearLayout>
 
     <!-- Bottom-sheet place card (Presentation Spec 4.1, Peek state).
          One tap on a pin opens this card; "Full details" hands off to
@@ -49,11 +86,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="10dp"
+        android:layout_margin="12dp"
         android:background="@drawable/card_bg"
+        android:elevation="10dp"
         android:orientation="vertical"
         android:padding="14dp"
+        android:paddingTop="8dp"
         android:visibility="gone">
+
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/score_chip"
+            android:backgroundTint="@color/line" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -127,16 +174,18 @@
                 android:textAllCaps="false"
                 android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sheet_open"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="@string/action_full_details" />
 
             <Button
                 android:textAllCaps="false"
                 android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sheet_fav"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:drawablePadding="4dp"
                 android:text="@string/action_watch" />
