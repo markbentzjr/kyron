@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
 
     private val notifPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { }
+    ) { getSharedPreferences("kyron_ui", MODE_PRIVATE).edit().putBoolean("notif_asked", true).apply() }
 
     private val locationPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -82,7 +82,8 @@ class MainActivity : AppCompatActivity() {
         maybeShowWelcome()
 
         if (Build.VERSION.SDK_INT >= 33 &&
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED &&
+            !getSharedPreferences("kyron_ui", MODE_PRIVATE).getBoolean("notif_asked", false)
         ) {
             notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
