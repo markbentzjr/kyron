@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       states:
-        description: "comma list (fl,ga,tn,sc,nc,de,nyc,chicago,kingco) or all"
+        description: "comma list (fl,ga,tn,sc,nc,de,nyc,chicago,kingco,sf,austin,montgomery,wi,co,vt,ri) or all"
         default: "all"
 
 permissions:

@@ -67,7 +67,7 @@ object Regions {
         regionId = "us-fl", state = "FL", displayName = "Florida",
         scoreModel = MODEL_DISPOSITION, bundled = false,
         centerLat = 28.63, centerLng = -81.71,
-        manifestUrl = "https://markbentzjr.github.io/kyron/data/us-fl.manifest.json"
+        manifestUrl = "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-fl.manifest.json"
     )
 
     /** Georgia (Workstream C3): pack verified end-to-end in the rig, but
@@ -79,7 +79,7 @@ object Regions {
         regionId = "us-ga", state = "GA", displayName = "Georgia",
         scoreModel = MODEL_SCORE, bundled = false,
         centerLat = 32.96, centerLng = -83.11,
-        manifestUrl = "https://markbentzjr.github.io/kyron/data/us-ga.manifest.json"
+        manifestUrl = "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-ga.manifest.json"
     )
 
     /** Regions with a real data source today. Everything else is uncovered. */

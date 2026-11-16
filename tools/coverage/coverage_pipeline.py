@@ -212,7 +212,7 @@ def registry():
                   "closure…). District CSV extracts + inspection detail pages. Pack built "
                   "and app-verified (70,051 places)."),
     ], pack="published",
-        manifest="https://markbentzjr.github.io/kyron/data/us-fl.manifest.json",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-fl.manifest.json",
         host="unreachable-404", host_checked="2026-10-22",
         availability="declared-only",
         summary="Pack built and registered in-app; the PUBLICATION is declared but "
@@ -230,7 +230,7 @@ def registry():
             notes="100-point scale with A/B/C/U grades; full inspector notes.",
             restrictions="Gwinnett, Newton and Rockdale counties are NOT in the statewide search."),
     ], pack="published",
-        manifest="https://markbentzjr.github.io/kyron/data/us-ga.manifest.json",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-ga.manifest.json",
         host="unreachable-404", host_checked="2026-10-22",
         availability="declared-only",
         summary="Pack verified end-to-end in the rig and registered in-app; the "
@@ -436,8 +436,12 @@ def registry():
             verified="2026-10-22",
             refresh="HealthSpace/MyHealthDepartment statewide search (fetched 200 OK)",
             notes="Restaurant 100-pt scale: priority items deduct 5, priority-foundation 3; "
-                  "< 70 fails. One of the cleanest candidate integrations in the country."),
-    ], summary="Statewide, scored, full history — top integration candidate.")
+                  "< 70 fails. One of the cleanest candidate integrations in the country. "
+                  "Generic MHD adapter (harvest/mhd) configured but DISABLED — the "
+                  "statewide path answers [] so a county/district GUID map must be "
+                  "discovered before ingestion (states.py enabled=False)."),
+    ], summary="Statewide, scored, full history — top integration candidate; MHD "
+               "adapter staged but disabled pending district-GUID discovery.")
 
     add("WI", "Wisconsin", "PASS_FAIL", [
         src("wi-datcp", "Wisconsin DATCP (state-inspected facilities)", "Statewide (state-inspected)", "html",
@@ -524,18 +528,27 @@ def registry():
                   "statewide public database."),
     ], summary="Fragmented into local agencies; dispositions are the common currency.")
 
-    add("NV", "Nevada", "DISPOSITION", [
+    add("NV", "Nevada", "PENALTY_LOW", [
         src("nv-snhd", "Southern Nevada Health District (Clark County / Las Vegas)",
             "Southern Nevada", "bulk-csv",
             "https://www.southernnevadahealthdistrict.org/permits-and-regulations/restaurant-inspections/restaurant-inspection-search/",
-            "full", "full-history", "source-verified", "DISPOSITION",
-            verified="2026-10-22",
+            "full", "full-history", "pack-built", "PENALTY_LOW",
+            verified="2026-10-22", last_refresh="2026-11-16",
+            refresh="Harvest pipeline harvest/snhd (snhd_harvest)",
             notes="Nightly developer CSV download (restaurants.zip + SQL schema; both "
-                  "pages fetched 200) — ~5-day posting lag. Also demerit-style detail; "
-                  "no portal 0-100 number.",
-            restrictions="Southern Nevada only; Washoe County and rural DPBH counties are "
-                         "separate."),
-    ], summary="SNHD's nightly CSV is best-in-class bulk data.")
+                  "pages fetched 200) — ~5-day posting lag. Pack BUILT locally "
+                  "2026-11-16 (19,755 active-permit places / 238,876 inspections / "
+                  "425,909 violations, 96.8% geocoded): A/B/C-grade text carried "
+                  "natively with demerit points as the score (lower is better; "
+                  "closures land ~44+). Lat/lng columns are swapped at source — "
+                  "adapter un-swaps; legacy stanford-file violations resolve via "
+                  "query_insp_violations codebook; closed (record_status 02/04/05) "
+                  "permits and their ~95k inspections excluded by convention.",
+            restrictions="Southern Nevada only; Washoe County (Reno) and rural DPBH "
+                         "counties are separate."),
+    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
+       summary="SNHD's nightly CSV is best-in-class bulk data; pack covers Clark "
+               "County (~73% of NV population).")
 
     add("TX", "Texas", "SCORE_100_HIGH", [
         src("tx-austin", "Austin Public Health", "Austin", "api",
@@ -854,7 +867,10 @@ def registry():
                   "type search, FDA Food Code citation-level detail, history stated to "
                   "cover 2007→current. Help page "
                   "dchealth.dc.gov/service/understanding-food-establishment-inspections "
-                  "confirmed 200."),
+                  "confirmed 200. DHD adapter (harvest/dhd) configured but DISABLED — "
+                  "tried /dc, /stateofdc and /districtofcolumbia deployments without "
+                  "finding the API root; the verified entry point is "
+                  "dc.healthinspections.us/?a=Inspections."),
     ], jtype="federal-district",
         summary="Registered as a jurisdiction, explicitly NOT one of the 50 states.")
 # addTo=
