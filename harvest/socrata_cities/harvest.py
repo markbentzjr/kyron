@@ -101,7 +101,7 @@ def main():
                       ("validate_report.json", rep),
                       ("manifest.json", {"generated_at": datetime.now(timezone.utc).isoformat(),
                                          "source": a.source, "dataset": cfg["dataset"]})):
-        with open(os.path.join(out, name), "w") as f:
+        with open(os.path.join(out, name), "w", encoding="utf-8") as f:
             json.dump(obj, f, ensure_ascii=False)
     print(json.dumps({k: v for k, v in rep.items() if k != "errors"}))
     return 1 if rep["error_count"] else 0

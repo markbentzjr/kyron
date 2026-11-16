@@ -24,6 +24,17 @@ __pycache__/
 
 # Socrata city/county harvest outputs + packs (regenerate with harvest/socrata_cities)
 harvest/socrata_cities/out/
+
+# Generic-platform harvest raw caches + packs (regenerate with harvest/mhd, sfi, dhd)
+harvest/mhd/raw/
+harvest/mhd/out/
+harvest/mhd/work/
+harvest/sfi/raw/
+harvest/sfi/out/
+harvest/sfi/work/
+harvest/dhd/raw/
+harvest/dhd/out/
+harvest/dhd/work/
 dist/
 /kyron-keys/
 .kotlin/

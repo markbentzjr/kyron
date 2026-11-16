@@ -103,6 +103,61 @@ jobs:
             run: |
               python3 harvest/socrata_cities/harvest.py kingco
               python3 tools/packs/build_pack_socrata.py kingco
+          - st: sf
+            region: us-ca
+            name: San Francisco (CA)
+            packs: "harvest/socrata_cities/out/sf/us-ca-*.db.gz harvest/socrata_cities/out/sf/us-ca.manifest.json"
+            run: |
+              python3 harvest/socrata_cities/harvest.py sf
+              python3 tools/packs/build_pack_socrata.py sf
+          - st: austin
+            region: us-tx
+            name: Austin (TX)
+            packs: "harvest/socrata_cities/out/austin/us-tx-*.db.gz harvest/socrata_cities/out/austin/us-tx.manifest.json"
+            run: |
+              python3 harvest/socrata_cities/harvest.py austin
+              python3 tools/packs/build_pack_socrata.py austin
+          - st: montgomery
+            region: us-md
+            name: Montgomery County (MD)
+            packs: "harvest/socrata_cities/out/montgomery/us-md-*.db.gz harvest/socrata_cities/out/montgomery/us-md.manifest.json"
+            run: |
+              python3 harvest/socrata_cities/harvest.py montgomery
+              python3 tools/packs/build_pack_socrata.py montgomery
+          - st: wi
+            region: us-wi
+            name: Wisconsin (DATCP/MHD)
+            packs: "harvest/mhd/out/wi/us-wi-*.db.gz harvest/mhd/out/wi/us-wi.manifest.json"
+            run: |
+              python3 harvest/mhd/mhd_fetch.py wi
+              python3 harvest/mhd/mhd_fetch_details.py wi
+              python3 harvest/mhd/mhd_build.py wi
+              python3 tools/packs/build_pack_mhd.py wi
+          - st: co
+            region: us-co
+            name: Colorado (CDPHE/MHD)
+            packs: "harvest/mhd/out/co/us-co-*.db.gz harvest/mhd/out/co/us-co.manifest.json"
+            run: |
+              python3 harvest/mhd/mhd_fetch.py co
+              python3 harvest/mhd/mhd_fetch_details.py co
+              python3 harvest/mhd/mhd_build.py co
+              python3 tools/packs/build_pack_mhd.py co
+          - st: vt
+            region: us-vt
+            name: Vermont (SFI)
+            packs: "harvest/sfi/out/vt/us-vt-*.db.gz harvest/sfi/out/vt/us-vt.manifest.json"
+            run: |
+              python3 harvest/sfi/sfi_fetch.py vt
+              python3 harvest/sfi/sfi_build.py vt
+              python3 tools/packs/build_pack_sfi.py vt
+          - st: ri
+            region: us-ri
+            name: Rhode Island (DHD)
+            packs: "harvest/dhd/out/ri/us-ri-*.db.gz harvest/dhd/out/ri/us-ri.manifest.json"
+            run: |
+              python3 harvest/dhd/dhd_fetch.py ri
+              python3 harvest/dhd/dhd_build.py ri
+              python3 tools/packs/build_pack_dhd.py ri
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:

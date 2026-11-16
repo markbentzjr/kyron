@@ -197,6 +197,102 @@ def normalize_kingco(rows, cfg):
     return _finish(places)
 
 
+# ------------------------------------------------------------------ SF
+def normalize_sf(rows, cfg):
+    """SCORE_100_HIGH: one row per inspection (inspection_id =
+    <business_id>_<yyyymmdd>), inspection_score is the published 0-100.
+    The companion violations dataset referenced in the registry
+    (f29f-c3np) is no longer published, so inspections ship without
+    violation rows — never fabricated."""
+    places = {}
+    for r in rows:
+        bid = r.get("business_id")
+        iid = r.get("inspection_id")
+        if not bid or not r.get("business_name") or not iid:
+            continue
+        p = places.get(bid)
+        if p is None:
+            lat, lng = _coord(r.get("business_latitude"),
+                              r.get("business_longitude"))
+            p = places[bid] = _place(
+                cfg, bid, r["business_name"], r.get("business_address") or "",
+                (r.get("business_city") or "").title(),
+                r.get("business_postal_code"), cfg["county"], lat, lng,
+                "https://data.sfgov.org/d/pyih-qa8i")
+        s = _int(r.get("inspection_score"))
+        p["_insp"][iid] = {"d": _iso(r.get("inspection_date")),
+                           "t": r.get("inspection_type") or "",
+                           "s": s if s is not None and s >= 0 else NO_SCORE,
+                           "disp": "", "v": []}
+    return _finish(places)
+
+
+# --------------------------------------------------------------- Austin
+def normalize_austin(rows, cfg):
+    """SCORE_100_HIGH: one row per inspection; `score` is the published
+    0-100 and `inspectionscorecategory` ('90+ (Green)', '70-89 (Yellow)',
+    'Under 70 (Red)') is the city's own band text -> rides in `disp`."""
+    places = {}
+    for r in rows:
+        fid = r.get("facility_id")
+        iid = r.get("inspectionid") or _iso(r.get("inspection_date"))
+        if not fid or not r.get("restaurant_name"):
+            continue
+        p = places.get(fid)
+        if p is None:
+            lat, lng = _coord(r.get("lat"), r.get("lng"))
+            p = places[fid] = _place(
+                cfg, fid, r["restaurant_name"], r.get("address") or "",
+                "Austin", r.get("zip_code"), cfg["county"], lat, lng,
+                "https://data.austintexas.gov/d/ecmv-9xxi")
+        s = _int(r.get("score"))
+        p["_insp"][iid] = {"d": _iso(r.get("inspection_date")),
+                           "t": r.get("process_description") or "",
+                           "s": s if s is not None and s >= 0 else NO_SCORE,
+                           "disp": (r.get("inspectionscorecategory") or "")
+                           .strip(), "v": []}
+    return _finish(places)
+
+
+# ----------------------------------------------------- Montgomery Co MD
+def normalize_montgomery(rows, cfg):
+    """VIOLATIONS_ONLY: one row per inspection. `inspectionresults` is the
+    county's own outcome text ('No Critical Violations Noted', 'Critical
+    Violations Corrected', 'Facility Closed') -> `disp`. The violationN
+    columns are the county's fixed checklist slots ('In Compliance' /
+    'Out of Compliance' verbatim); out-of-compliance slots ship as
+    violations keyed by slot name — slot meanings are not republished
+    by the dataset, so nothing is invented."""
+    slots = [f"violation{i}" for i in range(1, 23)] + [
+        "violation6a", "violation6b", "violation7a", "violation7b",
+        "violationmenu", "violationsmoking", "violationtransfat"]
+    places = {}
+    for r in rows:
+        eid = r.get("establishment_id")
+        if not eid or not r.get("name"):
+            continue
+        p = places.get(eid)
+        if p is None:
+            lat, lng = _coord(r.get("latitude"), r.get("longitude"))
+            p = places[eid] = _place(
+                cfg, eid, r["name"], r.get("address1") or "",
+                (r.get("city") or "").title(), r.get("zip"), cfg["county"],
+                lat, lng, "https://data.montgomerycountymd.gov/d/5pue-gfbe")
+        key = (r.get("inspectiondate") or "")[:10] + "|" + \
+            (r.get("inspectiontype") or "")
+        viol = [{"p": 0, "c": False,
+                 "r": f"{s}: {(r.get(s) or '').strip()}"}
+                for s in slots
+                if (r.get(s) or "").strip().lower()
+                not in ("", "in compliance", "n/a", "not applicable")]
+        p["_insp"][key] = {"d": _iso(r.get("inspectiondate")),
+                           "t": r.get("inspectiontype") or "",
+                           "s": NO_SCORE,
+                           "disp": (r.get("inspectionresults") or "").strip(),
+                           "v": viol}
+    return _finish(places)
+
+
 SOURCES = {
     "nyc": {
         "region": "us-ny", "state": "NY", "name": "New York (NYC)",
@@ -219,6 +315,43 @@ SOURCES = {
         "attribution": "City of Chicago — Food Inspections, Chicago Data Portal "
                        "(4ijn-s7e5). Data provided by the City of Chicago; subject "
                        "to the City of Chicago Data Portal Terms of Use.",
+    },
+    "sf": {
+        "region": "us-ca", "state": "CA", "name": "California (San Francisco)",
+        "domain": "data.sfgov.org", "dataset": "pyih-qa8i",
+        "date_field": "inspection_date", "window_days": None,
+        "source_id": "ca-sf", "jurisdiction": "CA-SF-DPH",
+        "jur_name": "San Francisco Department of Public Health",
+        "model": "SCORE_100_HIGH", "county": "San Francisco",
+        "normalize": normalize_sf,
+        "attribution": "San Francisco Department of Public Health — Restaurant "
+                       "Scores (LIVES Standard), SF Open Data (pyih-qa8i). "
+                       "Public data; SF Open Data terms of use.",
+    },
+    "austin": {
+        "region": "us-tx", "state": "TX", "name": "Texas (Austin)",
+        "domain": "data.austintexas.gov", "dataset": "ecmv-9xxi",
+        "date_field": "inspection_date", "window_days": None,
+        "source_id": "tx-austin", "jurisdiction": "TX-AUSTIN-PH",
+        "jur_name": "Austin Public Health",
+        "model": "SCORE_100_HIGH", "county": "Travis",
+        "normalize": normalize_austin,
+        "attribution": "Austin Public Health — Food Establishment Inspection "
+                       "Scores, City of Austin Open Data (ecmv-9xxi). Public "
+                       "data; City of Austin open data terms of use.",
+    },
+    "montgomery": {
+        "region": "us-md", "state": "MD", "name": "Maryland (Montgomery Co.)",
+        "domain": "data.montgomerycountymd.gov", "dataset": "5pue-gfbe",
+        "date_field": "inspectiondate", "window_days": None,
+        "source_id": "md-montgomery", "jurisdiction": "MD-MONTGOMERY-LFS",
+        "jur_name": "Montgomery County Dept. of Health & Human Services — "
+                    "Licensure & Regulatory Services",
+        "model": "VIOLATIONS_ONLY", "county": "Montgomery",
+        "normalize": normalize_montgomery,
+        "attribution": "Montgomery County, Maryland — Food & Facility "
+                       "Inspections, Montgomery County Open Data (5pue-gfbe). "
+                       "Public data; Montgomery County open data terms of use.",
     },
     "kingco": {
         "region": "us-wa", "state": "WA", "name": "Washington (King County)",

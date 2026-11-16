@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "generated": "2026-10-25",
+  "generated": "2026-11-16",
   "license_note": "Registry data describes OFFICIAL public sources; it carries no restaurant records, scores, or violations.",
   "jurisdiction_types": {
     "state": "one of the 50 states",
@@ -569,11 +569,11 @@
       "name": "California",
       "type": "state",
       "result_model": "SCORE_100_HIGH",
-      "summary": "County-fragmented by design (CalCode). LA County + SF datasets cover a big population share.",
-      "pack_status": "none",
+      "summary": "San Francisco pack built + validated locally (0-100 scores); county-fragmented otherwise (CalCode).",
+      "pack_status": "built",
       "pack_manifest_url": null,
-      "pack_availability": "none",
-      "artifact_verified": "",
+      "pack_availability": "staged-local",
+      "artifact_verified": "2026-11-16",
       "pack_host_status": "",
       "pack_host_checked": "",
       "center": {
@@ -607,13 +607,13 @@
           "violations": "full",
           "history": "some-history",
           "result_model": "SCORE_100_HIGH",
-          "status": "source-verified",
+          "status": "pack-built",
           "verified": "2026-10-13",
           "blocker": "",
           "restrictions": "",
-          "refresh": "",
-          "last_refresh": "",
-          "notes": "Numeric 0-100 score plus dedicated violations dataset (f29f-c3np)."
+          "refresh": "Harvest pipeline harvest/socrata_cities (sf)",
+          "last_refresh": "2026-11-16",
+          "notes": "Numeric 0-100 score plus dedicated violations dataset (f29f-c3np). Pack BUILT locally 2026-11-16 (6,253 places / 890 inspections — full dataset, one inspection row per violation-bearing inspection)."
         },
         {
           "id": "ca-statewide",
@@ -812,7 +812,7 @@
           "restrictions": "State-inspected jurisdictions only; agency-delegated ones are a second source.",
           "refresh": "",
           "last_refresh": "",
-          "notes": "DATCP publishes directly (fetched 200 OK); ~130 agency-managed local health departments publish separately in HealthSpace."
+          "notes": "DATCP publishes directly (fetched 200 OK); ~130 agency-managed local health departments publish separately in HealthSpace. Generic MHD adapter (harvest/mhd) validated end-to-end 2026-11-16 — bounded proof pack: 196 places / 202 inspections / 495 violations, 0 unverified; full-history harvest pending."
         }
       ]
     },
@@ -886,7 +886,7 @@
           "restrictions": "",
           "refresh": "",
           "last_refresh": "",
-          "notes": "'Food Safety 5.5' platform; numeric inspection score (44-item checklist) + critical flags since May 2016. ASP.NET POST needed."
+          "notes": "'Food Safety 5.5' platform; numeric inspection score (44-item checklist) + critical flags since May 2016. ASP.NET POST needed. SFI adapter (harvest/sfi) validated end-to-end 2026-11-16 — bounded proof pack: 20 places / 112 inspections / 231 violations incl. report-PDF extraction; full-history harvest pending."
         }
       ]
     },
@@ -997,7 +997,7 @@
           "restrictions": "",
           "refresh": "",
           "last_refresh": "",
-          "notes": "Official portal (linked from health.ri.gov/food-safety, fetched 200); Tyler-hosted JS/postback app — parsing needs the postback, not plain links."
+          "notes": "Official portal (linked from health.ri.gov/food-safety, fetched 200); Tyler-hosted JS/postback app — parsing needs the postback, not plain links. DHD adapter (harvest/dhd) validated end-to-end 2026-11-16 — bounded proof: 20 facilities / 51 inspections / 188 violations via paged search + inspectionsData API; full statewide fetch pending (~2k pages)."
         }
       ]
     },
@@ -1098,11 +1098,11 @@
       "name": "Texas",
       "type": "state",
       "result_model": "SCORE_100_HIGH",
-      "summary": "Big-city open-data APIs (Austin verified); no statewide results search.",
-      "pack_status": "none",
+      "summary": "Austin pack built + validated locally (0-100 scores); no statewide results search.",
+      "pack_status": "built",
       "pack_manifest_url": null,
-      "pack_availability": "none",
-      "artifact_verified": "",
+      "pack_availability": "staged-local",
+      "artifact_verified": "2026-11-16",
       "pack_host_status": "",
       "pack_host_checked": "",
       "center": {
@@ -1119,13 +1119,13 @@
           "violations": "partial",
           "history": "full-history",
           "result_model": "SCORE_100_HIGH",
-          "status": "source-verified",
+          "status": "pack-built",
           "verified": "2026-10-22",
           "blocker": "",
           "restrictions": "",
-          "refresh": "",
-          "last_refresh": "",
-          "notes": "Socrata API (fetched 200 JSON): numeric 0-100 with color bands."
+          "refresh": "Harvest pipeline harvest/socrata_cities (austin)",
+          "last_refresh": "2026-11-16",
+          "notes": "Socrata API (fetched 200 JSON): numeric 0-100 with color bands. Pack BUILT locally 2026-11-16 (6,448 places — full dataset)."
         },
         {
           "id": "tx-dshs",
@@ -1243,11 +1243,11 @@
       "name": "Maryland",
       "type": "state",
       "result_model": "VIOLATIONS_ONLY",
-      "summary": "County APIs verified (Montgomery); statewide portal at present unreachable.",
-      "pack_status": "none",
+      "summary": "Montgomery County pack built + validated locally (compliance flags); statewide portal at present unreachable.",
+      "pack_status": "built",
       "pack_manifest_url": null,
-      "pack_availability": "none",
-      "artifact_verified": "",
+      "pack_availability": "staged-local",
+      "artifact_verified": "2026-11-16",
       "pack_host_status": "",
       "pack_host_checked": "",
       "center": {
@@ -1264,13 +1264,13 @@
           "violations": "partial",
           "history": "some-history",
           "result_model": "VIOLATIONS_ONLY",
-          "status": "source-verified",
+          "status": "pack-built",
           "verified": "2026-10-22",
           "blocker": "",
           "restrictions": "",
-          "refresh": "",
-          "last_refresh": "",
-          "notes": "Socrata (fetched 200 with data): per-item In/Out of Compliance rows."
+          "refresh": "Harvest pipeline harvest/socrata_cities (montgomery)",
+          "last_refresh": "2026-11-16",
+          "notes": "Socrata (fetched 200 with data): per-item In/Out of Compliance rows. Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — full dataset)."
         },
         {
           "id": "md-statewide",
@@ -1708,7 +1708,7 @@
           "restrictions": "",
           "refresh": "",
           "last_refresh": "",
-          "notes": "Fetched 200 OK (linked from CDPHE page; CDPHE plain fetch is 403). Results are Pass / Re-Inspection Required / Closed with risk-index points (Pass 0–49; Re-inspect 50–109; Closed 110+) — NOT a 0–100 score or letter grade."
+          "notes": "Fetched 200 OK (linked from CDPHE page; CDPHE plain fetch is 403). Results are Pass / Re-Inspection Required / Closed with risk-index points (Pass 0–49; Re-inspect 50–109; Closed 110+) — NOT a 0–100 score or letter grade. Generic MHD adapter (harvest/mhd) validated end-to-end 2026-11-16 — bounded proof pack: 151 places / 518 violations with native result text; full-history harvest pending."
         },
         {
           "id": "co-denver",

@@ -378,16 +378,20 @@ def registry():
             restrictions="Excludes Pasadena, Long Beach and Vernon (own health departments)."),
         src("ca-sf", "San Francisco Department of Public Health", "San Francisco", "api",
             "https://data.sfgov.org/resource/pyih-qa8i.json",
-            "full", "some-history", "source-verified", "SCORE_100_HIGH",
-            verified="2026-10-13",
-            notes="Numeric 0-100 score plus dedicated violations dataset (f29f-c3np)."),
+            "full", "some-history", "pack-built", "SCORE_100_HIGH",
+            verified="2026-10-13", last_refresh="2026-11-16",
+            refresh="Harvest pipeline harvest/socrata_cities (sf)",
+            notes="Numeric 0-100 score plus dedicated violations dataset (f29f-c3np). "
+                  "Pack BUILT locally 2026-11-16 (6,253 places / 890 inspections — "
+                  "full dataset, one inspection row per violation-bearing inspection)."),
         link_only("ca-statewide", "California Department of Public Health (Retail Food Program)",
                   "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/RetailFoodProgram.aspx",
                   "CalCode makes 60+ county EHDs the publishers; no statewide portal, "
                   "bulk download, or API (AFDO index lists counties only; CDPH page "
                   "fetch-blocked on 2026-10-22)."),
-    ], summary="County-fragmented by design (CalCode). LA County + SF datasets "
-               "cover a big population share.")
+    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
+        summary="San Francisco pack built + validated locally (0-100 scores); "
+                "county-fragmented otherwise (CalCode).")
 
     add("MA", "Massachusetts", "PASS_FAIL", [
         src("ma-boston", "City of Boston Inspectional Services", "Boston", "bulk-csv",
@@ -441,7 +445,10 @@ def registry():
             "full", "some-history", "source-verified", "PASS_FAIL",
             verified="2026-10-22",
             notes="DATCP publishes directly (fetched 200 OK); ~130 agency-managed local "
-                  "health departments publish separately in HealthSpace.",
+                  "health departments publish separately in HealthSpace. Generic MHD "
+                  "adapter (harvest/mhd) validated end-to-end 2026-11-16 — bounded "
+                  "proof pack: 196 places / 202 inspections / 495 violations, 0 "
+                  "unverified; full-history harvest pending.",
             restrictions="State-inspected jurisdictions only; agency-delegated ones are a "
                   "second source.",
             blocker=""),
@@ -463,7 +470,10 @@ def registry():
             "full", "full-history", "source-verified", "SCORE_100_HIGH",
             verified="2026-10-22",
             notes="'Food Safety 5.5' platform; numeric inspection score (44-item "
-                  "checklist) + critical flags since May 2016. ASP.NET POST needed."),
+                  "checklist) + critical flags since May 2016. ASP.NET POST needed. "
+                  "SFI adapter (harvest/sfi) validated end-to-end 2026-11-16 — bounded "
+                  "proof pack: 20 places / 112 inspections / 231 violations incl. "
+                  "report-PDF extraction; full-history harvest pending."),
     ], summary="Single-state agency; numeric score + violations; same platform family "
                "as SD/WY/PA.")
 
@@ -494,7 +504,10 @@ def registry():
             verified="2026-10-22",
             notes="Official portal (linked from health.ri.gov/food-safety, fetched 200); "
                   "Tyler-hosted JS/postback app — parsing needs the postback, not "
-                  "plain links."),
+                  "plain links. DHD adapter (harvest/dhd) validated end-to-end "
+                  "2026-11-16 — bounded proof: 20 facilities / 51 inspections / 188 "
+                  "violations via paged search + inspectionsData API; full statewide "
+                  "fetch pending (~2k pages)."),
     ], summary="Statewide; reachable but JS-postback heavy.")
 
     add("NJ", "New Jersey", "DISPOSITION", [
@@ -527,9 +540,11 @@ def registry():
     add("TX", "Texas", "SCORE_100_HIGH", [
         src("tx-austin", "Austin Public Health", "Austin", "api",
             "https://data.austintexas.gov/resource/ecmv-9xxi.json",
-            "partial", "full-history", "source-verified", "SCORE_100_HIGH",
-            verified="2026-10-22",
-            notes="Socrata API (fetched 200 JSON): numeric 0-100 with color bands."),
+            "partial", "full-history", "pack-built", "SCORE_100_HIGH",
+            verified="2026-10-22", last_refresh="2026-11-16",
+            refresh="Harvest pipeline harvest/socrata_cities (austin)",
+            notes="Socrata API (fetched 200 JSON): numeric 0-100 with color bands. "
+                  "Pack BUILT locally 2026-11-16 (6,448 places — full dataset)."),
         src("tx-dshs", "Texas DSHS Retail Food Safety Unit", "Where no local program exists", "official-link-only",
             "https://www.dshs.texas.gov/retail-food-establishments",
             "unverified", "unverified", "official-link-only", "VIOLATIONS_ONLY",
@@ -538,7 +553,9 @@ def registry():
                   "ArcGIS jurisdiction map and open-records requests.",
             restrictions="DSHS inspects only where no local program exists; Houston/Dallas/"
                          "San Antonio/El Paso publish their own (Dallas/SOCRATA unverified-cited)."),
-    ], summary="Big-city open-data APIs (Austin verified); no statewide results search.")
+    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
+        summary="Austin pack built + validated locally (0-100 scores); no statewide "
+                "results search.")
 
     add("UT", "Utah", "VIOLATIONS_ONLY", [
         src("ut-slco", "Salt Lake County Health Department", "Salt Lake County", "html",
@@ -567,15 +584,19 @@ def registry():
     add("MD", "Maryland", "VIOLATIONS_ONLY", [
         src("md-montgomery", "Montgomery County", "Montgomery County", "api",
             "https://data.montgomerycountymd.gov/resource/5pue-gfbe.json",
-            "partial", "some-history", "source-verified", "VIOLATIONS_ONLY",
-            verified="2026-10-22",
-            notes="Socrata (fetched 200 with data): per-item In/Out of Compliance rows."),
+            "partial", "some-history", "pack-built", "VIOLATIONS_ONLY",
+            verified="2026-10-22", last_refresh="2026-11-16",
+            refresh="Harvest pipeline harvest/socrata_cities (montgomery)",
+            notes="Socrata (fetched 200 with data): per-item In/Out of Compliance rows. "
+                  "Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — "
+                  "full dataset)."),
         link_only("md-statewide", "Maryland DHMH Office of Food Protection (24 LHDs)",
                   "https://health.maryland.gov/phpa/pages/ofp.aspx",
                   "Statewide search vsi.maryland.gov was unreachable on 2026-10-22 "
                   "(3 attempts); many counties publish by records request."),
-    ], summary="County APIs verified (Montgomery); statewide portal at present "
-               "unreachable.")
+    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
+        summary="Montgomery County pack built + validated locally (compliance flags); "
+                "statewide portal at present unreachable.")
 
     add("MO", "Missouri", "DISPOSITION", [
         src("mo-stl", "City of St. Louis Department of Health", "City of St. Louis", "html",
@@ -690,7 +711,9 @@ def registry():
             notes="Fetched 200 OK (linked from CDPHE page; CDPHE plain fetch is 403). "
                   "Results are Pass / Re-Inspection Required / Closed with risk-index "
                   "points (Pass 0–49; Re-inspect 50–109; Closed 110+) — NOT a 0–100 "
-                  "score or letter grade."),
+                  "score or letter grade. Generic MHD adapter (harvest/mhd) validated "
+                  "end-to-end 2026-11-16 — bounded proof pack: 151 places / 518 "
+                  "violations with native result text; full-history harvest pending."),
         src("co-denver", "Denver Department of Public Health & Environment", "City & County of Denver", "html",
             "https://www.denvergov.org/restaurantinspections",
             "full", "some-history", "source-verified", "PASS_FAIL",
