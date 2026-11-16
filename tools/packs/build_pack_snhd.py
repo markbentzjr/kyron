@@ -69,6 +69,9 @@ def main():
         limit=a.limit,
         version=(f"{src_m['generated_at'][:10]}.{a.version_seq}"
                  if a.version_seq else None),
+        # SNHD keeps ~18y of history per place (max depth 58); 30 bounds
+        # the outliers while retaining ~98% of all inspections.
+        max_inspections=30,
         attribution=cfg["attribution"],
         jurisdictions=[{"jurisdictionId": cfg["jurisdiction"],
                         "name": cfg["attribution"]}])

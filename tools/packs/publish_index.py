@@ -29,10 +29,23 @@ def main():
             sys.exit(f"sha mismatch {pack}")
         shutil.copy(pack, DIST)
         shutil.copy(man, DIST)
-        entries[m["regionId"]] = {"manifest": os.path.basename(man),
-                                  "file": m["full"]["file"], "bytes": m["full"]["bytes"],
-                                  "sha256": sha, "datasetVersion": m["datasetVersion"],
-                                  "placeCount": m["placeCount"]}
+        entry = {"manifest": os.path.basename(man),
+                 "file": m["full"]["file"], "bytes": m["full"]["bytes"],
+                 "sha256": sha, "datasetVersion": m["datasetVersion"],
+                 "placeCount": m["placeCount"]}
+        d = m.get("delta")
+        if d:
+            dp = os.path.join(os.path.dirname(man), d["file"])
+            if not os.path.exists(dp):
+                sys.exit(f"manifest delta file missing: {dp}")
+            dsha = hashlib.sha256(open(dp, "rb").read()).hexdigest()
+            if dsha != d["sha256"]:
+                sys.exit(f"delta sha mismatch {dp}")
+            shutil.copy(dp, DIST)
+            entry["delta"] = {"fromVersion": d["fromVersion"],
+                              "file": d["file"], "bytes": d["bytes"],
+                              "sha256": dsha}
+        entries[m["regionId"]] = entry
     idx = {"schema": 1, "generatedAt": datetime.now(timezone.utc).isoformat(),
            "packs": entries}
     ip = os.path.join(DIST, "index.json")

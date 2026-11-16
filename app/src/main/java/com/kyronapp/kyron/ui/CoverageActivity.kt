@@ -432,15 +432,45 @@ class CoverageActivity : AppCompatActivity() {
                         throw IllegalStateException("Manifest is for ${manifest.regionId}, not $regionId")
                     }
                     val base = manifestUrl.substringBeforeLast('/')
+                    var indexBytes: ByteArray? = null
+                    var indexSig: String? = null
+                    var indexKey: java.security.PublicKey? = null
                     // Packs hosted on the GitHub Release MUST verify against the
                     // signed index (bundled public key); legacy hosts keep the
                     // manifest-sha256 check below.
                     if (manifestUrl.contains("/releases/download/")) {
                         val key = com.kyronapp.kyron.data.PackIndex.loadPublicKey(this@CoverageActivity)
                             ?: throw IllegalStateException("No pack-index public key bundled")
-                        val idx = fetchBytes("$base/index.json")
-                        val sig = String(fetchBytes("$base/index.json.sig"), Charsets.UTF_8)
-                        com.kyronapp.kyron.data.PackIndex.requireListed(idx, sig, key, regionId, manifest.fullSha256)
+                        indexKey = key
+                        indexBytes = fetchBytes("$base/index.json")
+                        indexSig = String(fetchBytes("$base/index.json.sig"), Charsets.UTF_8)
+                        com.kyronapp.kyron.data.PackIndex.requireListed(
+                            indexBytes!!, indexSig!!, key, regionId, manifest.fullSha256)
+                    }
+                    // When the advertised delta builds on exactly the
+                    // installed version, the small change set replaces a
+                    // full redownload. Any refusal — base mismatch, bad
+                    // checksum, index veto, network failure — falls back
+                    // to the full path below; applyDelta verifies before
+                    // writing, so a rejected delta changes nothing.
+                    val usableDelta = manifest.deltaFile != null &&
+                        manifest.deltaSha256 != null &&
+                        manifest.deltaFromVersion != null &&
+                        manifest.deltaFromVersion ==
+                            app.repository.installedRegionVersion(regionId)
+                    if (usableDelta) {
+                        try {
+                            if (indexBytes != null) {
+                                com.kyronapp.kyron.data.PackIndex.requireDeltaListed(
+                                    indexBytes, indexSig!!, indexKey!!, regionId,
+                                    manifest.fullSha256, manifest.deltaSha256!!)
+                            }
+                            val deltaFile = File(cacheDir, manifest.deltaFile!!)
+                            fetchToFile(base + "/" + manifest.deltaFile, deltaFile)
+                            return@withContext app.repository.applyPackDelta(deltaFile, manifest)
+                        } catch (_: Exception) {
+                            // fall through to the full download
+                        }
                     }
                     val packUrl = base + "/" + manifest.fullFile
                     val packFile = File(cacheDir, manifest.fullFile)

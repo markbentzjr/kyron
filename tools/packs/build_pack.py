@@ -99,12 +99,15 @@ def pack_place(raw, **fields):
 
 def write_pack(*, region, state, name, model, source_label, places,
                generated_at, out_dir, jurisdictions, limit=0,
-               attribution=None, version=None):
+               attribution=None, version=None, max_inspections=None):
     """Shared write tail of every pack builder: SQLite catalog -> .db.gz
     -> .manifest.json. `version` derives from generated_at under the
     existing convention ("<day>.1", or "<day>.dev<limit>" for a bounded
     proof build) unless overridden (e.g. a same-day corrected
-    republish bumps ".1" -> ".2"). Returns (gz_path, manifest)."""
+    republish bumps ".1" -> ".2"). `max_inspections` bounds each
+    place's stored history to its N most recent inspections (ranked
+    by date); dropped rows are counted honestly in the manifest.
+    Returns (gz_path, manifest)."""
     if version is None:
         version = f"{generated_at[:10]}.1" if not limit else \
             f"{generated_at[:10]}.dev{limit}"
@@ -113,6 +116,19 @@ def write_pack(*, region, state, name, model, source_label, places,
     db_path = os.path.join(out_dir, db_name)
     if os.path.exists(db_path):
         os.remove(db_path)
+
+    capped = dropped = 0
+    if max_inspections is not None:
+        for p in places:
+            insps = p["inspections"]
+            if len(insps) <= max_inspections:
+                continue
+            capped += 1
+            dropped += len(insps) - max_inspections
+            keep = sorted(range(len(insps)),
+                          key=lambda i: date_key(insps[i]["date"]),
+                          reverse=True)[:max_inspections]
+            p["inspections"] = [insps[i] for i in sorted(keep)]
 
     con = sqlite3.connect(db_path)
     cur = con.cursor()
@@ -161,7 +177,8 @@ def write_pack(*, region, state, name, model, source_label, places,
         "schemaVersion": SCHEMA_VERSION, "minAppVersion": "2.0",
         "full": {"file": gz_name, "bytes": len(raw),
                  "sha256": hashlib.sha256(raw).hexdigest()},
-        "delta": None, "jurisdictions": jurisdictions}
+        "delta": None, "jurisdictions": jurisdictions,
+        "inspectionsCapped": capped, "inspectionsDropped": dropped}
     if attribution is not None:
         manifest["attribution"] = attribution
     manifest_path = os.path.join(out_dir, f"{region}.manifest.json")

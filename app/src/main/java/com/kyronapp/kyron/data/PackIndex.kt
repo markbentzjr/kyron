@@ -54,4 +54,27 @@ object PackIndex {
             "Pack checksum does not match the signed index"
         }
     }
+
+    /**
+     * Same check as [requireListed], plus a delta block: the signed index
+     * must also vouch for [deltaSha256]. Without this the index would
+     * authenticate only the full pack — a tampered manifest could point
+     * its delta block at anything. publish_index.py propagates each
+     * manifest's delta into the signed entry for exactly this check.
+     */
+    fun requireDeltaListed(indexBytes: ByteArray, sigBase64: String, key: PublicKey,
+                           regionId: String, fullSha256: String, deltaSha256: String) {
+        check(verify(indexBytes, sigBase64, key)) { "Pack index signature is invalid" }
+        val entry = JSONObject(String(indexBytes, Charsets.UTF_8))
+            .optJSONObject("packs")?.optJSONObject(regionId)
+            ?: throw IllegalStateException("Region $regionId is not in the signed pack index")
+        check(entry.optString("sha256").lowercase() == fullSha256.lowercase()) {
+            "Pack checksum does not match the signed index"
+        }
+        val delta = entry.optJSONObject("delta")
+            ?: throw IllegalStateException("Signed index carries no delta for $regionId")
+        check(delta.optString("sha256").lowercase() == deltaSha256.lowercase()) {
+            "Delta checksum does not match the signed index"
+        }
+    }
 }
