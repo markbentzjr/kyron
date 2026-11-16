@@ -273,6 +273,36 @@ class CoverageActivity : AppCompatActivity() {
                 }
             }
             if (info != null && !info.bundled && installed) {
+                // Installed regions can reach the published pack's update:
+                // the check fetches the manifest LIVE (no trust in cached
+                // statuses), and a version difference runs the same verified
+                // downloadRegion() path — which prefers a signed delta when
+                // its fromVersion matches the installed one.
+                if (info.manifestUrl != null) {
+                    actions.addView(actionButton("Check for update") {
+                        if (busy) return@actionButton
+                        status("Checking $name for a newer pack…")
+                        scope.launch {
+                            val newer = try {
+                                val m = withContext(Dispatchers.IO) {
+                                    PackManifest.fromJson(JSONObject(fetchText(info.manifestUrl)))
+                                }
+                                val installedV = app.repository.installedRegionVersion(regionId)
+                                if (m.datasetVersion == installedV) {
+                                    status("$name is already on the latest published data (v$installedV).")
+                                    false
+                                } else {
+                                    status("$name update available: v${installedV ?: "?"} → v${m.datasetVersion}.")
+                                    true
+                                }
+                            } catch (e: Exception) {
+                                status("Couldn't check $name's pack: ${e.message ?: "network error"}.")
+                                false
+                            }
+                            if (newer) downloadRegion(regionId)
+                        }
+                    })
+                }
                 if (app.repository.packHasRollback(regionId)) {
                     actions.addView(actionButton("Roll back") {
                         confirm("Roll back $name?", "Restore the previous ${name} data pack? Your favorites and alerts are not affected.") {
