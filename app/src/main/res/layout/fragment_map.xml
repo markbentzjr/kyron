@@ -125,6 +125,7 @@
 
             <Button
                 android:textAllCaps="false"
+                android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sheet_open"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -132,6 +133,7 @@
 
             <Button
                 android:textAllCaps="false"
+                android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sheet_fav"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -39,6 +39,7 @@
         android:textSize="13sp" />
 
     <Button
+        android:stateListAnimator="@animator/press_scale"
         android:id="@+id/cov_location_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

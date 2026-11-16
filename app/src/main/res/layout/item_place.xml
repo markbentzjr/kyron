@@ -1,24 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="12dp"
-    android:layout_marginEnd="12dp"
-    android:layout_marginTop="4dp"
-    android:layout_marginBottom="4dp"
+    android:layout_marginStart="14dp"
+    android:layout_marginEnd="14dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
     android:background="@drawable/card_bg"
+    android:clipToOutline="true"
+    android:foreground="?attr/selectableItemBackground"
     android:orientation="horizontal"
-    android:padding="12dp">
+    android:padding="12dp"
+    android:stateListAnimator="@animator/press_scale">
 
-    <TextView
-        android:id="@+id/score"
-        android:layout_width="52dp"
-        android:layout_height="52dp"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:textSize="19sp"
-        android:textStyle="bold" />
+    <FrameLayout
+        android:layout_width="92dp"
+        android:layout_height="92dp">
+
+        <ImageView
+            android:id="@+id/photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/photo_tile"
+            android:clipToOutline="true"
+            android:contentDescription="@string/cd_place_map"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/mono"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/photo_tile"
+            android:clipToOutline="true"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="34sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="6dp"
+            android:background="@drawable/score_chip"
+            android:minWidth="30dp"
+            android:gravity="center"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/star"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="5dp"
+            android:background="@drawable/star_scrim"
+            android:contentDescription="@string/cd_watch"
+            android:padding="7dp"
+            android:src="@drawable/ic_star_border" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -40,6 +85,7 @@
             android:id="@+id/addr"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/muted"
@@ -49,6 +95,7 @@
             android:id="@+id/meta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:textColor="@color/muted"
             android:textSize="12.5sp" />
 
@@ -62,12 +109,4 @@
             android:textSize="13sp"
             android:visibility="gone" />
     </LinearLayout>
-
-    <ImageButton
-        android:id="@+id/star"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/cd_watch"
-        android:src="@drawable/ic_star_border" />
 </LinearLayout>

@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var app: KyronApplication
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var tab: Int = 0
+    private var litTab: Int = -1
 
     /** Classic tab bar (LF4FIX2): four labeled tabs, the pre-2.1
      *  navigation. Selection is rendered directly by [selectTab]. */
@@ -126,8 +127,24 @@ class MainActivity : AppCompatActivity() {
                     tv.typeface,
                     if (active) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
                 )
+                // Animated selection: crossfade the tinted pill in/out and
+                // pop the newly-active tab so the switch feels physical.
+                (tv.background as? android.graphics.drawable.TransitionDrawable)?.let { td ->
+                    // reverseTransition on a never-started drawable flashes
+                    // the pill on — only reverse when it had been lit.
+                    if (active) td.startTransition(180)
+                    else if (litTab == idx) td.reverseTransition(180)
+                }
+                if (active) {
+                    tv.animate().cancel()
+                    tv.scaleX = 0.88f; tv.scaleY = 0.88f
+                    tv.animate().scaleX(1f).scaleY(1f).setDuration(220)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(2f))
+                        .start()
+                }
             }
         }
+        litTab = i
         val target = frags[i]
             ?: supportFragmentManager.findFragmentByTag("tab$i")
             ?: when (i) {
@@ -138,6 +155,7 @@ class MainActivity : AppCompatActivity() {
             }
         frags[i] = target
         val tx = supportFragmentManager.beginTransaction()
+        tx.setCustomAnimations(R.anim.frag_in, R.anim.frag_out)
         // Hide every other added fragment — including ones FragmentManager
         // restored after a process recreation that we haven't tracked yet.
         (supportFragmentManager.fragments + frags.filterNotNull()).distinct().forEach { f ->

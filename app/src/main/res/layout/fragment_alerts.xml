@@ -170,6 +170,7 @@
 
                 <Button
                     android:textAllCaps="false"
+                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/area_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -179,6 +180,7 @@
 
                 <Button
                     android:textAllCaps="false"
+                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/area_remove"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -219,6 +221,7 @@
 
                 <Button
                     android:textAllCaps="false"
+                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/choose_counties"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -266,6 +269,7 @@
 
                 <Button
                     android:textAllCaps="false"
+                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/use_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -340,6 +344,7 @@
 
             <Button
                 android:textAllCaps="false"
+                android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sync_now"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -414,6 +419,7 @@
 
             <Button
                 android:textAllCaps="false"
+                android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/save_profile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -523,6 +529,7 @@
 
                 <Button
                     android:textAllCaps="false"
+                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/export_backup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -530,6 +537,7 @@
 
                 <Button
                     android:textAllCaps="false"
+                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/import_backup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

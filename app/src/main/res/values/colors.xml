@@ -4,7 +4,9 @@
     <color name="kyron_primary">#1E6B38</color>
     <color name="kyron_green">#2E9E4F</color>
     <color name="kyron_lime">#7AB648</color>
+    <color name="kyron_lime_dark">#5C8A2E</color>
     <color name="kyron_amber">#E8A13A</color>
+    <color name="kyron_amber_dark">#B27310</color>
     <color name="kyron_red">#A33A3A</color>
     <color name="tone_red">#D9534F</color>
     <color name="tone_gray">#8A97A5</color>

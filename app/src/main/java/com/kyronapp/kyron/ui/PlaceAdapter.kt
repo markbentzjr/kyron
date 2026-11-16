@@ -34,32 +34,60 @@ class PlaceAdapter(
 
     override fun onBindViewHolder(h: VH, position: Int) {
         val p = items[position]
+        val ctx = h.itemView.context
         if (p.hasNumericScore) {
-            h.score.textSize = 19f
             h.score.text = p.score.toString()
-            h.score.setBackgroundResource(
-                when {
-                    p.score >= 95 -> R.drawable.score_green
-                    p.score >= 85 -> R.drawable.score_lime
-                    else -> R.drawable.score_amber
-                }
+            h.score.setTextColor(
+                ContextCompat.getColor(
+                    ctx,
+                    when {
+                        p.score >= 95 -> R.color.kyron_green
+                        p.score >= 85 -> R.color.kyron_lime_dark
+                        else -> R.color.kyron_amber_dark
+                    }
+                )
             )
         } else {
             // Disposition regions: the badge is the jurisdiction's own
-            // result in compact form, colored by tone — never a number
-            // Kyron invented. The full native text is in the meta line.
-            h.score.textSize = 10f
+            // result in compact form — never a number Kyron invented.
             h.score.text = p.badgeText
-            h.score.setBackgroundResource(
-                when (p.resultTone) {
-                    1 -> R.drawable.score_green
-                    2 -> R.drawable.score_amber
-                    3 -> R.drawable.score_red
-                    else -> R.drawable.score_gray
-                }
+            h.score.setTextColor(
+                ContextCompat.getColor(
+                    ctx,
+                    when (p.resultTone) {
+                        1 -> R.color.kyron_green
+                        2 -> R.color.kyron_amber_dark
+                        3 -> R.color.kyron_red
+                        else -> R.color.muted
+                    }
+                )
             )
         }
-        h.score.setTextColor(0xFFFFFFFF.toInt())
+        // Photo tile: real OSM map imagery centered on the verified
+        // address; monogram letter fallback when ungeocoded.
+        if (p.lat != null && p.lng != null) {
+            h.mono.visibility = View.GONE
+            h.photo.visibility = View.VISIBLE
+            h.photo.setImageDrawable(null)
+            MapThumbLoader.bind(h.photo, p.lat!!, p.lng!!)
+        } else {
+            h.photo.visibility = View.GONE
+            h.photo.setImageDrawable(null)
+            h.mono.visibility = View.VISIBLE
+            h.mono.text = p.name.firstOrNull()?.uppercase() ?: "?"
+            h.mono.setBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    when {
+                        p.hasNumericScore && p.score >= 85 -> R.color.kyron_green
+                        p.hasNumericScore -> R.color.kyron_amber_dark
+                        p.resultTone == 1 -> R.color.kyron_green
+                        p.resultTone == 3 -> R.color.kyron_red
+                        else -> R.color.muted
+                    }
+                )
+            )
+        }
         h.name.text = p.name
         h.addr.text = "${p.address} · ${p.city}"
         h.meta.text = if (p.hasNumericScore) {
@@ -91,20 +119,29 @@ class PlaceAdapter(
             h.why.visibility = View.GONE
         }
         val fav = favorites.contains(p.id)
-        val ctx = h.itemView.context
         h.star.setImageResource(if (fav) R.drawable.ic_star else R.drawable.ic_star_border)
         h.star.setColorFilter(
-            ContextCompat.getColor(ctx, if (fav) R.color.star_on else R.color.muted)
+            ContextCompat.getColor(ctx, if (fav) R.color.star_on else R.color.white)
         )
         h.star.contentDescription = ctx.getString(
             if (fav) R.string.cd_watching else R.string.cd_watch
         )
         h.itemView.setOnClickListener { onOpen(p) }
-        h.star.setOnClickListener { onToggleFavorite(p) }
+        h.star.setOnClickListener {
+            // Bounce on tap — the actual state flip comes back via submit().
+            it.animate().scaleX(0.7f).scaleY(0.7f).setDuration(90).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(160)
+                    .setInterpolator(android.view.animation.OvershootInterpolator())
+                    .start()
+            }.start()
+            onToggleFavorite(p)
+        }
     }
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
         val score: TextView = v.findViewById(R.id.score)
+        val photo: android.widget.ImageView = v.findViewById(R.id.photo)
+        val mono: TextView = v.findViewById(R.id.mono)
         val name: TextView = v.findViewById(R.id.name)
         val addr: TextView = v.findViewById(R.id.addr)
         val meta: TextView = v.findViewById(R.id.meta)

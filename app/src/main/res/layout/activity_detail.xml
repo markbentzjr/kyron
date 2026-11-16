@@ -107,6 +107,7 @@
 
                     <Button
                         android:textAllCaps="false"
+                        android:stateListAnimator="@animator/press_scale"
                         android:id="@+id/d_fav"
                         android:layout_width="0dp"
                         android:layout_weight="1"
@@ -115,6 +116,7 @@
 
                     <Button
                         android:textAllCaps="false"
+                        android:stateListAnimator="@animator/press_scale"
                         android:id="@+id/d_directions"
                         android:layout_width="0dp"
                         android:layout_weight="1"
@@ -124,6 +126,7 @@
 
                     <Button
                         android:textAllCaps="false"
+                        android:stateListAnimator="@animator/press_scale"
                         android:id="@+id/d_share"
                         android:layout_width="0dp"
                         android:layout_weight="1"
@@ -234,6 +237,7 @@
 
             <Button
                 android:textAllCaps="false"
+                android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/d_load"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

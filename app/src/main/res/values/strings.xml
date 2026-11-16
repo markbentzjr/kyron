@@ -11,6 +11,7 @@
     <string name="cd_close_card">Close this place card</string>
     <string name="cd_back">Go back</string>
     <string name="cd_search">Search restaurants</string>
+    <string name="cd_place_map">Map thumbnail of the place\'s verified location</string>
     <string name="cd_score_threshold">Alert score threshold slider</string>
     <string name="cd_area_radius">Alert area radius slider</string>
     <string name="action_watch">Watch</string>
