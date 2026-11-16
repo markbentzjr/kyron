@@ -1,6 +1,6 @@
 # Kyron National Coverage Matrix
 
-Generated from `tools/coverage/coverage_pipeline.py` on 2026-10-25.
+Generated from `tools/coverage/coverage_pipeline.py` on 2026-11-16.
 
 **Status vocabulary (distinct, do not conflate):**
 - **integrated** — data ships in the app (bundled seed and/or live sync).
@@ -158,14 +158,14 @@ Chicago pack built + validated locally (pass/fail); statewide coverage is county
 
 ## California (CA) — `us-ca`
 
-**Primary tier:** Source verified (no ingestion yet) · **Result model:** SCORE_100_HIGH · **Pack:** none (none)
+**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** SCORE_100_HIGH · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
 
-County-fragmented by design (CalCode). LA County + SF datasets cover a big population share.
+San Francisco pack built + validated locally (0-100 scores); county-fragmented otherwise (CalCode).
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
 | ca-lacounty | Los Angeles County Department of Public Health | Los Angeles County (excl. Pasadena/Long Beach/Vernon) | api | full | full-history | source-verified | 2026-10-13 | Inspections + separate violations dataset (8jyd-4pv9); numeric score + letter grade. |
-| ca-sf | San Francisco Department of Public Health | San Francisco | api | full | some-history | source-verified | 2026-10-13 | Numeric 0-100 score plus dedicated violations dataset (f29f-c3np). |
+| ca-sf | San Francisco Department of Public Health | San Francisco | api | full | some-history | pack-built | 2026-10-13 | Numeric 0-100 score plus dedicated violations dataset (f29f-c3np). Pack BUILT locally 2026-11-16 (6,253 places / 890 inspections — full dataset, one inspection row per violation-bearing inspection). |
 | ca-statewide | California Department of Public Health (Retail Food Program) | Statewide (not verified) | official-link-only | unverified | unverified | official-link-only | — | CalCode makes 60+ county EHDs the publishers; no statewide portal, bulk download, or API (AFDO index lists counties only; CDPH page fetch-blocked on 2026-10-22). |
 
 ## Massachusetts (MA) — `us-ma`
@@ -194,11 +194,11 @@ King County pack built + validated locally (penalty points + rating); statewide 
 
 **Primary tier:** Source verified (no ingestion yet) · **Result model:** SCORE_100_HIGH · **Pack:** none (none)
 
-Statewide, scored, full history — top integration candidate.
+Statewide, scored, full history — top integration candidate; MHD adapter staged but disabled pending district-GUID discovery.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| or-oha | Oregon Health Authority (statewide, county-run inspections) | Statewide | html | full | full-history | source-verified | 2026-10-22 | Restaurant 100-pt scale: priority items deduct 5, priority-foundation 3; < 70 fails. One of the cleanest candidate integrations in the country. |
+| or-oha | Oregon Health Authority (statewide, county-run inspections) | Statewide | html | full | full-history | source-verified | 2026-10-22 | Restaurant 100-pt scale: priority items deduct 5, priority-foundation 3; < 70 fails. One of the cleanest candidate integrations in the country. Generic MHD adapter (harvest/mhd) configured but DISABLED — the statewide path answers [] so a county/district GUID map must be discovered before ingestion (states.py enabled=False). |
 
 ## Wisconsin (WI) — `us-wi`
 
@@ -208,7 +208,7 @@ Dual-vendor state (DATCP + HealthSpace local agencies).
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| wi-datcp | Wisconsin DATCP (state-inspected facilities) | Statewide (state-inspected) | html | full | some-history | source-verified | 2026-10-22 | DATCP publishes directly (fetched 200 OK); ~130 agency-managed local health departments publish separately in HealthSpace. |
+| wi-datcp | Wisconsin DATCP (state-inspected facilities) | Statewide (state-inspected) | html | full | some-history | source-verified | 2026-10-22 | DATCP publishes directly (fetched 200 OK); ~130 agency-managed local health departments publish separately in HealthSpace. Generic MHD adapter (harvest/mhd) validated end-to-end 2026-11-16 — bounded proof pack: 196 places / 202 inspections / 495 violations, 0 unverified; full-history harvest pending. |
 
 ## Oklahoma (OK) — `us-ok`
 
@@ -228,7 +228,7 @@ Single-state agency; numeric score + violations; same platform family as SD/WY/P
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| vt-vdh | Vermont Department of Health — Food & Lodging Program | Statewide | html | full | full-history | source-verified | 2026-10-22 | 'Food Safety 5.5' platform; numeric inspection score (44-item checklist) + critical flags since May 2016. ASP.NET POST needed. |
+| vt-vdh | Vermont Department of Health — Food & Lodging Program | Statewide | html | full | full-history | source-verified | 2026-10-22 | 'Food Safety 5.5' platform; numeric inspection score (44-item checklist) + critical flags since May 2016. ASP.NET POST needed. SFI adapter (harvest/sfi) validated end-to-end 2026-11-16 — bounded proof pack: 20 places / 112 inspections / 231 violations incl. report-PDF extraction; full-history harvest pending. |
 
 ## South Dakota (SD) — `us-sd`
 
@@ -258,7 +258,7 @@ Statewide; reachable but JS-postback heavy.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| ri-ridoh | Rhode Island Department of Health — Center for Food Protection | Statewide | html | full | some-history | source-verified | 2026-10-22 | Official portal (linked from health.ri.gov/food-safety, fetched 200); Tyler-hosted JS/postback app — parsing needs the postback, not plain links. |
+| ri-ridoh | Rhode Island Department of Health — Center for Food Protection | Statewide | html | full | some-history | source-verified | 2026-10-22 | Official portal (linked from health.ri.gov/food-safety, fetched 200); Tyler-hosted JS/postback app — parsing needs the postback, not plain links. DHD adapter (harvest/dhd) validated end-to-end 2026-11-16 — bounded proof: 20 facilities / 51 inspections / 188 violations via paged search + inspectionsData API; full statewide fetch pending (~2k pages). |
 
 ## New Jersey (NJ) — `us-nj`
 
@@ -273,23 +273,23 @@ Fragmented into local agencies; dispositions are the common currency.
 
 ## Nevada (NV) — `us-nv`
 
-**Primary tier:** Source verified (no ingestion yet) · **Result model:** DISPOSITION · **Pack:** none (none)
+**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** PENALTY_LOW · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
 
-SNHD's nightly CSV is best-in-class bulk data.
+SNHD's nightly CSV is best-in-class bulk data; pack covers Clark County (~73% of NV population).
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| nv-snhd | Southern Nevada Health District (Clark County / Las Vegas) | Southern Nevada | bulk-csv | full | full-history | source-verified | 2026-10-22 | Nightly developer CSV download (restaurants.zip + SQL schema; both pages fetched 200) — ~5-day posting lag. Also demerit-style detail; no portal 0-100 number. |
+| nv-snhd | Southern Nevada Health District (Clark County / Las Vegas) | Southern Nevada | bulk-csv | full | full-history | pack-built | 2026-10-22 | Nightly developer CSV download (restaurants.zip + SQL schema; both pages fetched 200) — ~5-day posting lag. Pack BUILT locally 2026-11-16 (19,755 active-permit places / 238,876 inspections / 425,909 violations, 96.8% geocoded): A/B/C-grade text carried natively with demerit points as the score (lower is better; closures land ~44+). Lat/lng columns are swapped at source — adapter un-swaps; legacy stanford-file violations resolve via query_insp_violations codebook; closed (record_status 02/04/05) permits and their ~95k inspections excluded by convention. |
 
 ## Texas (TX) — `us-tx`
 
-**Primary tier:** Source verified (no ingestion yet) · **Result model:** SCORE_100_HIGH · **Pack:** none (none)
+**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** SCORE_100_HIGH · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
 
-Big-city open-data APIs (Austin verified); no statewide results search.
+Austin pack built + validated locally (0-100 scores); no statewide results search.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| tx-austin | Austin Public Health | Austin | api | partial | full-history | source-verified | 2026-10-22 | Socrata API (fetched 200 JSON): numeric 0-100 with color bands. |
+| tx-austin | Austin Public Health | Austin | api | partial | full-history | pack-built | 2026-10-22 | Socrata API (fetched 200 JSON): numeric 0-100 with color bands. Pack BUILT locally 2026-11-16 (6,448 places — full dataset). |
 | tx-dshs | Texas DSHS Retail Food Safety Unit | Where no local program exists | official-link-only | unverified | unverified | official-link-only | 2026-10-22 | DSHS (fetched 200) publishes no public results search — only an ArcGIS jurisdiction map and open-records requests. |
 
 ## Utah (UT) — `us-ut`
@@ -315,13 +315,13 @@ State portal covers groceries only; restaurants are local agencies.
 
 ## Maryland (MD) — `us-md`
 
-**Primary tier:** Source verified (no ingestion yet) · **Result model:** VIOLATIONS_ONLY · **Pack:** none (none)
+**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** VIOLATIONS_ONLY · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
 
-County APIs verified (Montgomery); statewide portal at present unreachable.
+Montgomery County pack built + validated locally (compliance flags); statewide portal at present unreachable.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| md-montgomery | Montgomery County | Montgomery County | api | partial | some-history | source-verified | 2026-10-22 | Socrata (fetched 200 with data): per-item In/Out of Compliance rows. |
+| md-montgomery | Montgomery County | Montgomery County | api | partial | some-history | pack-built | 2026-10-22 | Socrata (fetched 200 with data): per-item In/Out of Compliance rows. Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — full dataset). |
 | md-statewide | Maryland DHMH Office of Food Protection (24 LHDs) | Statewide (not verified) | official-link-only | unverified | unverified | official-link-only | — | Statewide search vsi.maryland.gov was unreachable on 2026-10-22 (3 attempts); many counties publish by records request. |
 
 ## Missouri (MO) — `us-mo`
@@ -425,7 +425,7 @@ Shared state platform + Denver's own program; risk-index points, no 0–100 scor
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| co-cdphe | Colorado CDPHE + delegated counties (shared platform) | Statewide (some counties opt out) | html | full | some-history | source-verified | 2026-10-22 | Fetched 200 OK (linked from CDPHE page; CDPHE plain fetch is 403). Results are Pass / Re-Inspection Required / Closed with risk-index points (Pass 0–49; Re-inspect 50–109; Closed 110+) — NOT a 0–100 score or letter grade. |
+| co-cdphe | Colorado CDPHE + delegated counties (shared platform) | Statewide (some counties opt out) | html | full | some-history | source-verified | 2026-10-22 | Fetched 200 OK (linked from CDPHE page; CDPHE plain fetch is 403). Results are Pass / Re-Inspection Required / Closed with risk-index points (Pass 0–49; Re-inspect 50–109; Closed 110+) — NOT a 0–100 score or letter grade. Generic MHD adapter (harvest/mhd) validated end-to-end 2026-11-16 — bounded proof pack: 151 places / 518 violations with native result text; full-history harvest pending. |
 | co-denver | Denver Department of Public Health & Environment | City & County of Denver | html | full | some-history | source-verified | 2026-10-22 | Fetched 200 OK. Inspections after 9/6/24 moved to Accela (aca-prod.accela.com/DENVER); Denver self-inspects. |
 
 ## Alaska (AK) — `us-ak`
@@ -546,13 +546,13 @@ Registered as a jurisdiction, explicitly NOT one of the 50 states.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| dc-dchealth | DC Health — Food Safety & Hygiene Inspection Services Division | District of Columbia (all inspections state-run) | html | full | full-history | source-verified | 2026-10-22 | DC-run healthinspections.us instance fetched 200 OK: name/inspection-type search, FDA Food Code citation-level detail, history stated to cover 2007→current. Help page dchealth.dc.gov/service/understanding-food-establishment-inspections confirmed 200. |
+| dc-dchealth | DC Health — Food Safety & Hygiene Inspection Services Division | District of Columbia (all inspections state-run) | html | full | full-history | source-verified | 2026-10-22 | DC-run healthinspections.us instance fetched 200 OK: name/inspection-type search, FDA Food Code citation-level detail, history stated to cover 2007→current. Help page dchealth.dc.gov/service/understanding-food-establishment-inspections confirmed 200. DHD adapter (harvest/dhd) configured but DISABLED — tried /dc, /stateofdc and /districtofcolumbia deployments without finding the API root; the verified entry point is dc.healthinspections.us/?a=Inspections. |
 
 ## Tier tally (50 states, each assigned once)
 
 - Integrated (live in app): **1**
-- Pack built/declared — NOT verified downloadable: **8**
-- Source verified (no ingestion yet): **29**
+- Pack built/declared — NOT verified downloadable: **12**
+- Source verified (no ingestion yet): **25**
 - Official-link-only / blocked: **12**
 - **States total: 50** (must equal 50)
 

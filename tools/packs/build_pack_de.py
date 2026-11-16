@@ -39,11 +39,8 @@ Usage (same CLI shape as build_pack.py):
       --out <...>/harvest/de_socrata/out
 """
 
-import gzip
-import hashlib
 import json
 import os
-import sqlite3
 import sys
 from datetime import datetime, timezone
 
@@ -160,95 +157,18 @@ def main() -> int:
 
     generated_at = (src_manifest.get("generated_at")
                     or datetime.now(timezone.utc).isoformat())
-    day = generated_at[:10]
-    version = f"{day}.1" if not args.limit else f"{day}.dev{args.limit}"
-
-    out_dir = args.out or os.path.join(os.path.dirname(args.source),
-                                       "out")
-    os.makedirs(out_dir, exist_ok=True)
-    db_name = f"{args.region}-{version}.db"
-    db_path = os.path.join(out_dir, db_name)
-    if os.path.exists(db_path):
-        os.remove(db_path)
-
-    con = sqlite3.connect(db_path)
-    cur = con.cursor()
-    cur.execute("CREATE TABLE pack_meta(k TEXT PRIMARY KEY, v TEXT)")
-    cur.execute(bp.PLACES_DDL)
-    cur.execute(bp.INSPECTIONS_DDL)
-    meta = {
-        "region_id": args.region,
-        "state": args.state,
-        "dataset_version": version,
-        "generated_at": generated_at,
-        "place_count": str(len(places)),
-        "schema_version": str(SCHEMA_VERSION),
-        "score_model": "VIOLATIONS_ONLY",
-        "source": ("Delaware Division of Public Health — Food "
-                   "Establishment Inspection Violations, Socrata "
-                   "dataset 384s-wygj (data.delaware.gov)"),
-    }
-    cur.executemany("INSERT INTO pack_meta VALUES (?,?)",
-                    list(meta.items()))
-    cols = ("id,name,name_lc,address,city,zip,county,score,date,date_key,"
-            "source,lat,lng,geo_status,geo_acc,geo_prov,geo_match,"
-            "detail_url,state,jurisdiction,region_id,result_text")
-    ph = ",".join("?" * 22)
-    for p in places:
-        cur.execute(f"INSERT INTO places ({cols}) VALUES ({ph})", (
-            p["id"], p["name"], p["name"].lower(), p["address"],
-            p["city"], p["zip"], p["county"], p["score"], p["date"],
-            bp.date_key(p["date"]), p["source"], p["lat"], p["lng"],
-            p["geo_status"], p["geo_acc"], p["geo_prov"], p["geo_match"],
-            p["detail_url"], p["state"], p["jurisdiction"], p["region_id"],
-            p["result_text"],
-        ))
-        for idx, insp in enumerate(p["inspections"]):
-            cur.execute(
-                "INSERT INTO inspections"
-                " (place_id,idx,score,date,type,violations_json,result_text)"
-                " VALUES (?,?,?,?,?,?,?)",
-                (p["id"], idx, insp["score"], insp["date"], insp["type"],
-                 json.dumps(insp["violations"], ensure_ascii=False),
-                 insp["result_text"]),
-            )
-    con.commit()
-    con.close()
-
-    gz_name = db_name + ".gz"
-    gz_path = os.path.join(out_dir, gz_name)
-    with open(db_path, "rb") as f_in, gzip.GzipFile(
-            filename="", mode="wb", fileobj=open(gz_path, "wb"), mtime=0
-            ) as gz:
-        gz.write(f_in.read())
-    os.remove(db_path)
-
-    raw = open(gz_path, "rb").read()
-    manifest = {
-        "regionId": args.region,
-        "displayName": args.name,
-        "state": args.state,
-        "status": "available",
-        "datasetVersion": version,
-        "generatedAt": generated_at,
-        "placeCount": len(places),
-        "schemaVersion": SCHEMA_VERSION,
-        "minAppVersion": "2.0",
-        "full": {"file": gz_name, "bytes": len(raw),
-                 "sha256": hashlib.sha256(raw).hexdigest()},
-        "delta": None,
-        "jurisdictions": [{"jurisdictionId": JURISDICTION_ID,
-                           "name": "Delaware Division of Public Health "
-                                   "(statewide)"}],
-    }
-    manifest_path = os.path.join(out_dir,
-                                 f"{args.region}.manifest.json")
-    with open(manifest_path, "w") as f:
-        json.dump(manifest, f, indent=1)
-
-    print(f"pack: {gz_path} ({len(raw):,} bytes, "
-          f"sha256 {manifest['full']['sha256'][:16]}…)")
-    print(f"manifest: {manifest_path}")
+    out_dir = args.out or os.path.join(os.path.dirname(args.source), "out")
+    bp.write_pack(
+        region=args.region, state=args.state, name=args.name,
+        model="VIOLATIONS_ONLY",
+        source_label=("Delaware Division of Public Health — Food "
+                      "Establishment Inspection Violations, Socrata "
+                      "dataset 384s-wygj (data.delaware.gov)"),
+        places=places, generated_at=generated_at, out_dir=out_dir,
+        limit=args.limit,
+        jurisdictions=[{"jurisdictionId": JURISDICTION_ID,
+                        "name": "Delaware Division of Public Health "
+                                "(statewide)"}])
     print(f"places={len(places):,} inspections={n_insp:,} "
           f"violations={n_viol:,} scores_invented=0 "
           f"score_model=VIOLATIONS_ONLY (nativeResult empty everywhere)")

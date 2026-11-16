@@ -158,6 +158,13 @@ jobs:
               python3 harvest/dhd/dhd_fetch.py ri
               python3 harvest/dhd/dhd_build.py ri
               python3 tools/packs/build_pack_dhd.py ri
+          - st: nv
+            region: us-nv
+            name: Southern Nevada (SNHD)
+            packs: "harvest/snhd/out/snhd/us-nv-*.db.gz harvest/snhd/out/snhd/us-nv.manifest.json"
+            run: |
+              python3 harvest/snhd/snhd_harvest.py
+              python3 tools/packs/build_pack_snhd.py
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:

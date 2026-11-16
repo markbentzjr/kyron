@@ -77,6 +77,98 @@ from datetime import datetime, timezone
 
 SCHEMA_VERSION = 2
 
+PLACE_COLS = ("id,name,name_lc,address,city,zip,county,score,date,date_key,"
+              "source,lat,lng,geo_status,geo_acc,geo_prov,geo_match,"
+              "detail_url,state,jurisdiction,region_id,result_text")
+
+
+def pack_place(raw, **fields):
+    """Canonical place row pre-filled with the 13 fields every family
+    emits identically from the compact normalized record; `fields` adds
+    score/date/source/state/jurisdiction/region_id/result_text/
+    inspections."""
+    p = {"id": raw["id"], "name": raw["n"], "address": raw["a"],
+         "city": raw["c"], "zip": raw["z"], "county": raw["ct"],
+         "lat": raw["lat"], "lng": raw["lng"], "detail_url": raw["du"],
+         "geo_status": raw["gs"], "geo_acc": raw["ga"],
+         "geo_prov": raw["gp"], "geo_match": raw["gm"],
+         "result_text": raw.get("disp") or ""}
+    p.update(fields)
+    return p
+
+
+def write_pack(*, region, state, name, model, source_label, places,
+               generated_at, out_dir, jurisdictions, limit=0,
+               attribution=None):
+    """Shared write tail of every pack builder: SQLite catalog -> .db.gz
+    -> .manifest.json. `version` derives from generated_at under the
+    existing convention ("<day>.1", or "<day>.dev<limit>" for a bounded
+    proof build). Returns (gz_path, manifest)."""
+    version = f"{generated_at[:10]}.1" if not limit else \
+        f"{generated_at[:10]}.dev{limit}"
+    os.makedirs(out_dir, exist_ok=True)
+    db_name = f"{region}-{version}.db"
+    db_path = os.path.join(out_dir, db_name)
+    if os.path.exists(db_path):
+        os.remove(db_path)
+
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+    cur.execute("CREATE TABLE pack_meta(k TEXT PRIMARY KEY, v TEXT)")
+    cur.execute(PLACES_DDL)
+    cur.execute(INSPECTIONS_DDL)
+    meta = {"region_id": region, "state": state,
+            "dataset_version": version, "generated_at": generated_at,
+            "place_count": str(len(places)),
+            "schema_version": str(SCHEMA_VERSION), "score_model": model,
+            "source": source_label}
+    cur.executemany("INSERT INTO pack_meta VALUES (?,?)", list(meta.items()))
+    ph = ",".join("?" * 22)
+    for p in places:
+        cur.execute(f"INSERT INTO places ({PLACE_COLS}) VALUES ({ph})", (
+            p["id"], p["name"], p["name"].lower(), p["address"], p["city"],
+            p["zip"], p["county"], p["score"], p["date"],
+            date_key(p["date"]), p["source"], p["lat"], p["lng"],
+            p["geo_status"], p["geo_acc"], p["geo_prov"], p["geo_match"],
+            p["detail_url"], p["state"], p["jurisdiction"], p["region_id"],
+            p["result_text"]))
+        for idx, insp in enumerate(p["inspections"]):
+            cur.execute(
+                "INSERT INTO inspections"
+                " (place_id,idx,score,date,type,violations_json,result_text)"
+                " VALUES (?,?,?,?,?,?,?)",
+                (p["id"], idx, insp["score"], insp["date"], insp["type"],
+                 json.dumps(insp["violations"], ensure_ascii=False),
+                 insp["result_text"]))
+    con.commit()
+    con.close()
+
+    gz_name = db_name + ".gz"
+    gz_path = os.path.join(out_dir, gz_name)
+    with open(db_path, "rb") as f_in, open(gz_path, "wb") as fo, \
+            gzip.GzipFile(filename="", mode="wb", fileobj=fo,
+                          mtime=0) as gz:
+        gz.write(f_in.read())
+    os.remove(db_path)
+
+    raw = open(gz_path, "rb").read()
+    manifest = {
+        "regionId": region, "displayName": name, "state": state,
+        "status": "available", "datasetVersion": version,
+        "generatedAt": generated_at, "placeCount": len(places),
+        "schemaVersion": SCHEMA_VERSION, "minAppVersion": "2.0",
+        "full": {"file": gz_name, "bytes": len(raw),
+                 "sha256": hashlib.sha256(raw).hexdigest()},
+        "delta": None, "jurisdictions": jurisdictions}
+    if attribution is not None:
+        manifest["attribution"] = attribution
+    manifest_path = os.path.join(out_dir, f"{region}.manifest.json")
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=1)
+    print(f"pack {gz_path} {len(raw):,} bytes places={len(places):,} "
+          f"sha256={manifest['full']['sha256'][:16]}")
+    return gz_path, manifest
+
 PLACES_DDL = """CREATE TABLE places(
     id TEXT PRIMARY KEY, name TEXT NOT NULL, name_lc TEXT NOT NULL,
     address TEXT NOT NULL DEFAULT '', city TEXT NOT NULL DEFAULT '',
@@ -551,84 +643,16 @@ def main() -> int:
     n_disp = sum(1 for p in places if p["result_text"])
 
     generated_at = src_manifest.get("generated_at") or datetime.now(timezone.utc).isoformat()
-    day = generated_at[:10]
-    version = f"{day}.1" if not args.limit else f"{day}.dev{args.limit}"
-
     out_dir = args.out or os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "out",
         args.region + ("-subset" if args.limit else ""),
     )
-    os.makedirs(out_dir, exist_ok=True)
-    db_name = f"{args.region}-{version}.db"
-    db_path = os.path.join(out_dir, db_name)
-    if os.path.exists(db_path):
-        os.remove(db_path)
-
-    con = sqlite3.connect(db_path)
-    cur = con.cursor()
-    cur.execute("CREATE TABLE pack_meta(k TEXT PRIMARY KEY, v TEXT)")
-    cur.execute(PLACES_DDL)
-    cur.execute(INSPECTIONS_DDL)
-    meta = {
-        "region_id": args.region,
-        "state": args.state,
-        "dataset_version": version,
-        "generated_at": generated_at,
-        "place_count": str(len(places)),
-        "schema_version": str(SCHEMA_VERSION),
-        "score_model": SCORE_MODELS[args.region],
-        "source": src_manifest.get("source", SOURCE_DEFAULTS[args.region]),
-    }
-    cur.executemany("INSERT INTO pack_meta VALUES (?,?)", list(meta.items()))
-    cols = ("id,name,name_lc,address,city,zip,county,score,date,date_key,source,"
-            "lat,lng,geo_status,geo_acc,geo_prov,geo_match,detail_url,"
-            "state,jurisdiction,region_id,result_text")
-    ph = ",".join("?" * 22)
-    for p in places:
-        cur.execute(f"INSERT INTO places ({cols}) VALUES ({ph})", (
-            p["id"], p["name"], p["name"].lower(), p["address"], p["city"], p["zip"],
-            p["county"], p["score"], p["date"], date_key(p["date"]), p["source"],
-            p["lat"], p["lng"], p["geo_status"], p["geo_acc"], p["geo_prov"],
-            p["geo_match"], p["detail_url"], p["state"], p["jurisdiction"],
-            p["region_id"], p["result_text"],
-        ))
-        for idx, insp in enumerate(p["inspections"]):
-            cur.execute(
-                "INSERT INTO inspections (place_id,idx,score,date,type,violations_json,result_text)"
-                " VALUES (?,?,?,?,?,?,?)",
-                (p["id"], idx, insp["score"], insp["date"], insp["type"],
-                 json.dumps(insp["violations"]), insp["result_text"]),
-            )
-    con.commit()
-    con.close()
-
-    gz_name = db_name + ".gz"
-    gz_path = os.path.join(out_dir, gz_name)
-    with open(db_path, "rb") as f_in, gzip.GzipFile(filename="", mode="wb", fileobj=open(gz_path, "wb"), mtime=0) as gz:
-        gz.write(f_in.read())
-    os.remove(db_path)
-
-    raw = open(gz_path, "rb").read()
-    manifest = {
-        "regionId": args.region,
-        "displayName": args.name,
-        "state": args.state,
-        "status": "available",
-        "datasetVersion": version,
-        "generatedAt": generated_at,
-        "placeCount": len(places),
-        "schemaVersion": SCHEMA_VERSION,
-        "minAppVersion": "2.0",
-        "full": {"file": gz_name, "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()},
-        "delta": None,
-        "jurisdictions": JURISDICTIONS[args.region],
-    }
-    manifest_path = os.path.join(out_dir, f"{args.region}.manifest.json")
-    with open(manifest_path, "w") as f:
-        json.dump(manifest, f, indent=1)
-
-    print(f"pack: {gz_path} ({len(raw):,} bytes, sha256 {manifest['full']['sha256'][:16]}…)")
-    print(f"manifest: {manifest_path}")
+    write_pack(region=args.region, state=args.state, name=args.name,
+               model=SCORE_MODELS[args.region],
+               source_label=src_manifest.get(
+                   "source", SOURCE_DEFAULTS[args.region]),
+               places=places, generated_at=generated_at, out_dir=out_dir,
+               jurisdictions=JURISDICTIONS[args.region], limit=args.limit)
     print(f"places={len(places):,} with_inspections={n_with:,} inspections={n_insp:,} "
           f"with_disposition={n_disp:,} scores_invented=0")
     return 0

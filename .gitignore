@@ -35,6 +35,10 @@ harvest/sfi/work/
 harvest/dhd/raw/
 harvest/dhd/out/
 harvest/dhd/work/
+harvest/snhd/raw/
+harvest/snhd/out/
+harvest/_release/
+_verify/
 dist/
 /kyron-keys/
 .kotlin/
