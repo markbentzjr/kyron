@@ -363,11 +363,11 @@ def main():
         1 for p in out_places for i in p["insp"] if i["s"] is not None)
 
     os.makedirs(OUT, exist_ok=True)
-    with open(os.path.join(OUT, "places_sc.json"), "w") as fh:
+    with open(os.path.join(OUT, "places_sc.json"), "w", encoding="utf-8") as fh:
         json.dump(out_places, fh, ensure_ascii=False, indent=1)
-    with open(os.path.join(OUT, "exclusions.json"), "w") as fh:
+    with open(os.path.join(OUT, "exclusions.json"), "w", encoding="utf-8") as fh:
         json.dump(exclusions, fh, ensure_ascii=False, indent=1)
-    with open(os.path.join(OUT, "qa_report.json"), "w") as fh:
+    with open(os.path.join(OUT, "qa_report.json"), "w", encoding="utf-8") as fh:
         json.dump(qa, fh, ensure_ascii=False, indent=1)
     manifest = {
         "region": "us-sc",
@@ -408,7 +408,7 @@ def main():
             "counties_with_places": qa["counties_with_places"],
         },
     }
-    with open(os.path.join(OUT, "manifest.json"), "w") as fh:
+    with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, ensure_ascii=False, indent=1)
     print(json.dumps(qa, indent=1))
 

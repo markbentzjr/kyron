@@ -81,21 +81,24 @@ def region_id(code):
 # region descriptor. Bounds mirrored from app Regions.kt STATE_BOUNDS.
 _CENTERS = {
     "AL": (32.58, -86.68), "AK": (61.28, -154.99), "AZ": (34.17, -111.93),
-    "AR": (34.75, -92.13), "CA": (37.27, -119.27), "CO": (39.00, -105.55),
+    # City-county packs anchor on the covered CITY, not the state centroid:
+    # CA->San Francisco, TX->Austin, MD->Montgomery Co, NY->NYC, IL->Chicago,
+    # WA->King Co (Seattle), NV->SNHD Clark County (Las Vegas).
+    "AR": (34.75, -92.13), "CA": (37.77, -122.42), "CO": (39.00, -105.55),
     "CT": (41.52, -72.76), "DE": (39.15, -75.42), "FL": (27.70, -83.72),
     "GA": (32.68, -83.23), "HI": (20.58, -157.53), "ID": (45.50, -114.14),
-    "IL": (39.74, -87.52), "IN": (39.77, -86.46), "IA": (41.94, -93.83),
+    "IL": (41.88, -87.63), "IN": (39.77, -86.46), "IA": (41.94, -93.83),
     "KS": (38.50, -98.32), "KY": (37.90, -85.77), "LA": (30.98, -91.43),
-    "ME": (45.26, -69.02), "MD": (38.81, -77.27), "MA": (41.99, -71.43),
+    "ME": (45.26, -69.02), "MD": (39.08, -77.15), "MA": (41.99, -71.43),
     "MI": (45.00, -86.27), "MN": (46.44, -93.41), "MS": (32.38, -89.88),
     "MO": (38.31, -92.70), "MT": (46.68, -110.05), "NE": (41.50, -98.68),
-    "NV": (38.50, -117.03), "NH": (44.01, -71.64), "NJ": (40.15, -74.73),
-    "NM": (34.17, -106.03), "NY": (42.76, -75.81), "NC": (35.22, -79.19),
+    "NV": (36.17, -115.14), "NH": (44.01, -71.64), "NJ": (40.15, -74.73),
+    "NM": (34.17, -106.03), "NY": (40.71, -74.01), "NC": (35.22, -79.19),
     "ND": (47.47, -100.57), "OH": (40.19, -82.67), "OK": (35.31, -98.72),
     "OR": (44.14, -120.52), "PA": (41.00, -77.61), "RI": (41.67, -71.49),
     "SC": (33.63, -80.96), "SD": (44.22, -100.26), "TN": (35.83, -85.98),
-    "TX": (31.17, -100.08), "UT": (39.50, -111.55), "VT": (43.87, -72.45),
-    "VA": (38.01, -79.48), "WA": (47.27, -120.83), "WV": (38.92, -80.18),
+    "TX": (30.27, -97.74), "UT": (39.50, -111.55), "VT": (43.87, -72.45),
+    "VA": (38.01, -79.48), "WA": (47.55, -122.30), "WV": (38.92, -80.18),
     "WI": (44.79, -89.85), "WY": (43.00, -107.56),
     "DC": (38.90, -77.03),
 }
@@ -213,11 +216,10 @@ def registry():
                   "and app-verified (70,051 places)."),
     ], pack="published",
         manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-fl.manifest.json",
-        host="unreachable-404", host_checked="2026-10-22",
-        availability="declared-only",
-        summary="Pack built and registered in-app; the PUBLICATION is declared but "
-                "the pack host returned HTTP 404 on 2026-10-22 — the download is NOT "
-                "verified available until it is republished (declared-only).")
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
+        summary="Pack published to the data-packs release; artifact downloaded "
+                "and sha256-verified 2026-11-16 (70,033 places).")
 
     # ------------------------------------------------------------ GEORGIA
     add("GA", "Georgia", "SCORE_100_HIGH", [
@@ -248,10 +250,13 @@ def registry():
             notes="Statewide scores with per-violation observation text (HealthSpace "
                   "platform). Place dataset built (122,091 detail pages); pack staged, "
                   "not yet published."),
-    ], pack="built",
-        availability="staged-local",
+    ], pack="published",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-tn.manifest.json",
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
         summary="Ingestion verified (138 MB place dataset, QA crosscheck pass); "
-                "pack staged locally — blocked on publishing infrastructure.")
+                "pack published to the data-packs release, artifact sha256-verified "
+                "2026-11-16 (33,262 places).")
 
     # ------------------------------------------------------- SOUTH CAROLINA
     add("SC", "South Carolina", "SCORE_100_HIGH", [
@@ -263,10 +268,12 @@ def registry():
             refresh="Harvest pipeline harvest/sc",
             notes="Points-based (A >87); full inspection report as PDF. 35,862 places "
                   "harvested; pack staged, not yet published."),
-    ], pack="built",
-        availability="staged-local",
-        summary="Ingestion verified (35,862 places, QA all-pass); pack staged "
-                "locally — blocked on publishing infrastructure.")
+    ], pack="published",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-sc.manifest.json",
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
+        summary="Ingestion verified (35,862 places, QA all-pass); pack published "
+                "to the data-packs release, artifact sha256-verified 2026-11-16.")
 
     # ------------------------------------------------------- NORTH CAROLINA
     add("NC", "North Carolina", "SCORE_100_HIGH", [
@@ -389,8 +396,12 @@ def registry():
                   "CalCode makes 60+ county EHDs the publishers; no statewide portal, "
                   "bulk download, or API (AFDO index lists counties only; CDPH page "
                   "fetch-blocked on 2026-10-22)."),
-    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
-        summary="San Francisco pack built + validated locally (0-100 scores); "
+    ], pack="published",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-ca.manifest.json",
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
+        summary="San Francisco pack published to the data-packs release, artifact "
+                "sha256-verified 2026-11-16 (6,253 places, 0-100 scores); "
                 "county-fragmented otherwise (CalCode).")
 
     add("MA", "Massachusetts", "PASS_FAIL", [
@@ -546,9 +557,13 @@ def registry():
                   "permits and their ~95k inspections excluded by convention.",
             restrictions="Southern Nevada only; Washoe County (Reno) and rural DPBH "
                          "counties are separate."),
-    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
-       summary="SNHD's nightly CSV is best-in-class bulk data; pack covers Clark "
-               "County (~73% of NV population).")
+    ], pack="published",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-nv.manifest.json",
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
+        summary="SNHD's nightly CSV is best-in-class bulk data; pack published to "
+                "the data-packs release, artifact sha256-verified 2026-11-16 "
+                "(19,755 places, Clark County ~73% of NV population).")
 
     add("TX", "Texas", "SCORE_100_HIGH", [
         src("tx-austin", "Austin Public Health", "Austin", "api",
@@ -566,9 +581,13 @@ def registry():
                   "ArcGIS jurisdiction map and open-records requests.",
             restrictions="DSHS inspects only where no local program exists; Houston/Dallas/"
                          "San Antonio/El Paso publish their own (Dallas/SOCRATA unverified-cited)."),
-    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
-        summary="Austin pack built + validated locally (0-100 scores); no statewide "
-                "results search.")
+    ], pack="published",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-tx.manifest.json",
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
+        summary="Austin pack published to the data-packs release, artifact "
+                "sha256-verified 2026-11-16 (6,448 places, 0-100 scores); "
+                "no statewide results search.")
 
     add("UT", "Utah", "VIOLATIONS_ONLY", [
         src("ut-slco", "Salt Lake County Health Department", "Salt Lake County", "html",
@@ -602,14 +621,22 @@ def registry():
             refresh="Harvest pipeline harvest/socrata_cities (montgomery)",
             notes="Socrata (fetched 200 with data): per-item In/Out of Compliance rows. "
                   "Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — "
-                  "full dataset)."),
+                  "full dataset). Data caveat: ~32 place names carry a literal "
+                  "U+FFFD where the county's own import mangled 'é' ('CAF\ufffd') — "
+                  "source-side corruption in older rows, unrecoverable (the "
+                  "'organization' field is the legal entity, not the trade name); "
+                  "shipped verbatim."),
         link_only("md-statewide", "Maryland DHMH Office of Food Protection (24 LHDs)",
                   "https://health.maryland.gov/phpa/pages/ofp.aspx",
                   "Statewide search vsi.maryland.gov was unreachable on 2026-10-22 "
                   "(3 attempts); many counties publish by records request."),
-    ], pack="built", availability="staged-local", artifact_verified="2026-11-16",
-        summary="Montgomery County pack built + validated locally (compliance flags); "
-                "statewide portal at present unreachable.")
+    ], pack="published",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-md.manifest.json",
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
+        summary="Montgomery County pack published to the data-packs release, "
+                "artifact sha256-verified 2026-11-16 (4,160 places, compliance "
+                "flags); statewide portal at present unreachable.")
 
     add("MO", "Missouri", "DISPOSITION", [
         src("mo-stl", "City of St. Louis Department of Health", "City of St. Louis", "html",
@@ -781,12 +808,13 @@ def registry():
                   "(3,731 places / 9,202 inspections / 32,570 violations; sha256 "
                   "536e54a6…92835); staged, NOT published. Violations-ONLY extract: "
                   "zero-violation establishments are absent from the source dataset."),
-    ], pack="built",
-        availability="staged-local",
-        artifact_verified="2026-10-22",
-        summary="Pack built + validated locally (datasetVersion 2026-10-23.1; window "
-                "2024-10-14..2026-12-03); staged — blocked on publishing infrastructure. "
-                "No scores exist in this data (violations-only model).")
+    ], pack="published",
+        manifest="https://github.com/EMC-MB/kyron/releases/download/data-packs/us-de.manifest.json",
+        host="reachable", host_checked="2026-11-16",
+        availability="downloadable-verified", artifact_verified="2026-11-16",
+        summary="Pack published to the data-packs release, artifact sha256-verified "
+                "2026-11-16 (3,740 places, datasetVersion 2026-11-16.1). "
+                "Violations-only model — no scores exist in this data.")
 
     add("ID", "Idaho", "VIOLATIONS_ONLY", [
         src("id-dhw", "Idaho DHW + 7 Public Health Districts", "Statewide via 7 districts", "official-link-only",

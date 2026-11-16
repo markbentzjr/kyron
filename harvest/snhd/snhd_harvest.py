@@ -32,11 +32,14 @@ import hashlib
 import io
 import json
 import os
-import urllib.request
+import sys
 import zipfile
 from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(HERE))
+import common  # noqa: E402
+
 RAW = os.path.join(HERE, "raw")
 OUT = os.path.join(HERE, "out", "snhd")
 ZIP_URL = ("https://www.southernnevadahealthdistrict.org"
@@ -44,8 +47,7 @@ ZIP_URL = ("https://www.southernnevadahealthdistrict.org"
 SEARCH_URL = ("https://www.southernnevadahealthdistrict.org"
               "/permits-and-regulations/restaurant-inspections/"
               "restaurant-inspection-search/")
-UA = "KyronHarvest/1.0 (public data; github.com/markbentzjr/kyron)"
-NO_SCORE = -1
+NO_SCORE = common.NO_SCORE
 
 # Nevada bounds sanity: lat 35..42, lng -120..-110.
 def resolve_coords(lat_txt, lng_txt):
@@ -67,7 +69,10 @@ def resolve_coords(lat_txt, lng_txt):
 
 
 def csv_rows(z, name):
-    f = io.TextIOWrapper(z.open(name), encoding="utf-8", errors="replace")
+    # The dump is a Windows-era MySQL export: names carry cp1252 bytes
+    # (0xC9 = É in 'CAFÉ', 0x92 = ' in 'DOTTY’S'). A utf-8 decode turns
+    # every one into U+FFFD (69 names destroyed on 2026-11-16 run).
+    f = io.TextIOWrapper(z.open(name), encoding="cp1252", errors="replace")
     return list(csv.reader(f, delimiter=";"))
 
 
@@ -209,40 +214,14 @@ def normalize(z, log):
     return out, excl
 
 
-def validate(places):
-    errs = []
-    ids = set()
-    for p in places:
-        if p["id"] in ids:
-            errs.append(f"duplicate id {p['id']}")
-        ids.add(p["id"])
-        if not p["n"]:
-            errs.append(f"{p['id']}: empty name")
-        if (p["lat"] is None) != (p["gs"] != "ACCEPTED"):
-            errs.append(f"{p['id']}: geo/provenance mismatch")
-        for i in p["insp"]:
-            if i["s"] != -1 and not (0 <= i["s"] <= 300):
-                errs.append(f"{p['id']}: demerits out of range {i['s']}")
-            if not i["d"]:
-                errs.append(f"{p['id']}: inspection without date")
-    return {"places": len(places),
-            "inspections": sum(len(p["insp"]) for p in places),
-            "violations": sum(len(i["v"]) for p in places for i in p["insp"]),
-            "with_coords": sum(p["lat"] is not None for p in places),
-            "errors": errs[:50], "error_count": len(errs)}
-
-
 def main():
     os.makedirs(RAW, exist_ok=True)
-    os.makedirs(OUT, exist_ok=True)
     t0 = datetime.datetime.now(datetime.timezone.utc)
 
-    zpath = os.path.join(RAW, "restaurants.zip")
-    req = urllib.request.Request(ZIP_URL, headers={"User-Agent": UA})
-    body = urllib.request.urlopen(req, timeout=300).read()
-    with open(zpath, "wb") as f:
+    body = common.fetch(ZIP_URL)
+    with open(os.path.join(RAW, "restaurants.zip"), "wb") as f:
         f.write(body)
-    sha = hashlib.sha256(body).hexdigest()
+    sha = common.sha256(body)
     print(f"zip {len(body):,} bytes sha256={sha[:16]}")
 
     z = zipfile.ZipFile(io.BytesIO(body))
@@ -250,19 +229,17 @@ def main():
            "sha256": sha, "members": {n: z.getinfo(n).file_size
                                       for n in z.namelist()}}
     places, excl = normalize(z, log)
-    rep = validate(places)
+    rep = common.validate_places(places)
     rep["exclusions"] = dict(excl)
-    for name, obj in (
-            ("places.json", places),
-            ("fetch_log.json", log),
-            ("validate_report.json", rep),
-            ("exclusions.json", dict(excl)),
-            ("manifest.json",
-             {"generated_at": t0.isoformat(), "source": "snhd",
-              "dataset": "restaurants.zip",
-              "dataset_version": t0.date().isoformat() + ".1"})):
-        with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
-            json.dump(obj, f, ensure_ascii=False)
+    common.emit(
+        OUT,
+        places=places,
+        fetch_log=log,
+        validate_report=rep,
+        exclusions=dict(excl),
+        manifest={"generated_at": t0.isoformat(), "source": "snhd",
+                  "dataset": "restaurants.zip",
+                  "dataset_version": t0.date().isoformat() + ".1"})
     print(json.dumps({k: v for k, v in rep.items() if k != "errors"}))
     return 1 if rep["error_count"] else 0
 

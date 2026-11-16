@@ -33,10 +33,10 @@ def main():
         shutil.copyfile(OLD_SEED, backup)
         print(f"original seed preserved -> {backup}")
 
-    places = json.load(open(backup))
-    adjudicated = json.load(open(os.path.join(OUT, "adjudicated.json")))
-    addresses = {a["address_id"]: a for a in json.load(open(os.path.join(OUT, "addresses.json")))}
-    place_map = json.load(open(os.path.join(OUT, "place_address.json")))
+    places = json.load(open(backup, encoding="utf-8"))
+    adjudicated = json.load(open(os.path.join(OUT, "adjudicated.json"), encoding="utf-8"))
+    addresses = {a["address_id"]: a for a in json.load(open(os.path.join(OUT, "addresses.json"), encoding="utf-8"))}
+    place_map = json.load(open(os.path.join(OUT, "place_address.json"), encoding="utf-8"))
 
     stats = Counter()
     by_source = {}
@@ -63,7 +63,7 @@ def main():
             by_source[src]["unresolved"] += 1
         by_source[src]["total"] += 1
 
-    json.dump(places, open(NEW_SEED, "w"), separators=(",", ":"))
+    json.dump(places, open(NEW_SEED, "w", encoding="utf-8"), separators=(",", ":"))
     print(f"new seed -> {NEW_SEED} ({os.path.getsize(NEW_SEED)} bytes)")
 
     # Residual queue for the Geocodio free-tier pass: every address that is
@@ -80,7 +80,7 @@ def main():
                 "flags": ",".join(a["flags"]),
             })
     rows.sort(key=lambda r: -r["place_count"])
-    with open(os.path.join(OUT, "residual_queue.csv"), "w", newline="") as f:
+    with open(os.path.join(OUT, "residual_queue.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         w.writeheader()
         w.writerows(rows)
@@ -96,7 +96,7 @@ def main():
         "residual_places": residual_places,
         "by_source": {s: dict(c) for s, c in sorted(by_source.items())},
     }
-    json.dump(report, open(os.path.join(OUT, "seed_report.json"), "w"), indent=1)
+    json.dump(report, open(os.path.join(OUT, "seed_report.json"), "w", encoding="utf-8"), indent=1)
     print(json.dumps(report, indent=1))
 
     if os.path.exists(OLD_SEED):

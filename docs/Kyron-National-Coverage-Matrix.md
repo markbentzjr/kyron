@@ -36,9 +36,9 @@ Shipped bundled in the APK; three live sync sources.
 
 ## Florida (FL) — `us-fl`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** DISPOSITION · **Pack:** published (declared-only) · **Pack host:** unreachable-404 (checked 2026-10-22)
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** DISPOSITION · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-Pack built and registered in-app; the PUBLICATION is declared but the pack host returned HTTP 404 on 2026-10-22 — the download is NOT verified available until it is republished (declared-only).
+Pack published to the data-packs release; artifact downloaded and sha256-verified 2026-11-16 (70,033 places).
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -56,9 +56,9 @@ Pack verified end-to-end in the rig and registered in-app; the publication is de
 
 ## Tennessee (TN) — `us-tn`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** SCORE_100_HIGH · **Pack:** built (staged-local)
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** SCORE_100_HIGH · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-Ingestion verified (138 MB place dataset, QA crosscheck pass); pack staged locally — blocked on publishing infrastructure.
+Ingestion verified (138 MB place dataset, QA crosscheck pass); pack published to the data-packs release, artifact sha256-verified 2026-11-16 (33,262 places).
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -66,9 +66,9 @@ Ingestion verified (138 MB place dataset, QA crosscheck pass); pack staged local
 
 ## South Carolina (SC) — `us-sc`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** SCORE_100_HIGH · **Pack:** built (staged-local)
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** SCORE_100_HIGH · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-Ingestion verified (35,862 places, QA all-pass); pack staged locally — blocked on publishing infrastructure.
+Ingestion verified (35,862 places, QA all-pass); pack published to the data-packs release, artifact sha256-verified 2026-11-16.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -158,9 +158,9 @@ Chicago pack built + validated locally (pass/fail); statewide coverage is county
 
 ## California (CA) — `us-ca`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** SCORE_100_HIGH · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** SCORE_100_HIGH · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-San Francisco pack built + validated locally (0-100 scores); county-fragmented otherwise (CalCode).
+San Francisco pack published to the data-packs release, artifact sha256-verified 2026-11-16 (6,253 places, 0-100 scores); county-fragmented otherwise (CalCode).
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -273,9 +273,9 @@ Fragmented into local agencies; dispositions are the common currency.
 
 ## Nevada (NV) — `us-nv`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** PENALTY_LOW · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** PENALTY_LOW · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-SNHD's nightly CSV is best-in-class bulk data; pack covers Clark County (~73% of NV population).
+SNHD's nightly CSV is best-in-class bulk data; pack published to the data-packs release, artifact sha256-verified 2026-11-16 (19,755 places, Clark County ~73% of NV population).
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -283,9 +283,9 @@ SNHD's nightly CSV is best-in-class bulk data; pack covers Clark County (~73% of
 
 ## Texas (TX) — `us-tx`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** SCORE_100_HIGH · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** SCORE_100_HIGH · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-Austin pack built + validated locally (0-100 scores); no statewide results search.
+Austin pack published to the data-packs release, artifact sha256-verified 2026-11-16 (6,448 places, 0-100 scores); no statewide results search.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -315,13 +315,13 @@ State portal covers groceries only; restaurants are local agencies.
 
 ## Maryland (MD) — `us-md`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** VIOLATIONS_ONLY · **Pack:** built (staged-local) · **Artifact verified:** 2026-11-16
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** VIOLATIONS_ONLY · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-Montgomery County pack built + validated locally (compliance flags); statewide portal at present unreachable.
+Montgomery County pack published to the data-packs release, artifact sha256-verified 2026-11-16 (4,160 places, compliance flags); statewide portal at present unreachable.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
-| md-montgomery | Montgomery County | Montgomery County | api | partial | some-history | pack-built | 2026-10-22 | Socrata (fetched 200 with data): per-item In/Out of Compliance rows. Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — full dataset). |
+| md-montgomery | Montgomery County | Montgomery County | api | partial | some-history | pack-built | 2026-10-22 | Socrata (fetched 200 with data): per-item In/Out of Compliance rows. Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — full dataset). Data caveat: ~32 place names carry a literal U+FFFD where the county's own import mangled 'é' ('CAF�') — source-side corruption in older rows, unrecoverable (the 'organization' field is the legal entity, not the trade name); shipped verbatim. |
 | md-statewide | Maryland DHMH Office of Food Protection (24 LHDs) | Statewide (not verified) | official-link-only | unverified | unverified | official-link-only | — | Statewide search vsi.maryland.gov was unreachable on 2026-10-22 (3 attempts); many counties publish by records request. |
 
 ## Missouri (MO) — `us-mo`
@@ -460,9 +460,9 @@ No statewide portal (verified negative finding); town-by-town.
 
 ## Delaware (DE) — `us-de`
 
-**Primary tier:** Pack built/declared — NOT verified downloadable · **Result model:** VIOLATIONS_ONLY · **Pack:** built (staged-local) · **Artifact verified:** 2026-10-22
+**Primary tier:** Pack downloadable (artifact verified) · **Result model:** VIOLATIONS_ONLY · **Pack:** published (downloadable-verified) · **Pack host:** reachable (checked 2026-11-16) · **Artifact verified:** 2026-11-16
 
-Pack built + validated locally (datasetVersion 2026-10-23.1; window 2024-10-14..2026-12-03); staged — blocked on publishing infrastructure. No scores exist in this data (violations-only model).
+Pack published to the data-packs release, artifact sha256-verified 2026-11-16 (3,740 places, datasetVersion 2026-11-16.1). Violations-only model — no scores exist in this data.
 
 | Source | Agency | Coverage | Access | Violations | History | Status | Verified | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -551,7 +551,8 @@ Registered as a jurisdiction, explicitly NOT one of the 50 states.
 ## Tier tally (50 states, each assigned once)
 
 - Integrated (live in app): **1**
-- Pack built/declared — NOT verified downloadable: **12**
+- Pack downloadable (artifact verified): **8**
+- Pack built/declared — NOT verified downloadable: **4**
 - Source verified (no ingestion yet): **25**
 - Official-link-only / blocked: **12**
 - **States total: 50** (must equal 50)

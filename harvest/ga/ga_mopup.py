@@ -66,14 +66,14 @@ def consistent(entries, ss, sd):
 
 def main():
     bad = json.load(open(os.path.join(ROOT, "work",
-                                      "insp_stub_mismatches.json")))
+                                      "insp_stub_mismatches.json"), encoding="utf-8"))
     # stubs (first sighting) for county + b64 id
     stubs = {}
     for cdir in sorted(glob.glob(os.path.join(ROOT, "raw",
                                               "search_pages", "*"))):
         c = os.path.basename(cdir)
         for pf in sorted(glob.glob(os.path.join(cdir, "p*.json"))):
-            for s in json.load(open(pf)):
+            for s in json.load(open(pf, encoding="utf-8")):
                 stubs.setdefault(base64.b64decode(s["id"]).decode(),
                                   (c, s))
     fixed = still = 0
@@ -100,7 +100,7 @@ def main():
         path = os.path.join(ROOT, "raw", rel)
         with open(path, "wb") as f:
             f.write(body)
-        with open(os.path.join(ROOT, "fetch_log.tsv"), "a") as f:
+        with open(os.path.join(ROOT, "fetch_log.tsv"), "a", encoding="utf-8") as f:
             f.write("\t".join([
                 rel + " (mopup)", url, utcnow(), "200", str(len(body)),
                 hashlib.sha256(body).hexdigest()]) + "\n")
@@ -120,7 +120,7 @@ def main():
     for x in still_list:
         print("  STILL:", x)
     json.dump(still_list, open(os.path.join(
-        ROOT, "work", "mopup_still_bad.json"), "w"), indent=1)
+        ROOT, "work", "mopup_still_bad.json"), "w", encoding="utf-8"), indent=1)
 
 
 if __name__ == "__main__":

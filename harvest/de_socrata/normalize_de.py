@@ -286,7 +286,7 @@ def main() -> int:
     with open(os.path.join(OUT, "places.json"), "w",
               encoding="utf-8") as f:
         json.dump(out_places, f, ensure_ascii=False)
-    with open(os.path.join(OUT, "excluded_rows.json"), "w") as f:
+    with open(os.path.join(OUT, "excluded_rows.json"), "w", encoding="utf-8") as f:
         json.dump(EXCLUDED, f, indent=1)
     with open(os.path.join(OUT, "qa_report.json"), "w",
               encoding="utf-8") as f:

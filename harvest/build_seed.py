@@ -128,7 +128,7 @@ def street_has_fused_tail(street):
 adph = {}
 adph_rejects = []
 for path in sorted(glob.glob(os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/adph/*.json')):
-    for r in json.load(open(path)):
+    for r in json.load(open(path, encoding="utf-8")):
         # Workstream B gate rule: a score that cannot be attached to a
         # named place AT a street address must not ship. ADPH publishes a
         # few permits with no street address at all (verified: exactly 2 in
@@ -149,15 +149,15 @@ for path in sorted(glob.glob(os.path.expanduser(os.environ.get('KYRON_BUILD','~/
 print("ADPH places:", len(adph))
 if adph_rejects:
     rej_path = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/adph_rejects.json'
-    json.dump(adph_rejects, open(rej_path, 'w'), indent=1)
+    json.dump(adph_rejects, open(rej_path, 'w', encoding="utf-8"), indent=1)
     print(f"ADPH REJECTS (score without name/street address): {len(adph_rejects)} -> {rej_path}")
 
 # --- JCDH detail-rich places ---
 # Optional legacy JCDH detail extracts (not public); skipped when absent.
 _PROTO = os.environ.get('KYRON_JCDH_PROTO', '')
 _RAW = os.environ.get('KYRON_JCDH_RAW', '')
-proto = {p['permit']: p for p in json.load(open(_PROTO))} if os.path.exists(_PROTO) else {}
-raw = json.load(open(_RAW)) if os.path.exists(_RAW) else []
+proto = {p['permit']: p for p in json.load(open(_PROTO, encoding="utf-8"))} if os.path.exists(_PROTO) else {}
+raw = json.load(open(_RAW, encoding="utf-8")) if os.path.exists(_RAW) else []
 merged = 0
 for rp in raw:
     permit = rp['permit']
@@ -200,7 +200,7 @@ existing_ids = {p['id'] for p in adph.values()}
 enum_path = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/harvest/jcdh_enum.json'
 n_enum = n_dup = n_bad = 0
 if os.path.exists(enum_path):
-    for r in json.load(open(enum_path)):
+    for r in json.load(open(enum_path, encoding="utf-8")):
         rid = f"jcdh_{r['permit']}"
         if rid in existing_ids:
             n_dup += 1
@@ -252,7 +252,7 @@ mchd_path = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/
 n_mchd = n_mchd_bad = 0
 if os.path.exists(mchd_path):
     insp_re = re.compile(r'^(\d{1,2}/\d{1,2}/\d{4}),\s*Score:\s*(\d+)')
-    for row in json.load(open(mchd_path)):
+    for row in json.load(open(mchd_path, encoding="utf-8")):
         name, address, csz = (row + ["", "", ""])[:3]
         name = name.strip()
         if not name or not (address or "").strip():
@@ -286,7 +286,7 @@ places = list(adph.values())
 places.sort(key=lambda p: (p['ct'], p['n'].lower()))
 out = os.path.expanduser(os.environ.get('KYRON_BUILD','~/kyron-build'))+'/manual/src/main/assets/places_seed.json'
 os.makedirs(os.path.dirname(out), exist_ok=True)
-json.dump(places, open(out, 'w'), separators=(',', ':'))
+json.dump(places, open(out, 'w', encoding="utf-8"), separators=(',', ':'))
 n_insp = sum(1 for p in places if p['insp'])
 n_geo = sum(1 for p in places if p['lat'])
 print(f"SEED total={len(places)} with_inspections={n_insp} geocoded={n_geo} bytes={os.path.getsize(out)}")

@@ -32,18 +32,18 @@ MAX_PER_FILE = 5000
 
 
 def load_addresses():
-    return json.load(open(os.path.join(OUT, "addresses.json")))
+    return json.load(open(os.path.join(OUT, "addresses.json"), encoding="utf-8"))
 
 
 def load_seed_places():
     seed = os.path.join(HERE, "..", "..", "src", "main", "assets", "places_seed.json")
-    return json.load(open(seed))
+    return json.load(open(seed, encoding="utf-8"))
 
 
 def write_batch(name, rows, street_field="street"):
     os.makedirs(BATCHES, exist_ok=True)
     path = os.path.join(BATCHES, name + ".csv")
-    with open(path, "w", newline="") as f:
+    with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         for a in rows:
             w.writerow([a["address_id"], a[street_field], a["city"], "AL", a["zip"]])
@@ -56,7 +56,7 @@ def build_pilot():
     # Ground truth: every address belonging to a place that already carries
     # coordinates (harvested earlier) — Census results get distance-checked
     # against those stored coordinates during adjudication.
-    place_map = json.load(open(os.path.join(OUT, "place_address.json")))
+    place_map = json.load(open(os.path.join(OUT, "place_address.json"), encoding="utf-8"))
     truth_ids = set()
     for p in load_seed_places():
         if p.get("lat") is not None:
@@ -70,7 +70,7 @@ def build_pilot():
     pilot = sample + [a for a in truth if a["address_id"] not in seen]
     write_batch("pilot1000", pilot)
     json.dump([a["address_id"] for a in pilot],
-              open(os.path.join(OUT, "pilot_ids.json"), "w"))
+              open(os.path.join(OUT, "pilot_ids.json"), "w", encoding="utf-8"))
     print(f"pilot rows: {len(pilot)} (incl. {len(truth)} ground-truth addresses)")
 
 
@@ -84,7 +84,7 @@ def build_repair(round_no):
     Ties are NOT resubmitted: a refined identical key cannot break a tie
     honestly (draft 3.5); they stay in the residual queue.
     """
-    adjudicated = json.load(open(os.path.join(OUT, "adjudicated.json")))
+    adjudicated = json.load(open(os.path.join(OUT, "adjudicated.json"), encoding="utf-8"))
     addrs = {a["address_id"]: a for a in load_addresses()}
     todo = []
     for aid, adj in adjudicated.items():
@@ -122,7 +122,7 @@ def result_ok(name):
     if not os.path.exists(path):
         return False
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             rows = list(csv.reader(f))
         return len(rows) > 0
     except Exception:
@@ -136,7 +136,7 @@ def submit(name):
     os.makedirs(RESULTS, exist_ok=True)
     in_path = os.path.join(BATCHES, name + ".csv")
     out_path = os.path.join(RESULTS, name + ".csv")
-    n_rows = sum(1 for _ in open(in_path))
+    n_rows = sum(1 for _ in open(in_path, encoding="utf-8"))
     timeout = max(600, n_rows)  # generous: ~ up to 1s/address worst case
     for attempt in range(1, 4):
         t0 = time.time()
@@ -151,9 +151,9 @@ def submit(name):
         code = body.rsplit("HTTP:", 1)[-1].strip() if "HTTP:" in body else "?"
         payload = body.rsplit("\nHTTP:", 1)[0] if "HTTP:" in body else body
         if code == "200" and payload.strip() and "Match" in payload or "No_Match" in payload:
-            with open(out_path, "w") as f:
+            with open(out_path, "w", encoding="utf-8") as f:
                 f.write(payload)
-            rows = list(csv.reader(open(out_path)))
+            rows = list(csv.reader(open(out_path, encoding="utf-8")))
             print(f"batch {name}: OK {len(rows)} result rows in {time.time()-t0:.0f}s")
             return True
         print(f"batch {name}: HTTP {code}, body head: {payload[:200]!r}; retrying")
@@ -170,7 +170,7 @@ def main():
         pilot_ids = set()
         p = os.path.join(OUT, "pilot_ids.json")
         if os.path.exists(p):
-            pilot_ids = set(json.load(open(p)))
+            pilot_ids = set(json.load(open(p, encoding="utf-8")))
         build_production(pilot_ids)
     elif cmd == "build-repair":
         build_repair(int(sys.argv[2]))

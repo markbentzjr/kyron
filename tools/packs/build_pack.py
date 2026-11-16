@@ -99,13 +99,15 @@ def pack_place(raw, **fields):
 
 def write_pack(*, region, state, name, model, source_label, places,
                generated_at, out_dir, jurisdictions, limit=0,
-               attribution=None):
+               attribution=None, version=None):
     """Shared write tail of every pack builder: SQLite catalog -> .db.gz
     -> .manifest.json. `version` derives from generated_at under the
     existing convention ("<day>.1", or "<day>.dev<limit>" for a bounded
-    proof build). Returns (gz_path, manifest)."""
-    version = f"{generated_at[:10]}.1" if not limit else \
-        f"{generated_at[:10]}.dev{limit}"
+    proof build) unless overridden (e.g. a same-day corrected
+    republish bumps ".1" -> ".2"). Returns (gz_path, manifest)."""
+    if version is None:
+        version = f"{generated_at[:10]}.1" if not limit else \
+            f"{generated_at[:10]}.dev{limit}"
     os.makedirs(out_dir, exist_ok=True)
     db_name = f"{region}-{version}.db"
     db_path = os.path.join(out_dir, db_name)
@@ -579,12 +581,12 @@ def main() -> int:
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
-    with open(args.source) as f:
+    with open(args.source, encoding="utf-8") as f:
         raw_places = json.load(f)
     src_manifest_path = os.path.join(os.path.dirname(args.source), "manifest.json")
     src_manifest = {}
     if os.path.exists(src_manifest_path):
-        with open(src_manifest_path) as f:
+        with open(src_manifest_path, encoding="utf-8") as f:
             src_manifest = json.load(f)
 
     converter = CONVERTERS.get(args.region)

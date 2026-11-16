@@ -91,13 +91,13 @@
       "name": "Florida",
       "type": "state",
       "result_model": "DISPOSITION",
-      "summary": "Pack built and registered in-app; the PUBLICATION is declared but the pack host returned HTTP 404 on 2026-10-22 — the download is NOT verified available until it is republished (declared-only).",
+      "summary": "Pack published to the data-packs release; artifact downloaded and sha256-verified 2026-11-16 (70,033 places).",
       "pack_status": "published",
       "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-fl.manifest.json",
-      "pack_availability": "declared-only",
-      "artifact_verified": "",
-      "pack_host_status": "unreachable-404",
-      "pack_host_checked": "2026-10-22",
+      "pack_availability": "downloadable-verified",
+      "artifact_verified": "2026-11-16",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
         "lat": 27.7,
         "lng": -83.72
@@ -165,13 +165,13 @@
       "name": "Tennessee",
       "type": "state",
       "result_model": "SCORE_100_HIGH",
-      "summary": "Ingestion verified (138 MB place dataset, QA crosscheck pass); pack staged locally — blocked on publishing infrastructure.",
-      "pack_status": "built",
-      "pack_manifest_url": null,
-      "pack_availability": "staged-local",
-      "artifact_verified": "",
-      "pack_host_status": "",
-      "pack_host_checked": "",
+      "summary": "Ingestion verified (138 MB place dataset, QA crosscheck pass); pack published to the data-packs release, artifact sha256-verified 2026-11-16 (33,262 places).",
+      "pack_status": "published",
+      "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-tn.manifest.json",
+      "pack_availability": "downloadable-verified",
+      "artifact_verified": "2026-11-16",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
         "lat": 35.83,
         "lng": -85.98
@@ -202,13 +202,13 @@
       "name": "South Carolina",
       "type": "state",
       "result_model": "SCORE_100_HIGH",
-      "summary": "Ingestion verified (35,862 places, QA all-pass); pack staged locally — blocked on publishing infrastructure.",
-      "pack_status": "built",
-      "pack_manifest_url": null,
-      "pack_availability": "staged-local",
-      "artifact_verified": "",
-      "pack_host_status": "",
-      "pack_host_checked": "",
+      "summary": "Ingestion verified (35,862 places, QA all-pass); pack published to the data-packs release, artifact sha256-verified 2026-11-16.",
+      "pack_status": "published",
+      "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-sc.manifest.json",
+      "pack_availability": "downloadable-verified",
+      "artifact_verified": "2026-11-16",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
         "lat": 33.63,
         "lng": -80.96
@@ -469,8 +469,8 @@
       "pack_host_status": "",
       "pack_host_checked": "",
       "center": {
-        "lat": 42.76,
-        "lng": -75.81
+        "lat": 40.71,
+        "lng": -74.01
       },
       "sources": [
         {
@@ -523,8 +523,8 @@
       "pack_host_status": "",
       "pack_host_checked": "",
       "center": {
-        "lat": 39.74,
-        "lng": -87.52
+        "lat": 41.88,
+        "lng": -87.63
       },
       "sources": [
         {
@@ -569,16 +569,16 @@
       "name": "California",
       "type": "state",
       "result_model": "SCORE_100_HIGH",
-      "summary": "San Francisco pack built + validated locally (0-100 scores); county-fragmented otherwise (CalCode).",
-      "pack_status": "built",
-      "pack_manifest_url": null,
-      "pack_availability": "staged-local",
+      "summary": "San Francisco pack published to the data-packs release, artifact sha256-verified 2026-11-16 (6,253 places, 0-100 scores); county-fragmented otherwise (CalCode).",
+      "pack_status": "published",
+      "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-ca.manifest.json",
+      "pack_availability": "downloadable-verified",
       "artifact_verified": "2026-11-16",
-      "pack_host_status": "",
-      "pack_host_checked": "",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
-        "lat": 37.27,
-        "lng": -119.27
+        "lat": 37.77,
+        "lng": -122.42
       },
       "sources": [
         {
@@ -702,8 +702,8 @@
       "pack_host_status": "",
       "pack_host_checked": "",
       "center": {
-        "lat": 47.27,
-        "lng": -120.83
+        "lat": 47.55,
+        "lng": -122.3
       },
       "sources": [
         {
@@ -1061,16 +1061,16 @@
       "name": "Nevada",
       "type": "state",
       "result_model": "PENALTY_LOW",
-      "summary": "SNHD's nightly CSV is best-in-class bulk data; pack covers Clark County (~73% of NV population).",
-      "pack_status": "built",
-      "pack_manifest_url": null,
-      "pack_availability": "staged-local",
+      "summary": "SNHD's nightly CSV is best-in-class bulk data; pack published to the data-packs release, artifact sha256-verified 2026-11-16 (19,755 places, Clark County ~73% of NV population).",
+      "pack_status": "published",
+      "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-nv.manifest.json",
+      "pack_availability": "downloadable-verified",
       "artifact_verified": "2026-11-16",
-      "pack_host_status": "",
-      "pack_host_checked": "",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
-        "lat": 38.5,
-        "lng": -117.03
+        "lat": 36.17,
+        "lng": -115.14
       },
       "sources": [
         {
@@ -1098,16 +1098,16 @@
       "name": "Texas",
       "type": "state",
       "result_model": "SCORE_100_HIGH",
-      "summary": "Austin pack built + validated locally (0-100 scores); no statewide results search.",
-      "pack_status": "built",
-      "pack_manifest_url": null,
-      "pack_availability": "staged-local",
+      "summary": "Austin pack published to the data-packs release, artifact sha256-verified 2026-11-16 (6,448 places, 0-100 scores); no statewide results search.",
+      "pack_status": "published",
+      "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-tx.manifest.json",
+      "pack_availability": "downloadable-verified",
       "artifact_verified": "2026-11-16",
-      "pack_host_status": "",
-      "pack_host_checked": "",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
-        "lat": 31.17,
-        "lng": -100.08
+        "lat": 30.27,
+        "lng": -97.74
       },
       "sources": [
         {
@@ -1243,16 +1243,16 @@
       "name": "Maryland",
       "type": "state",
       "result_model": "VIOLATIONS_ONLY",
-      "summary": "Montgomery County pack built + validated locally (compliance flags); statewide portal at present unreachable.",
-      "pack_status": "built",
-      "pack_manifest_url": null,
-      "pack_availability": "staged-local",
+      "summary": "Montgomery County pack published to the data-packs release, artifact sha256-verified 2026-11-16 (4,160 places, compliance flags); statewide portal at present unreachable.",
+      "pack_status": "published",
+      "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-md.manifest.json",
+      "pack_availability": "downloadable-verified",
       "artifact_verified": "2026-11-16",
-      "pack_host_status": "",
-      "pack_host_checked": "",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
-        "lat": 38.81,
-        "lng": -77.27
+        "lat": 39.08,
+        "lng": -77.15
       },
       "sources": [
         {
@@ -1270,7 +1270,7 @@
           "restrictions": "",
           "refresh": "Harvest pipeline harvest/socrata_cities (montgomery)",
           "last_refresh": "2026-11-16",
-          "notes": "Socrata (fetched 200 with data): per-item In/Out of Compliance rows. Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — full dataset)."
+          "notes": "Socrata (fetched 200 with data): per-item In/Out of Compliance rows. Pack BUILT locally 2026-11-16 (4,160 places / 6,708 violations — full dataset). Data caveat: ~32 place names carry a literal U+FFFD where the county's own import mangled 'é' ('CAF�') — source-side corruption in older rows, unrecoverable (the 'organization' field is the legal entity, not the trade name); shipped verbatim."
         },
         {
           "id": "md-statewide",
@@ -1846,13 +1846,13 @@
       "name": "Delaware",
       "type": "state",
       "result_model": "VIOLATIONS_ONLY",
-      "summary": "Pack built + validated locally (datasetVersion 2026-10-23.1; window 2024-10-14..2026-12-03); staged — blocked on publishing infrastructure. No scores exist in this data (violations-only model).",
-      "pack_status": "built",
-      "pack_manifest_url": null,
-      "pack_availability": "staged-local",
-      "artifact_verified": "2026-10-22",
-      "pack_host_status": "",
-      "pack_host_checked": "",
+      "summary": "Pack published to the data-packs release, artifact sha256-verified 2026-11-16 (3,740 places, datasetVersion 2026-11-16.1). Violations-only model — no scores exist in this data.",
+      "pack_status": "published",
+      "pack_manifest_url": "https://github.com/EMC-MB/kyron/releases/download/data-packs/us-de.manifest.json",
+      "pack_availability": "downloadable-verified",
+      "artifact_verified": "2026-11-16",
+      "pack_host_status": "reachable",
+      "pack_host_checked": "2026-11-16",
       "center": {
         "lat": 39.15,
         "lng": -75.42

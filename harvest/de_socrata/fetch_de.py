@@ -185,7 +185,7 @@ def main() -> int:
     log["exact_duplicate_rows_in_stream"] = dup
     log["finished_utc"] = time.strftime("%H:%M:%SZ", time.gmtime())
 
-    with open(os.path.join(OUT, "fetch_log.json"), "w") as f:
+    with open(os.path.join(OUT, "fetch_log.json"), "w", encoding="utf-8") as f:
         json.dump(log, f, indent=1)
     print(json.dumps({k: log[k] for k in (
         "count_unfiltered", "count_where_window", "chosen_pattern",

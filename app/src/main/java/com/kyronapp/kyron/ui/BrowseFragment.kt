@@ -311,9 +311,15 @@ class BrowseFragment : Fragment() {
             // Re-label the chips for this region's model (penalty scales
             // get demerit ranges; 0–100 scales keep their labels).
             val bands = NationalCoverage.bands(regionModel)
-            bandButtons[R.id.band_low]?.text = bands.getOrElse(1) { "" }
-            bandButtons[R.id.band_mid]?.text = bands.getOrElse(2) { "" }
-            bandButtons[R.id.band_high]?.text = bands.getOrElse(3) { "" }
+            // ToggleButton re-renders textOn/textOff on every check-state
+            // change — plain .text is wiped by the next selectBand() pass.
+            listOf(R.id.band_low to 1, R.id.band_mid to 2, R.id.band_high to 3)
+                .forEach { (id, i) ->
+                    bandButtons[id]?.apply {
+                        val lbl = bands.getOrElse(i) { "" }
+                        textOn = lbl; textOff = lbl; text = lbl
+                    }
+                }
             if (band == "All scores") selectBand(R.id.band_all)
         } else {
             chipRow?.visibility = View.GONE

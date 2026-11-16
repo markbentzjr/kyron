@@ -247,7 +247,7 @@ def main() -> int:
         "coverage_limitations": cov_limit,
         "sha256": sha, "bytes": len(raw),
     }
-    with open(os.path.join(OUT, "validate_report.json"), "w") as f:
+    with open(os.path.join(OUT, "validate_report.json"), "w", encoding="utf-8") as f:
         json.dump(report, f, indent=1)
     return 0
 

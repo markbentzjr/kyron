@@ -12,8 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 RAW, OUT = ROOT / "raw", ROOT / "OUTPUT"
-places_out = json.load(open(OUT / "places_fl.json"))
-manifest = json.load(open(OUT / "manifest.json"))
+places_out = json.load(open(OUT / "places_fl.json", encoding="utf-8"))
+manifest = json.load(open(OUT / "manifest.json", encoding="utf-8"))
 
 res = {}
 
@@ -70,7 +70,7 @@ out_lic = sum(1 for p in places_out if p.get("lic"))
 res["output_places"] = out_places
 res["output_places_with_license_number"] = out_lic
 res["output_inspections"] = out_insp
-builder_qa = json.load(open(OUT / "qa_report.json"))
+builder_qa = json.load(open(OUT / "qa_report.json", encoding="utf-8"))
 res["reconcile_places"] = (out_places == len(lic_full) + builder_qa["totals"]["places_inspection_only"])
 res["reconcile_inspections"] = (out_insp == res["raw_insp_rows_total"])
 res["manifest_places_match"] = (manifest["totals"]["places"] == out_places)
@@ -117,4 +117,4 @@ res["places_missing_state_or_jurisdiction"] = sum(1 for p in places_out if p.get
 res["places_with_coordinates"] = sum(1 for p in places_out if p.get("lat") is not None)
 
 print(json.dumps(res, indent=1))
-json.dump(res, open(OUT / "qa_crosscheck.json", "w"), indent=1)
+json.dump(res, open(OUT / "qa_crosscheck.json", "w", encoding="utf-8"), indent=1)

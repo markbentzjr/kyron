@@ -57,7 +57,7 @@ def iso(mdy):
 
 def main():
     res = {"checks": {}, "notes": []}
-    places = json.load(open(os.path.join(OUT, "places_ga.json")))
+    places = json.load(open(os.path.join(OUT, "places_ga.json"), encoding="utf-8"))
     by_id = {p["id"]: p for p in places}
 
     # ---- B1/B2/B3/B4: stream raw layer
@@ -66,13 +66,13 @@ def main():
     for cdir in sorted(glob.glob(os.path.join(RAW, "search_pages", "*"))):
         county = os.path.basename(cdir)
         for pf in sorted(glob.glob(os.path.join(cdir, "p*.json"))):
-            for stub in json.load(open(pf)):
+            for stub in json.load(open(pf, encoding="utf-8")):
                 fid = base64.b64decode(stub["id"]).decode()
                 raw_fac.setdefault(fid, (county, stub))
     # per-place inspection file exactly as the normalizer chose it:
     # the search county's copy, else the adjudicated county's copy
     excl_path = os.path.join(OUT, "exclusions.json")
-    n_excl = len(json.load(open(excl_path))) if os.path.exists(
+    n_excl = len(json.load(open(excl_path, encoding="utf-8"))) if os.path.exists(
         excl_path) else 0
     for p in places:
         fid = str(p["fid"])
@@ -82,7 +82,7 @@ def main():
         raw_insp[fid] = []
         for c in cand:
             if os.path.exists(c):
-                raw_insp[fid] = json.load(open(c))
+                raw_insp[fid] = json.load(open(c, encoding="utf-8"))
                 break
 
     res["raw_facilities"] = len(raw_fac)
@@ -120,7 +120,7 @@ def main():
     mism_latest = []
     invented = []
     excluded_fids = {str(e["facility"]) for e in json.load(
-        open(os.path.join(OUT, "exclusions.json")))} if os.path.exists(
+        open(os.path.join(OUT, "exclusions.json"), encoding="utf-8"))} if os.path.exists(
         os.path.join(OUT, "exclusions.json")) else set()
     for fid, (county, stub) in raw_fac.items():
         if fid in excluded_fids:
@@ -219,7 +219,7 @@ def main():
     for cdir in glob.glob(os.path.join(RAW, "search_pages", "*")):
         cname = os.path.basename(cdir)
         for pf in glob.glob(os.path.join(cdir, "p*.json")):
-            for stub in json.load(open(pf)):
+            for stub in json.load(open(pf, encoding="utf-8")):
                 sight[base64.b64decode(stub["id"]).decode()].add(cname)
     bad_adj = []
     multi = collections.Counter()
@@ -249,7 +249,7 @@ def main():
     res["counties_in_output"] = len({p["ct_raw"] for p in places})
 
     res["ALL_PASS"] = all(v for k, v in res["checks"].items())
-    with open(os.path.join(OUT, "qa_crosscheck.json"), "w") as f:
+    with open(os.path.join(OUT, "qa_crosscheck.json"), "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
     print(json.dumps(res, indent=1)[:3500])
     return 0 if res["ALL_PASS"] else 1

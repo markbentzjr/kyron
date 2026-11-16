@@ -77,7 +77,7 @@ def main():
             problems.append(msg)
 
     sweep = {r["cty"]: (r["counties"][0][1] if r.get("counties") else None)
-             for r in json.load(open(os.path.join(ROOT, "work/county_sweep.json")))}
+             for r in json.load(open(os.path.join(ROOT, "work/county_sweep.json"), encoding="utf-8"))}
 
     # ---- stub truth from CSVs
     food_stubs = Counter()     # (sid, iso, SCORE, GRADE) multiset
@@ -105,7 +105,7 @@ def main():
     # ---- independent detail parse
     index = {}
     for path in glob.glob(os.path.join(ROOT, "index/cty*.jsonl")):
-        for line in open(path):
+        for line in open(path, encoding="utf-8"):
             rec = json.loads(line)
             index.setdefault(rec["insp"], rec)
     detail_keys = Counter()
@@ -130,7 +130,7 @@ def main():
                         {"insp": insp, "score": d["score"], "points_sum": pts})
 
     # ---- output under test
-    out = json.load(open(os.path.join(ROOT, "OUTPUT/places_nc.json")))
+    out = json.load(open(os.path.join(ROOT, "OUTPUT/places_nc.json"), encoding="utf-8"))
     out_keys = Counter()
     out_by_county = Counter()
     out_insp = out_viol = 0

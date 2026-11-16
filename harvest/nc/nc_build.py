@@ -101,7 +101,7 @@ def assemble_one(places, insp, rec, stub, p, county_names):
 
 def main():
     county_names = {}
-    sweep = json.load(open(os.path.join(ROOT, "work/county_sweep.json")))
+    sweep = json.load(open(os.path.join(ROOT, "work/county_sweep.json"), encoding="utf-8"))
     for row in sweep:
         if row.get("counties"):
             county_names[row["cty"]] = row["counties"][0][1]
@@ -129,7 +129,7 @@ def main():
     index = {}
     dup_index = 0
     for path in sorted(glob.glob(os.path.join(ROOT, "index/cty*.jsonl"))):
-        for line in open(path):
+        for line in open(path, encoding="utf-8"):
             rec = json.loads(line)
             if rec["insp"] in index:
                 dup_index += 1
@@ -179,9 +179,9 @@ def main():
                            "name": "", "reason": f"inspection {pr['insp']} failed stub verification: " + "; ".join(pr["errors"][:3])})
 
     os.makedirs(os.path.join(ROOT, "OUTPUT"), exist_ok=True)
-    with open(os.path.join(ROOT, "OUTPUT/places_nc.json"), "w") as f:
+    with open(os.path.join(ROOT, "OUTPUT/places_nc.json"), "w", encoding="utf-8") as f:
         json.dump(out_places, f, ensure_ascii=False, separators=(",", ":"))
-    with open(os.path.join(ROOT, "OUTPUT/exclusions.json"), "w") as f:
+    with open(os.path.join(ROOT, "OUTPUT/exclusions.json"), "w", encoding="utf-8") as f:
         json.dump(exclusions, f, indent=1, ensure_ascii=False)
 
     dates = [i["d"] for pl in out_places for i in pl["insp"] if i["d"]]
@@ -205,9 +205,9 @@ def main():
         "counties_with_places": len({pl['ct'] for pl in out_places}),
         "generated_at": generated,
     }
-    with open(os.path.join(ROOT, "OUTPUT/qa_report.json"), "w") as f:
+    with open(os.path.join(ROOT, "OUTPUT/qa_report.json"), "w", encoding="utf-8") as f:
         json.dump(qa, f, indent=1)
-    with open(os.path.join(ROOT, "OUTPUT/problems.json"), "w") as f:
+    with open(os.path.join(ROOT, "OUTPUT/problems.json"), "w", encoding="utf-8") as f:
         json.dump(problems, f, indent=1)
     manifest = {
         "region": "us-nc", "state": "NC", "jurisdiction": "NC-CDPEHS",
@@ -224,7 +224,7 @@ def main():
                    "inspection_date_max": qa["inspection_date_max"],
                    "counties_with_places": qa["counties_with_places"]},
     }
-    with open(os.path.join(ROOT, "OUTPUT/manifest.json"), "w") as f:
+    with open(os.path.join(ROOT, "OUTPUT/manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=1)
     print(json.dumps({k: qa[k] for k in ("universe_inspection_rows_all_types",
           "universe_food_stubs", "slice_csv_food_stubs", "verified_inspections",

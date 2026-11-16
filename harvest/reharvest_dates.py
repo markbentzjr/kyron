@@ -54,7 +54,7 @@ def fetch_county(code, name):
 
 targets = []
 for path in sorted(glob.glob(f"{OUT}/*.json"), key=lambda p: int(os.path.basename(p)[:-5])):
-    rows = json.load(open(path))
+    rows = json.load(open(path, encoding="utf-8"))
     nd = sum(1 for r in rows if not r.get('date'))
     if nd and rows:
         targets.append((os.path.basename(path)[:-5], rows[0]['county'], len(rows), nd))
@@ -66,7 +66,7 @@ for code, name, old_n, old_nd in targets:
         failed += 1; print(f"FAILED {name} ({code}) — keeping old file", flush=True); continue
     if len(places) < old_n * 0.8:
         failed += 1; print(f"SUSPECT {name}: new {len(places)} vs old {old_n} — keeping old file", flush=True); continue
-    json.dump(places, open(f"{OUT}/{code}.json", 'w'))
+    json.dump(places, open(f"{OUT}/{code}.json", 'w', encoding="utf-8"))
     nd = sum(1 for r in rows if not r.get('date')) if (rows:=places) else 0
     done += 1
     print(f"OK {name}: {len(places)} places, missing dates now {nd} (was {old_nd})", flush=True)

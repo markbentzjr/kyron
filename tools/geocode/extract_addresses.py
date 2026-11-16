@@ -23,7 +23,7 @@ OUT = os.path.join(HERE, "out")
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    places = json.load(open(SEED))
+    places = json.load(open(SEED, encoding="utf-8"))
     addresses = {}
     place_map = {}
     flag_counts = Counter()
@@ -56,8 +56,8 @@ def main():
             submittable_places += 1
 
     addr_list = sorted(addresses.values(), key=lambda a: a["address_id"])
-    json.dump(addr_list, open(os.path.join(OUT, "addresses.json"), "w"), indent=1)
-    json.dump(place_map, open(os.path.join(OUT, "place_address.json"), "w"))
+    json.dump(addr_list, open(os.path.join(OUT, "addresses.json"), "w", encoding="utf-8"), indent=1)
+    json.dump(place_map, open(os.path.join(OUT, "place_address.json"), "w", encoding="utf-8"))
     report = {
         "places": len(places),
         "unique_addresses": len(addr_list),
@@ -67,7 +67,7 @@ def main():
         "place_flag_counts": dict(flag_counts),
         "max_places_per_address": max(a["place_count"] for a in addr_list),
     }
-    json.dump(report, open(os.path.join(OUT, "extract_report.json"), "w"), indent=1)
+    json.dump(report, open(os.path.join(OUT, "extract_report.json"), "w", encoding="utf-8"), indent=1)
     print(json.dumps(report, indent=1))
 
 

@@ -28,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent
 RAW = ROOT / "raw"
 OUT = ROOT / "OUTPUT"
-CATS = {int(k): v["title"] for k, v in json.load(open(ROOT / "work" / "violation_categories.json")).items()}
+CATS = {int(k): v["title"] for k, v in json.load(open(ROOT / "work" / "violation_categories.json", encoding="utf-8")).items()}
 
 def norm_header(h):
     return h.strip()
@@ -376,7 +376,7 @@ if "by_method" in qa["join"]:
     qa["join"]["by_method"] = dict(qa["join"]["by_method"])
 
 OUT.mkdir(parents=True, exist_ok=True)
-with open(OUT / "places_fl.json", "w") as fh:
+with open(OUT / "places_fl.json", "w", encoding="utf-8") as fh:
     json.dump(all_places, fh, separators=(",", ":"))
 manifest = {
     "region": "us-fl",
@@ -389,11 +389,11 @@ manifest = {
     "adapter": "fl_dbpr prototype v0.1",
     "totals": qa["totals"],
 }
-with open(OUT / "manifest.json", "w") as fh:
+with open(OUT / "manifest.json", "w", encoding="utf-8") as fh:
     json.dump(manifest, fh, indent=1)
-with open(OUT / "qa_report.json", "w") as fh:
+with open(OUT / "qa_report.json", "w", encoding="utf-8") as fh:
     json.dump(qa, fh, indent=1)
-with open(OUT / "fl_name_rejects.json", "w") as fh:
+with open(OUT / "fl_name_rejects.json", "w", encoding="utf-8") as fh:
     json.dump(name_rejects, fh, indent=1)
 
 print(json.dumps(qa["totals"], indent=1))

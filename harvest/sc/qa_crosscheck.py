@@ -90,17 +90,17 @@ def parse_rate_file(path):
 
 
 def main():
-    places = json.load(open(os.path.join(OUT, "places_sc.json")))
-    exclusions = json.load(open(os.path.join(OUT, "exclusions.json")))
-    qa = json.load(open(os.path.join(OUT, "qa_report.json")))
+    places = json.load(open(os.path.join(OUT, "places_sc.json"), encoding="utf-8"))
+    exclusions = json.load(open(os.path.join(OUT, "exclusions.json"), encoding="utf-8"))
+    qa = json.load(open(os.path.join(OUT, "qa_report.json"), encoding="utf-8"))
 
     # ---------- raw GIS recount ----------
     steton = []
     for f in sorted(glob.glob(os.path.join(HERE, "raw", "gis_steton",
                                            "page_*.json"))):
-        steton += [x["attributes"] for x in json.load(open(f))["features"]]
+        steton += [x["attributes"] for x in json.load(open(f, encoding="utf-8"))["features"]]
     oracle = json.load(open(os.path.join(
-        HERE, "raw", "gis_steton", "_count.json")))["count"]
+        HERE, "raw", "gis_steton", "_count.json"), encoding="utf-8"))["count"]
     verdict("B1_steton_oracle", len(steton) == oracle == 137087,
             f"raw steton rows={len(steton)} oracle={oracle}")
     st_by_guid = {}
@@ -315,7 +315,7 @@ def main():
     print(f"INFO  B11_geocode_readiness: "
           f"{checks['B11_geocode_readiness']['detail']}")
 
-    with open(os.path.join(OUT, "qa_crosscheck.json"), "w") as fh:
+    with open(os.path.join(OUT, "qa_crosscheck.json"), "w", encoding="utf-8") as fh:
         json.dump(checks, fh, ensure_ascii=False, indent=1)
     failed = [k for k, v in checks.items() if not v["pass"]]
     print("QA CROSSCHECK:", "ALL PASS" if not failed else

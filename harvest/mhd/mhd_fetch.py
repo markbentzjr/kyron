@@ -168,7 +168,7 @@ class Scheduler:
         self.date_to = date_to
         self.done = {}
         if os.path.exists(paths.done):
-            with open(paths.done) as f:
+            with open(paths.done, encoding="utf-8") as f:
                 self.done = json.load(f)
         if self.done.get("STATEWIDE", {}).get("complete"):
             self.finished = True

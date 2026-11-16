@@ -64,12 +64,12 @@ total = 0
 for code, name in counties:
     path = f"{OUT}/{code}.json"
     if os.path.exists(path):
-        n = len(json.load(open(path))); total += n
+        n = len(json.load(open(path, encoding="utf-8"))); total += n
         print(f"skip {name} ({n})", flush=True); continue
     places = fetch_county(code, name.title())
     if places is None:
         print(f"FAILED {name}", flush=True); continue
-    json.dump(places, open(path, 'w'))
+    json.dump(places, open(path, 'w', encoding="utf-8"))
     total += len(places)
     print(f"{name}: {len(places)} places (running total {total})", flush=True)
     time.sleep(2)

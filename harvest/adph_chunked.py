@@ -63,5 +63,5 @@ for city in cities:
     print(f"{city}: {len(got)} (unique so far {len(seen)})", flush=True)
     time.sleep(1.5)
 path = f"{OUT}/{county_code}.json"
-json.dump(list(seen.values()), open(path, 'w'))
+json.dump(list(seen.values()), open(path, 'w', encoding="utf-8"))
 print(f"WROTE {path}: {len(seen)} places; failed cities: {failed}", flush=True)

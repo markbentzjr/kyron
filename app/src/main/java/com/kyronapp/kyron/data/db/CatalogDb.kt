@@ -446,8 +446,13 @@ class CatalogDb(context: Context) :
         }
 
     fun allPlaces(db: SQLiteDatabase): List<Place> {
+        // The list snapshot only ever exposes the FIRST inspection per place
+        // (adapters/summaries call inspections.firstOrNull(); Detail and
+        // search hydrate full history straight from SQLite). Loading every
+        // inspection+violations row here OOMs on 20k-place packs, so fetch
+        // idx=0 rows only — identical visible content, a fraction of the heap.
         val insps = HashMap<String, MutableList<Inspection>>()
-        db.rawQuery("SELECT place_id,score,date,type,violations_json,result_text FROM inspections ORDER BY place_id, idx", null)
+        db.rawQuery("SELECT place_id,score,date,type,violations_json,result_text FROM inspections WHERE idx=0", null)
             .use { c ->
                 while (c.moveToNext()) {
                     val vs = mutableListOf<Violation>()

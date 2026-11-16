@@ -60,5 +60,5 @@ def fetch_all():
 
 if __name__ == "__main__":
     rows = fetch_all()
-    json.dump(rows, open("mchd_rows.json", "w"))
+    json.dump(rows, open("mchd_rows.json", "w", encoding="utf-8"))
     print("saved mchd_rows.json")

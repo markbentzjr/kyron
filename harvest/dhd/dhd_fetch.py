@@ -219,7 +219,7 @@ def main():
         parts = partition_list(cfg, raw)
         done = {}
         if os.path.exists(done_path):
-            with open(done_path) as f:
+            with open(done_path, encoding="utf-8") as f:
                 done = json.load(f)
         for part in parts:
             if done.get(part, {}).get("complete"):

@@ -28,7 +28,7 @@ def wanted_ids():
     ids = {}
     fp = os.path.join(WORK, "failures.jsonl")
     if os.path.exists(fp):
-        with open(fp) as f:
+        with open(fp, encoding="utf-8") as f:
             for line in f:
                 try:
                     rec = json.loads(line)
@@ -39,7 +39,7 @@ def wanted_ids():
                     ids[iid] = county
     mp = os.path.join(WORK, "detail_mismatch.jsonl")
     if os.path.exists(mp):
-        with open(mp) as f:
+        with open(mp, encoding="utf-8") as f:
             for line in f:
                 try:
                     rec = json.loads(line)
@@ -83,7 +83,7 @@ def main():
             print(f"[still bad] {iid}: {res}", flush=True)
         time.sleep(0.3)
     mp = os.path.join(WORK, "detail_mismatch.jsonl")
-    with open(mp, "w") as f:
+    with open(mp, "w", encoding="utf-8") as f:
         for rec in still_bad:
             rec["ts"] = fd.utcnow()
             f.write(json.dumps(rec) + "\n")

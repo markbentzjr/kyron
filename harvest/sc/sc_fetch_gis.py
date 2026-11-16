@@ -38,7 +38,7 @@ def log(url, path, status, body):
     sha = hashlib.sha256(body).hexdigest()
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     rel = os.path.relpath(path, HERE)
-    with open(LOG, "a") as fh:
+    with open(LOG, "a", encoding="utf-8") as fh:
         fh.write(f"{rel}\t{url}\t{ts}\t{status}\t{len(body)}\t{sha}\n")
 
 
@@ -104,7 +104,7 @@ def pull(layer_id, subdir, out_fields, geometry):
 
 def main():
     if not os.path.exists(LOG):
-        with open(LOG, "w") as fh:
+        with open(LOG, "w", encoding="utf-8") as fh:
             fh.write("file\turl\tfetched_utc\thttp_status\tbytes\tsha256\n")
     pull(0, "gis_layer0",
          "OBJECTID,PROG_CODE,ZIPCODE,PERMIT_ID,FACILITY,ADDRESS,CITY,STATE,"

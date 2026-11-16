@@ -34,10 +34,10 @@ def main():
     for path in sorted(os.listdir(os.path.join(ROOT, "index"))):
         if not path.endswith(".jsonl"):
             continue
-        for line in open(os.path.join(ROOT, "index", path)):
+        for line in open(os.path.join(ROOT, "index", path), encoding="utf-8"):
             rec = json.loads(line)
             index[rec["insp"]] = rec
-    qa = json.load(open(os.path.join(ROOT, "OUTPUT/qa_report.json")))
+    qa = json.load(open(os.path.join(ROOT, "OUTPUT/qa_report.json"), encoding="utf-8"))
     problems = qa.get("problems_sample", [])
     # NOTE: build stores only a sample; recompute problem insp ids by
     # re-deriving stub mismatch is overkill - instead treat ALL index
@@ -45,7 +45,7 @@ def main():
     # is wrong too. Mopup A uses the problems list persisted by build:
     prob_path = os.path.join(ROOT, "OUTPUT/problems.json")
     if os.path.exists(prob_path):
-        problems = json.load(open(prob_path))
+        problems = json.load(open(prob_path, encoding="utf-8"))
 
     # ---- A: sequential direct re-GET of problem pages
     s = requests.Session(); s.headers.update({"User-Agent": "Mozilla/5.0"})
@@ -129,7 +129,7 @@ def main():
                        "grid_stub": {kk: row[kk] for kk in
                                      ("date", "name", "address", "state_id",
                                       "type_label", "score", "grade", "inspector")}}
-                with open(os.path.join(ROOT, "index", f"cty{code:03d}.jsonl"), "a") as f:
+                with open(os.path.join(ROOT, "index", f"cty{code:03d}.jsonl"), "a", encoding="utf-8") as f:
                     f.write(json.dumps(rec) + "\n")
                 need[k] -= 1
                 got += 1

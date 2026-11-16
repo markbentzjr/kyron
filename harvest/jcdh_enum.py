@@ -10,9 +10,9 @@ CAP = 52
 places = {}
 done = set()
 if os.path.exists(OUT):
-    places = {p['permit']: p for p in json.load(open(OUT))}
+    places = {p['permit']: p for p in json.load(open(OUT, encoding="utf-8"))}
 if os.path.exists(DONE):
-    done = set(json.load(open(DONE)))
+    done = set(json.load(open(DONE, encoding="utf-8")))
 print(f"resume: {len(places)} places, {len(done)} prefixes done", flush=True)
 
 s = requests.Session(); s.headers.update(UA)
@@ -67,8 +67,8 @@ while qi < len(queue):
         print(f"{kw}: {len(rows)} rows (CAP HIT -> expanding) unique={len(places)} queue={len(queue)-qi}", flush=True)
     else:
         print(f"{kw}: {len(rows)} rows unique={len(places)} queue_left={len(queue)-qi}", flush=True)
-    json.dump(list(places.values()), open(OUT, 'w'))
-    json.dump(sorted(done), open(DONE, 'w'))
+    json.dump(list(places.values()), open(OUT, 'w', encoding="utf-8"))
+    json.dump(sorted(done), open(DONE, 'w', encoding="utf-8"))
     time.sleep(1.2)
 
 print(f"DONE unique Jefferson places: {len(places)}", flush=True)

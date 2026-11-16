@@ -88,7 +88,7 @@ def log_fetch(fname, url, status, body):
     line = "\t".join([fname, url, utcnow(), str(status),
                       str(len(body)), sha]) + "\n"
     with _log_lock:
-        with open(LOG_PATH, "a") as f:
+        with open(LOG_PATH, "a", encoding="utf-8") as f:
             f.write(line)
 
 
@@ -96,7 +96,7 @@ def log_failure(kind, key, err):
     rec = {"ts": utcnow(), "kind": kind, "key": key,
            "error": str(err)[:300]}
     with _fail_lock:
-        with open(FAIL_PATH, "a") as f:
+        with open(FAIL_PATH, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
 
 
@@ -176,7 +176,7 @@ class Scheduler:
         self.cond = threading.Condition()
         self.done = {}
         if os.path.exists(DONE_PATH):
-            with open(DONE_PATH) as f:
+            with open(DONE_PATH, encoding="utf-8") as f:
                 self.done = json.load(f)
 
     def submit(self, ex, job, d0, d1, purpose):
@@ -261,7 +261,7 @@ class Scheduler:
                "leaf_ranges": job.leaf_ranges, "splits": job.splits}
         with _done_lock:
             self.done[job.name] = rec
-            with open(DONE_PATH, "w") as f:
+            with open(DONE_PATH, "w", encoding="utf-8") as f:
                 json.dump(self.done, f, indent=1)
         print(f"[done] {job.name}: {job.rows} rows (incl. split "
               f"dupes), leaves={job.leaf_ranges} splits={job.splits}, "
@@ -275,13 +275,13 @@ def main():
     os.makedirs(RAW, exist_ok=True)
     os.makedirs(WORK, exist_ok=True)
     if not os.path.exists(LOG_PATH):
-        with open(LOG_PATH, "w") as f:
+        with open(LOG_PATH, "w", encoding="utf-8") as f:
             f.write("file\turl\tfetched_utc\thttp_status\tbytes\tsha256\n")
-    with open(COUNTIES_PATH) as f:
+    with open(COUNTIES_PATH, encoding="utf-8") as f:
         counties = json.load(f)
     done = {}
     if os.path.exists(DONE_PATH):
-        with open(DONE_PATH) as f:
+        with open(DONE_PATH, encoding="utf-8") as f:
             done = json.load(f)
     only = sys.argv[1:] or None
     jobs = []

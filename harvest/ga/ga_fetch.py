@@ -80,7 +80,7 @@ def log_fetch(fname, url, status, body):
         fname, url, utcnow(), str(status), str(len(body)), sha,
     ]) + "\n"
     with _log_lock:
-        with open(LOG_PATH, "a") as f:
+        with open(LOG_PATH, "a", encoding="utf-8") as f:
             f.write(line)
 
 
@@ -88,7 +88,7 @@ def log_failure(kind, key, url, err):
     rec = {"ts": utcnow(), "kind": kind, "key": key, "url": url,
            "error": str(err)[:300]}
     with _fail_lock:
-        with open(FAIL_PATH, "a") as f:
+        with open(FAIL_PATH, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
 
 
@@ -140,7 +140,7 @@ def fetch_meta():
 
 
 def county_list():
-    with open(os.path.join(RAW, "meta_filters.json")) as f:
+    with open(os.path.join(RAW, "meta_filters.json"), encoding="utf-8") as f:
         filters = json.load(f)
     for f in filters:
         if f.get("name", "").startswith("County"):
@@ -205,7 +205,7 @@ def main():
     os.makedirs(RAW, exist_ok=True)
     os.makedirs(WORK, exist_ok=True)
     if not os.path.exists(LOG_PATH):
-        with open(LOG_PATH, "w") as f:
+        with open(LOG_PATH, "w", encoding="utf-8") as f:
             f.write("file\turl\tfetched_utc\thttp_status\tbytes\tsha256\n")
     fetch_meta()
     counties = county_list()
@@ -217,7 +217,7 @@ def main():
               flush=True)
     done = {}
     if os.path.exists(DONE_PATH):
-        with open(DONE_PATH) as f:
+        with open(DONE_PATH, encoding="utf-8") as f:
             done = json.load(f)
 
     only = sys.argv[1:] or None
@@ -249,7 +249,7 @@ def main():
         }
         with _done_lock:
             done[county] = rec
-            with open(DONE_PATH, "w") as f:
+            with open(DONE_PATH, "w", encoding="utf-8") as f:
                 json.dump(done, f, indent=1)
         print(f"[done] {county}: {len(stubs)} facilities, insp ok={ok} "
               f"fail={fail}, {rec['seconds']}s", flush=True)

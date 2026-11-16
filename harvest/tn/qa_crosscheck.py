@@ -55,7 +55,7 @@ def stream_stubs():
         for fname in sorted(os.listdir(cpath)):
             if not fname.endswith(".json"):
                 continue
-            with open(os.path.join(cpath, fname)) as f:
+            with open(os.path.join(cpath, fname), encoding="utf-8") as f:
                 for r in json.load(f):
                     if isinstance(r, dict) and is_food(r):
                         seen.setdefault(r["inspectionID"],
@@ -125,11 +125,11 @@ def x_viol_count(html_text):
 
 
 def main():
-    with open(os.path.join(OUT, "places_tn.json")) as f:
+    with open(os.path.join(OUT, "places_tn.json"), encoding="utf-8") as f:
         places = json.load(f)
-    with open(os.path.join(OUT, "exclusions.json")) as f:
+    with open(os.path.join(OUT, "exclusions.json"), encoding="utf-8") as f:
         exclusions = json.load(f)
-    with open(os.path.join(OUT, "qa_report.json")) as f:
+    with open(os.path.join(OUT, "qa_report.json"), encoding="utf-8") as f:
         build_qa = json.load(f)
 
     stubs = stream_stubs()
@@ -227,7 +227,7 @@ def main():
     checks["B5_spot_ok"] = b5_ok
 
     # B6 county attribution
-    with open(os.path.join(ROOT, "work", "counties.json")) as f:
+    with open(os.path.join(ROOT, "work", "counties.json"), encoding="utf-8") as f:
         guid2name = json.load(f)
     dir2name = {n.upper().replace(" ", "_"): n
                 for n in guid2name.values()}
@@ -280,7 +280,7 @@ def main():
         "B4_violations": b4_bad[:20],
         "B5_spot_checks": spots,
     }
-    with open(os.path.join(OUT, "qa_crosscheck.json"), "w") as f:
+    with open(os.path.join(OUT, "qa_crosscheck.json"), "w", encoding="utf-8") as f:
         json.dump(result, f, indent=1)
     failed = [k for k, v in checks.items() if not v]
     print(json.dumps(checks, indent=1))

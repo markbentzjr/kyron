@@ -65,7 +65,7 @@ def parse_rate_html(path):
 def load_gis(subdir):
     feats = []
     for p in sorted(glob.glob(os.path.join(HERE, "raw", subdir, "page_*.json"))):
-        with open(p) as fh:
+        with open(p, encoding="utf-8") as fh:
             feats += json.load(fh)["features"]
     return feats
 

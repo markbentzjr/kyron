@@ -48,7 +48,7 @@ def parse_results():
     for fn in order:
         if not fn.endswith(".csv"):
             continue
-        with open(os.path.join(RESULTS, fn)) as f:
+        with open(os.path.join(RESULTS, fn), encoding="utf-8") as f:
             for row in csv.reader(f):
                 if len(row) < 3:
                     continue
@@ -122,7 +122,7 @@ def haversine_m(lat1, lng1, lat2, lng2):
 
 
 def main():
-    addrs = {a["address_id"]: a for a in json.load(open(os.path.join(OUT, "addresses.json")))}
+    addrs = {a["address_id"]: a for a in json.load(open(os.path.join(OUT, "addresses.json"), encoding="utf-8"))}
     results = parse_results()
     out = {}
     counts = Counter()
@@ -139,12 +139,12 @@ def main():
                     "matched_address": results.get(aid, {}).get("matched_address", "")}
         counts[status] += 1
         counts["match_" + (match or "NONE")] += 1
-    json.dump(out, open(os.path.join(OUT, "adjudicated.json"), "w"))
+    json.dump(out, open(os.path.join(OUT, "adjudicated.json"), "w", encoding="utf-8"))
 
     # Ground truth: distance from Census coords to the previously stored
     # coordinates for places that had them (harvested earlier).
-    seed = json.load(open(os.path.join(HERE, "..", "..", "src", "main", "assets", "places_seed.json")))
-    place_map = json.load(open(os.path.join(OUT, "place_address.json")))
+    seed = json.load(open(os.path.join(HERE, "..", "..", "src", "main", "assets", "places_seed.json"), encoding="utf-8"))
+    place_map = json.load(open(os.path.join(OUT, "place_address.json"), encoding="utf-8"))
     truth = []
     for p in seed:
         if p.get("lat") is not None:
@@ -162,7 +162,7 @@ def main():
         "truth_dist_max": dists[-1] if dists else None,
         "truth_over_250m": [t for t in truth if t["dist_m"] > 250],
     }
-    json.dump(report, open(os.path.join(OUT, "adjudicate_report.json"), "w"), indent=1)
+    json.dump(report, open(os.path.join(OUT, "adjudicate_report.json"), "w", encoding="utf-8"), indent=1)
     print(json.dumps(report, indent=1))
 
 

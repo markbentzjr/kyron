@@ -82,7 +82,7 @@ def load_stubs():
         for fname in sorted(os.listdir(cpath)):
             if not fname.endswith(".json"):
                 continue
-            with open(os.path.join(cpath, fname)) as f:
+            with open(os.path.join(cpath, fname), encoding="utf-8") as f:
                 rows = json.load(f)
             for r in rows:
                 if not isinstance(r, dict) or "inspectionID" not in r:
@@ -172,7 +172,7 @@ def build_violations(parsed):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    with open(os.path.join(WORK, "counties.json")) as f:
+    with open(os.path.join(WORK, "counties.json"), encoding="utf-8") as f:
         guid2name = json.load(f)
     dir2name = {name.upper().replace(" ", "_"): name
                 for name in guid2name.values()}
@@ -363,15 +363,15 @@ def main():
         },
     }
 
-    with open(os.path.join(OUT, "places_tn.json"), "w") as f:
+    with open(os.path.join(OUT, "places_tn.json"), "w", encoding="utf-8") as f:
         json.dump(places, f, ensure_ascii=False)
-    with open(os.path.join(OUT, "manifest.json"), "w") as f:
+    with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=1)
-    with open(os.path.join(OUT, "exclusions.json"), "w") as f:
+    with open(os.path.join(OUT, "exclusions.json"), "w", encoding="utf-8") as f:
         json.dump(exclusions, f, indent=1)
     qa["exclusions"] = len(exclusions)
     qa["places_out"] = len(places)
-    with open(os.path.join(OUT, "qa_report.json"), "w") as f:
+    with open(os.path.join(OUT, "qa_report.json"), "w", encoding="utf-8") as f:
         json.dump(qa, f, indent=1)
     print(json.dumps(manifest["totals"], indent=1))
     print(f"exclusions: {len(exclusions)}  "

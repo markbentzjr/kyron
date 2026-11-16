@@ -9,26 +9,19 @@ Then:   python ../../tools/packs/build_pack_socrata.py <key>
 Read-only HTTP GET; deterministic `$order=:id` offset paging; one retry
 per page; row count cross-checked against `$select=count(*)`.
 """
-import argparse, json, os, sys, time, urllib.parse, urllib.request
+import argparse, json, os, sys, urllib.parse
 from datetime import date, datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import common  # noqa: E402
 from sources import SOURCES  # noqa: E402
 
-UA = "KyronHarvest/1.0 (public data; github.com/markbentzjr/kyron)"
 PAGE = 50000
 
 
 def get(url):
-    for attempt in range(2):
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=180) as r:
-                return json.loads(r.read().decode("utf-8"))
-        except Exception as e:  # noqa: BLE001
-            if attempt:
-                raise RuntimeError(f"GET failed: {e!r} {url[:120]}")
-            time.sleep(5)
+    return common.fetch_json(url)
 
 
 def fetch(cfg, limit_rows=0):
@@ -59,31 +52,6 @@ def fetch(cfg, limit_rows=0):
                   "fetched": len(rows), "pages": log}
 
 
-def validate(places, cfg):
-    errs = []
-    ids = set()
-    for p in places:
-        if p["id"] in ids:
-            errs.append(f"duplicate id {p['id']}")
-        ids.add(p["id"])
-        if not p["n"]:
-            errs.append(f"{p['id']}: empty name")
-        if (p["lat"] is None) != (p["gs"] != "ACCEPTED"):
-            errs.append(f"{p['id']}: geo/provenance mismatch")
-        for i in p["insp"]:
-            if cfg["model"] == "PASS_FAIL" and i["s"] != -1:
-                errs.append(f"{p['id']}: PASS_FAIL inspection has a score")
-            if i["s"] != -1 and not (0 <= i["s"] <= 300):
-                errs.append(f"{p['id']}: score out of range {i['s']}")
-            if not i["d"]:
-                errs.append(f"{p['id']}: inspection without date")
-    return {"places": len(places),
-            "inspections": sum(len(p["insp"]) for p in places),
-            "violations": sum(len(i["v"]) for p in places for i in p["insp"]),
-            "with_coords": sum(p["lat"] is not None for p in places),
-            "errors": errs[:50], "error_count": len(errs)}
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("source", choices=sorted(SOURCES))
@@ -91,18 +59,17 @@ def main():
     a = ap.parse_args()
     cfg = SOURCES[a.source]
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out", a.source)
-    os.makedirs(out, exist_ok=True)
     rows, flog = fetch(cfg, a.limit_rows)
     if not a.limit_rows and flog["fetched"] != flog["expected"]:
         print(f"WARN count mismatch {flog}", file=sys.stderr)
     places = cfg["normalize"](rows, cfg)
-    rep = validate(places, cfg)
-    for name, obj in (("places.json", places), ("fetch_log.json", flog),
-                      ("validate_report.json", rep),
-                      ("manifest.json", {"generated_at": datetime.now(timezone.utc).isoformat(),
-                                         "source": a.source, "dataset": cfg["dataset"]})):
-        with open(os.path.join(out, name), "w", encoding="utf-8") as f:
-            json.dump(obj, f, ensure_ascii=False)
+    rep = common.validate_places(places,
+                                 forbid_scores=cfg["model"] == "PASS_FAIL")
+    common.emit(
+        out,
+        places=places, fetch_log=flog, validate_report=rep,
+        manifest={"generated_at": datetime.now(timezone.utc).isoformat(),
+                  "source": a.source, "dataset": cfg["dataset"]})
     print(json.dumps({k: v for k, v in rep.items() if k != "errors"}))
     return 1 if rep["error_count"] else 0
 

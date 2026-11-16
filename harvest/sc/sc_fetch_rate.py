@@ -57,7 +57,7 @@ COUNTIES = {
 _lock = threading.Lock()
 _done = set()
 if os.path.exists(DONE):
-    with open(DONE) as fh:
+    with open(DONE, encoding="utf-8") as fh:
         for line in fh:
             _done.add(line.rstrip("\n"))
 
@@ -67,7 +67,7 @@ def log(url, path, status, body):
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     rel = os.path.relpath(path, HERE)
     with _lock:
-        with open(LOG, "a") as fh:
+        with open(LOG, "a", encoding="utf-8") as fh:
             fh.write(f"{rel}\t{url}\t{ts}\t{status}\t{len(body)}\t{sha}\n")
 
 
@@ -144,7 +144,7 @@ def walk(cc, d0, d1, depth=0):
 def _mark(key):
     with _lock:
         _done.add(key)
-        with open(DONE, "a") as fh:
+        with open(DONE, "a", encoding="utf-8") as fh:
             fh.write(key + "\n")
 
 
@@ -167,7 +167,7 @@ def main():
     with ThreadPoolExecutor(max_workers=4) as ex:
         for cc, n in ex.map(run_county, sorted(COUNTIES)):
             results[cc] = n
-    with open(os.path.join(WORK, "rate_totals.json"), "w") as fh:
+    with open(os.path.join(WORK, "rate_totals.json"), "w", encoding="utf-8") as fh:
         json.dump(results, fh, indent=1)
     print("rate fetch complete:", sum(results.values()), "rows total")
 

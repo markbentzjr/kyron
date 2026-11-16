@@ -40,5 +40,9 @@ harvest/snhd/out/
 harvest/_release/
 _verify/
 dist/
+
+# Built pack artifacts — regenerable via tools/packs; published to the
+# data-packs GitHub release, never committed.
+*.db.gz
 /kyron-keys/
 .kotlin/

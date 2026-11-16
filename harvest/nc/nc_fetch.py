@@ -44,7 +44,7 @@ def log_fetch(relpath, url, status, content: bytes):
     h = hashlib.sha256(content).hexdigest()
     line = f"{relpath}\t{url}\t{utcnow()}\t{status}\t{len(content)}\t{h}\n"
     with log_lock:
-        with open(LOG, "a") as f:
+        with open(LOG, "a", encoding="utf-8") as f:
             f.write(line)
 
 def save_gz(relpath, content: bytes):
@@ -240,7 +240,7 @@ def harvest_task(task):
                                  ("date", "name", "address", "state_id",
                                   "type_label", "score", "grade", "inspector")}}
             with log_lock:
-                with open(index_path, "a") as f:
+                with open(index_path, "a", encoding="utf-8") as f:
                     f.write(json.dumps(rec) + "\n")
             if (estab, insp) in seen_pairs:
                 fails.append({"stub": row, "page": page, "err": "duplicate pair in task"})
@@ -252,7 +252,7 @@ def harvest_task(task):
             ic2 = items_count(grid)
             if ic2 is None or ic2[1] != task["expected"]:
                 raise SliceFail(f"{tid}: after NextPage items {ic2}")
-    with open(done_file, "w") as f:
+    with open(done_file, "w", encoding="utf-8") as f:
         json.dump({"task": task, "harvested": harvested, "fails": fails,
                    "finished": utcnow()}, f, indent=1)
     return tid, f"done harvested={harvested} fails={len(fails)}"
@@ -333,7 +333,7 @@ def main():
     print(f"planned {len(tasks)} slice tasks, "
           f"{sum(t['expected'] for t in tasks)} food inspections", flush=True)
     json.dump([{k: v for k, v in t.items()} for t in tasks],
-              open(os.path.join(WORK, "tasks.json"), "w"), indent=1)
+              open(os.path.join(WORK, "tasks.json"), "w", encoding="utf-8"), indent=1)
     errors = []
     with ThreadPoolExecutor(max_workers=10) as ex:
         for tid, msg in ex.map(lambda t: _run(t, errors), tasks):

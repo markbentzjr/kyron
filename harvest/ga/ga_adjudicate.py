@@ -76,10 +76,10 @@ def main():
     for cdir in sorted(glob.glob(os.path.join(ROOT, "raw",
                                               "search_pages", "*"))):
         for pf in sorted(glob.glob(os.path.join(cdir, "p*.json"))):
-            for s in json.load(open(pf)):
+            for s in json.load(open(pf, encoding="utf-8")):
                 raw.setdefault(base64.b64decode(s["id"]).decode(), s)
     places = json.load(open(os.path.join(ROOT, "OUTPUT",
-                                          "places_ga.json")))
+                                          "places_ga.json"), encoding="utf-8"))
     flagged = [p for p in places if fused_split(p["a"] or "")]
     records = []
     patterns = collections.Counter()
@@ -113,7 +113,7 @@ def main():
         "records": records,
     }
     with open(os.path.join(ROOT, "OUTPUT", "gate_adjudication.json"),
-              "w") as f:
+              "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1)
     print(f"flagged={len(flagged)} all_verified={all_verified}")
     print(json.dumps(dict(patterns), indent=1))

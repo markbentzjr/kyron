@@ -45,6 +45,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("source", choices=["snhd"])
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--version-seq", type=int, default=0,
+                    help="override dataset version suffix (e.g. 2 -> <day>.2)")
     a = ap.parse_args()
     cfg = CFG
     out = os.path.join(REPO, "harvest", "snhd", "out", a.source)
@@ -64,7 +66,10 @@ def main():
         region=cfg["region"], state=cfg["state"], name=cfg["name"],
         model=cfg["model"], source_label=cfg["attribution"],
         places=places, generated_at=src_m["generated_at"], out_dir=out,
-        limit=a.limit, attribution=cfg["attribution"],
+        limit=a.limit,
+        version=(f"{src_m['generated_at'][:10]}.{a.version_seq}"
+                 if a.version_seq else None),
+        attribution=cfg["attribution"],
         jurisdictions=[{"jurisdictionId": cfg["jurisdiction"],
                         "name": cfg["attribution"]}])
 

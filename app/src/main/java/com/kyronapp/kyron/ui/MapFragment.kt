@@ -88,8 +88,17 @@ class MapFragment : Fragment() {
         mv.zoomController.setVisibility(
             org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER
         )
-        mv.controller.setZoom(11.0)
-        mv.controller.setCenter(GeoPoint(app.prefs.homeLat, app.prefs.homeLng))
+        // Initial camera: home point when it sits inside the ACTIVE region;
+        // otherwise anchor on the region itself (a region may have switched
+        // while this fragment was not alive, e.g. a Coverage download).
+        val initInfo = app.regions.activeInfo()
+        val homeInInit = app.prefs.homeLat in (initInfo.centerLat - 6)..(initInfo.centerLat + 6) &&
+            app.prefs.homeLng in (initInfo.centerLng - 7)..(initInfo.centerLng + 7)
+        mv.controller.setZoom(if (homeInInit) 11.0 else 8.0)
+        mv.controller.setCenter(
+            if (homeInInit) GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
+            else GeoPoint(initInfo.centerLat, initInfo.centerLng)
+        )
         mv.addMapListener(DelayedMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean { refreshViewport(); return true }
             override fun onZoom(event: ZoomEvent?): Boolean { refreshViewport(); return true }
@@ -108,7 +117,13 @@ class MapFragment : Fragment() {
 
         v.findViewById<ImageButton>(R.id.sheet_close).setOnClickListener { hideSheet() }
         v.findViewById<View>(R.id.map_locate).setOnClickListener {
-            mv.controller.animateTo(GeoPoint(app.prefs.homeLat, app.prefs.homeLng))
+            val info = app.regions.activeInfo()
+            val homeInRegion = app.prefs.homeLat in (info.centerLat - 6)..(info.centerLat + 6) &&
+                app.prefs.homeLng in (info.centerLng - 7)..(info.centerLng + 7)
+            mv.controller.animateTo(
+                if (homeInRegion) GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
+                else GeoPoint(info.centerLat, info.centerLng)
+            )
             mv.controller.setZoom(13.0)
         }
         v.findViewById<View>(R.id.map_zoom_in).setOnClickListener {

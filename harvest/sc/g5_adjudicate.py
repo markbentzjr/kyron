@@ -35,7 +35,7 @@ def clean(s):
 
 def main():
     places = {p["id"]: p for p in json.load(
-        open(os.path.join(HERE, "OUTPUT", "places_sc.json")))}
+        open(os.path.join(HERE, "OUTPUT", "places_sc.json"), encoding="utf-8"))}
     l0 = {}
     for f in load_gis("gis_layer0"):
         a = f["attributes"]
@@ -74,7 +74,7 @@ def main():
         })
         print(pid_, verdicts[-1]["verdict"], evidence[:1])
     with open(os.path.join(HERE, "OUTPUT", "gate_adjudication.json"),
-              "w") as fh:
+              "w", encoding="utf-8") as fh:
         json.dump(verdicts, fh, ensure_ascii=False, indent=1)
     bad = [v for v in verdicts if not v["evidence"]]
     print(f"{len(verdicts) - len(bad)}/{len(verdicts)} proven source-verbatim")

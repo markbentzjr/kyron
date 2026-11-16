@@ -68,13 +68,13 @@ def log_fetch(fname, url, status, body):
     line = "\t".join([fname, url, utcnow(), str(status),
                       str(len(body)), sha]) + "\n"
     with _log_lock:
-        with open(LOG_PATH, "a") as f:
+        with open(LOG_PATH, "a", encoding="utf-8") as f:
             f.write(line)
 
 
 def log_jsonl(path, lock, rec):
     with lock:
-        with open(path, "a") as f:
+        with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
 
 
@@ -154,7 +154,7 @@ def load_food_stubs(county_dir):
     for fname in sorted(os.listdir(cdir)):
         if not fname.endswith(".json"):
             continue
-        with open(os.path.join(cdir, fname)) as f:
+        with open(os.path.join(cdir, fname), encoding="utf-8") as f:
             rows = json.load(f)
         for r in rows:
             if not (r.get("permitType", "").startswith("Commercial Food")
@@ -203,14 +203,14 @@ def main():
     done_search = {}
     sp = os.path.join(WORK, "search_done.json")
     if os.path.exists(sp):
-        with open(sp) as f:
+        with open(sp, encoding="utf-8") as f:
             done_search = json.load(f)
     done = {}
     if os.path.exists(DONE_PATH):
-        with open(DONE_PATH) as f:
+        with open(DONE_PATH, encoding="utf-8") as f:
             done = json.load(f)
 
-    with open(os.path.join(WORK, "counties.json")) as f:
+    with open(os.path.join(WORK, "counties.json"), encoding="utf-8") as f:
         guid2name = json.load(f)
     dir2name = {name.upper().replace(" ", "_"): name
                 for name in guid2name.values()}
@@ -245,7 +245,7 @@ def main():
                "seconds": round(time.time() - t0, 1)}
         with _done_lock:
             done[cname] = rec
-            with open(DONE_PATH, "w") as f:
+            with open(DONE_PATH, "w", encoding="utf-8") as f:
                 json.dump(done, f, indent=1)
         print(f"[done] {cname}: {len(stubs)} food inspections, "
               f"{counts}, {rec['seconds']}s", flush=True)

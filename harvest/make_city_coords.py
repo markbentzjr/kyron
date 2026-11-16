@@ -39,7 +39,7 @@ def main(place_txt, counties_txt, out_path):
     assert len(counties) == 67, len(counties)
     out = {'cities': {k: [round(v[0], 5), round(v[1], 5)] for k, v in cities.items()},
            'counties': {k: [round(v[0], 5), round(v[1], 5)] for k, v in counties.items()}}
-    json.dump(out, open(out_path, 'w'), separators=(',', ':'))
+    json.dump(out, open(out_path, 'w', encoding="utf-8"), separators=(',', ':'))
     print(f'wrote {out_path}: {len(cities)} places, {len(counties)} counties')
 
 if __name__ == '__main__':

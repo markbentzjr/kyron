@@ -20,6 +20,7 @@
         android:label="Kyron"
         android:supportsRtl="true"
         android:theme="@style/Theme.Kyron"
+        android:largeHeap="true"
         android:usesCleartextTraffic="false">
 
         <activity

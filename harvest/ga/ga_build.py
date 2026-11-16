@@ -199,7 +199,7 @@ def main():
     for cdir in sorted(glob.glob(os.path.join(RAW, "search_pages", "*"))):
         c_raw = os.path.basename(cdir)
         for page_file in sorted(glob.glob(os.path.join(cdir, "p*.json"))):
-            with open(page_file) as f:
+            with open(page_file, encoding="utf-8") as f:
                 for stub in json.load(f):
                     fid_s = base64.b64decode(stub["id"]).decode()
                     sightings[fid_s].add(c_raw)
@@ -223,7 +223,7 @@ def main():
         qa["counties_searched"] += 1
         stubs = []
         for page_file in sorted(glob.glob(os.path.join(cdir, "p*.json"))):
-            with open(page_file) as f:
+            with open(page_file, encoding="utf-8") as f:
                 stubs.extend(json.load(f))
         seen_here = set()
         for stub in stubs:
@@ -345,7 +345,7 @@ def main():
                     insp_path = alt
             insp_list = []
             if os.path.exists(insp_path):
-                with open(insp_path) as f:
+                with open(insp_path, encoding="utf-8") as f:
                     insp_list = json.load(f)
             else:
                 qa.setdefault("missing_insp_files", []).append(
@@ -458,11 +458,11 @@ def main():
     qa["county_place_counts"] = dict(qa["county_place_counts"])
 
     os.makedirs(OUT, exist_ok=True)
-    with open(os.path.join(OUT, "places_ga.json"), "w") as f:
+    with open(os.path.join(OUT, "places_ga.json"), "w", encoding="utf-8") as f:
         json.dump(out_places, f, ensure_ascii=False)
-    with open(os.path.join(OUT, "qa_report.json"), "w") as f:
+    with open(os.path.join(OUT, "qa_report.json"), "w", encoding="utf-8") as f:
         json.dump(qa, f, indent=1, ensure_ascii=False)
-    with open(os.path.join(OUT, "exclusions.json"), "w") as f:
+    with open(os.path.join(OUT, "exclusions.json"), "w", encoding="utf-8") as f:
         json.dump(qa.get("excluded_places", []), f, indent=1,
                   ensure_ascii=False)
 
@@ -496,7 +496,7 @@ def main():
             "counties_with_places": len(qa["county_place_counts"]),
         },
     }
-    with open(os.path.join(OUT, "manifest.json"), "w") as f:
+    with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=1, ensure_ascii=False)
     print(json.dumps(manifest["totals"], indent=1))
     print("QA:", json.dumps({k: qa[k] for k in (

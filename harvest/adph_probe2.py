@@ -35,7 +35,7 @@ def search(name='', city='', county='', typeval=None):
     return r2
 
 r2 = search(city='Birmingham', county='Jefferson', typeval='Food Service Establishment')
-open('/home/hatch/kyron-build/harvest/bham_fse.html', 'w').write(r2.text)
+open('/home/hatch/kyron-build/harvest/bham_fse.html', 'w', encoding="utf-8").write(r2.text)
 d2 = BeautifulSoup(r2.text, 'html.parser')
 print("tables:", [(t.get('id'), len(t.find_all('tr'))) for t in d2.find_all('table')][:12])
 txt = d2.get_text(' ', strip=True)

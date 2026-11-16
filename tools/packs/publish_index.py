@@ -20,7 +20,7 @@ def main():
     entries = {}
     for man in sorted(glob.glob(os.path.join(REPO, "harvest", "**", "*.manifest.json"),
                                 recursive=True)):
-        m = json.load(open(man))
+        m = json.load(open(man, encoding="utf-8"))
         pack = os.path.join(os.path.dirname(man), m["full"]["file"])
         if not os.path.exists(pack):
             continue
@@ -36,7 +36,7 @@ def main():
     idx = {"schema": 1, "generatedAt": datetime.now(timezone.utc).isoformat(),
            "packs": entries}
     ip = os.path.join(DIST, "index.json")
-    with open(ip, "w") as f:
+    with open(ip, "w", encoding="utf-8") as f:
         json.dump(idx, f, indent=1, sort_keys=True)
     key = os.environ.get("PACK_SIGNING_KEY")
     if key:
@@ -44,7 +44,7 @@ def main():
             k.write(key)
         sig = subprocess.run(["openssl", "dgst", "-sha256", "-sign", k.name, ip], capture_output=True, check=True).stdout
         os.unlink(k.name)
-        open(ip + ".sig", "w").write(base64.b64encode(sig).decode())
+        open(ip + ".sig", "w", encoding="utf-8").write(base64.b64encode(sig).decode())
         print("signed index.json")
     else:
         print("PACK_SIGNING_KEY not set: index.json left UNSIGNED")

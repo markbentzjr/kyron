@@ -3,15 +3,15 @@
  "displayName": "Delaware",
  "state": "DE",
  "status": "available",
- "datasetVersion": "2026-10-23.1",
- "generatedAt": "2026-10-23T02:26:19.754798+00:00",
+ "datasetVersion": "2026-11-16.1",
+ "generatedAt": "2026-11-16T21:57:53.112332+00:00",
  "placeCount": 3731,
  "schemaVersion": 2,
  "minAppVersion": "2.0",
  "full": {
-  "file": "us-de-2026-10-23.1.db.gz",
-  "bytes": 828681,
-  "sha256": "536e54a6762f4861424ecd88d3eb08b204f24f3396789dd5bc3253dadbb92835"
+  "file": "us-de-2026-11-16.1.db.gz",
+  "bytes": 828682,
+  "sha256": "1547f9420d602bc616b4023c2a9404342bad6803592dde47c3c3aa1d64a90f2b"
  },
  "delta": null,
  "jurisdictions": [

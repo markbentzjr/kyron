@@ -21,7 +21,7 @@ data = {'__VIEWSTATE': hv('__VIEWSTATE'), '__VIEWSTATEGENERATOR': hv('__VIEWSTAT
 try:
     r2 = s.post(r.url, data=data, timeout=110)
     print("POST", r2.status_code, len(r2.text))
-    open('/home/hatch/kyron-build/harvest/adph_auburn.html','w').write(r2.text)
+    open('/home/hatch/kyron-build/harvest/adph_auburn.html','w', encoding="utf-8").write(r2.text)
     d2 = BeautifulSoup(r2.text, 'html.parser')
     gv = d2.find('table', {'id': lambda x: x and 'gvSearchResults' in x})
     if gv:
