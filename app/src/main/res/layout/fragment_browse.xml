@@ -180,13 +180,19 @@
              same MainActivity sync; the follow-up query re-renders the
              list and this button returns to its idle label when done. -->
         <Button
-            android:stateListAnimator="@animator/press_scale"
             android:id="@+id/refresh_btn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
             android:layout_marginEnd="8dp"
+            android:background="@drawable/btn_ghost"
+            android:minWidth="0dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:stateListAnimator="@animator/press_scale"
             android:text="@string/action_refresh"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textColor="@color/kyron_primary"
+            android:textSize="13sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -240,13 +246,19 @@
             android:textSize="14sp" />
 
         <Button
-            android:textAllCaps="false"
-            android:stateListAnimator="@animator/press_scale"
             android:id="@+id/empty_clear"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/action_clear_filters" />
+            android:layout_height="42dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/btn_primary"
+            android:minWidth="0dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:stateListAnimator="@animator/press_scale"
+            android:text="@string/action_clear_filters"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="13sp" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

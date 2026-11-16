@@ -2,21 +2,23 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="14dp">
 
-        <!-- Alert inbox: what your rules caught -->
+        <!-- ═══ INBOX — the hero: what your rules actually caught ═══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/card_bg"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -25,26 +27,42 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@string/nav_alerts"
                     android:src="@drawable/ic_notifications"
                     app:tint="@color/kyron_primary" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:layout_weight="1"
                     android:text="@string/alerts_inbox_title"
-                    android:textSize="16sp"
+                    android:textColor="@color/ink"
+                    android:textSize="17sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/inbox_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/chip_on_bg"
+                    android:paddingStart="10dp"
+                    android:paddingTop="3dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="3dp"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/inbox_empty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/alerts_inbox_empty"
                 android:textColor="@color/muted"
                 android:textSize="13sp" />
@@ -56,14 +74,26 @@
                 android:orientation="vertical" />
         </LinearLayout>
 
-        <!-- Rule card 1: favorites quick-pick -->
+        <!-- ═══ Section: ALERT RULES ═══ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="2dp"
+            android:text="@string/alerts_section_rules"
+            android:textColor="@color/muted"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Rule: favorites quick-pick -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:background="@drawable/card_bg"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -72,8 +102,8 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@string/nav_favorites"
                     android:src="@drawable/ic_star"
                     app:tint="@color/star_on" />
@@ -83,7 +113,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@string/alerts_favorites_title"
-                    android:textSize="16sp"
+                    android:textColor="@color/ink"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -99,7 +130,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/alerts_favorites_desc"
-                    android:textSize="13.5sp" />
+                    android:textColor="@color/ink_soft"
+                    android:textSize="13sp" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/sw_fav_alerts"
@@ -109,14 +141,14 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Rule card 2: area alerts -->
+        <!-- Rule: area alerts -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/card_bg"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -125,8 +157,8 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@string/cd_area_alerts"
                     android:src="@drawable/ic_place"
                     app:tint="@color/kyron_primary" />
@@ -136,7 +168,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@string/alerts_areas_title"
-                    android:textSize="16sp"
+                    android:textColor="@color/ink"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -153,7 +186,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/alerts_off"
-                    android:textSize="13.5sp" />
+                    android:textColor="@color/ink_soft"
+                    android:textSize="13sp" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/sw_area_alerts"
@@ -165,29 +199,43 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
 
                 <Button
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/area_edit"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
+                    android:background="@drawable/btn_ghost"
                     android:drawableStart="@drawable/ic_edit"
                     android:drawablePadding="4dp"
-                    android:text="@string/action_edit_area_alerts" />
+                    android:drawableTint="@color/kyron_primary"
+                    android:minWidth="0dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:stateListAnimator="@animator/press_scale"
+                    android:text="@string/action_edit_area_alerts"
+                    android:textAllCaps="false"
+                    android:textColor="@color/kyron_primary"
+                    android:textSize="13sp" />
 
                 <Button
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/area_remove"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/btn_ghost"
                     android:drawableStart="@drawable/ic_delete"
                     android:drawablePadding="4dp"
-                    android:text="@string/action_remove_rule" />
+                    android:drawableTint="@color/kyron_red"
+                    android:minWidth="0dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:stateListAnimator="@animator/press_scale"
+                    android:text="@string/action_remove_rule"
+                    android:textAllCaps="false"
+                    android:textColor="@color/kyron_red"
+                    android:textSize="13sp" />
             </LinearLayout>
 
             <!-- Editor (hidden until Edit is tapped) -->
@@ -201,14 +249,15 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
                     android:background="@color/line" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/alerts_counties_label"
+                    android:textColor="@color/ink"
                     android:textStyle="bold" />
 
                 <TextView
@@ -220,21 +269,29 @@
                     android:textSize="13sp" />
 
                 <Button
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/choose_counties"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/btn_ghost"
                     android:drawableStart="@drawable/ic_search"
                     android:drawablePadding="4dp"
-                    android:text="@string/action_choose_counties" />
+                    android:drawableTint="@color/kyron_primary"
+                    android:minWidth="0dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:stateListAnimator="@animator/press_scale"
+                    android:text="@string/action_choose_counties"
+                    android:textAllCaps="false"
+                    android:textColor="@color/kyron_primary"
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/threshold_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/ink"
                     android:textStyle="bold" />
 
                 <SeekBar
@@ -248,8 +305,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:text="@string/alerts_area_center_label"
+                    android:textColor="@color/ink"
                     android:textStyle="bold" />
 
                 <TextView
@@ -264,25 +322,33 @@
                     android:id="@+id/preset_box"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="8dp"
                     android:columnCount="2" />
 
                 <Button
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/use_location"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/btn_ghost"
                     android:drawableStart="@drawable/ic_my_location"
                     android:drawablePadding="4dp"
-                    android:text="@string/action_use_current_location" />
+                    android:drawableTint="@color/kyron_primary"
+                    android:minWidth="0dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:stateListAnimator="@animator/press_scale"
+                    android:text="@string/action_use_current_location"
+                    android:textAllCaps="false"
+                    android:textColor="@color/kyron_primary"
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/radius_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/ink"
                     android:textStyle="bold" />
 
                 <SeekBar
@@ -303,14 +369,26 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- ═══ Section: DEVICE & DATA ═══ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginBottom="2dp"
+            android:text="@string/alerts_section_device"
+            android:textColor="@color/muted"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
         <!-- Sync -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:background="@drawable/card_bg"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -319,8 +397,8 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@string/alerts_sync_title"
                     android:src="@drawable/ic_sync"
                     app:tint="@color/kyron_primary" />
@@ -330,7 +408,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@string/alerts_sync_title"
-                    android:textSize="16sp"
+                    android:textColor="@color/ink"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -343,21 +422,29 @@
                 android:textSize="13sp" />
 
             <Button
-                android:textAllCaps="false"
-                android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sync_now"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/btn_primary"
                 android:drawableStart="@drawable/ic_sync"
                 android:drawablePadding="4dp"
-                android:text="@string/action_sync_now" />
+                android:drawableTint="@color/white"
+                android:minWidth="0dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:stateListAnimator="@animator/press_scale"
+                android:text="@string/action_sync_now"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/sync_report"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/ink_soft"
                 android:textSize="13sp" />
 
             <TextView
@@ -376,7 +463,7 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/card_bg"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -385,8 +472,8 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@string/cd_profile"
                     android:src="@drawable/ic_person"
                     app:tint="@color/kyron_primary" />
@@ -396,88 +483,46 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@string/alerts_profile_title"
-                    android:textSize="16sp"
+                    android:textColor="@color/ink"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/alerts_name_label"
-                android:textColor="@color/muted"
-                android:textSize="12sp" />
 
             <EditText
                 android:id="@+id/profile_name"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/card_bg"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/search_pill"
+                android:hint="@string/alerts_name_label"
                 android:inputType="textPersonName"
                 android:maxLines="1"
-                android:padding="10dp" />
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textColor="@color/ink"
+                android:textColorHint="@color/muted"
+                android:textSize="14sp" />
 
             <Button
-                android:textAllCaps="false"
-                android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/save_profile"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/action_save_profile" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/alerts_profile_note"
-                android:textColor="@color/muted"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- Sources -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/card_bg"
-            android:orientation="vertical"
-            android:padding="14dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@string/alerts_sources_title"
-                    android:src="@drawable/ic_info"
-                    app:tint="@color/kyron_primary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/alerts_sources_title"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/sources_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:background="@drawable/btn_primary"
+                android:minWidth="0dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:stateListAnimator="@animator/press_scale"
+                android:text="@string/action_save_profile"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
                 android:textSize="13sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="@string/alerts_sources_note"
+                android:text="@string/alerts_profile_note"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -489,7 +534,7 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/card_bg"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -498,8 +543,8 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@string/cd_backup"
                     android:src="@drawable/ic_download"
                     app:tint="@color/kyron_primary" />
@@ -509,7 +554,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@string/alerts_backup_title"
-                    android:textSize="16sp"
+                    android:textColor="@color/ink"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -524,32 +570,93 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
 
                 <Button
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/export_backup"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/action_export_backup" />
+                    android:layout_height="40dp"
+                    android:background="@drawable/btn_primary"
+                    android:minWidth="0dp"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:stateListAnimator="@animator/press_scale"
+                    android:text="@string/action_export_backup"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="13sp" />
 
                 <Button
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@animator/press_scale"
                     android:id="@+id/import_backup"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_marginStart="8dp"
-                    android:text="@string/action_import_backup" />
+                    android:background="@drawable/btn_ghost"
+                    android:minWidth="0dp"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:stateListAnimator="@animator/press_scale"
+                    android:text="@string/action_import_backup"
+                    android:textAllCaps="false"
+                    android:textColor="@color/kyron_primary"
+                    android:textSize="13sp" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/backup_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Sources -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@string/alerts_sources_title"
+                    android:src="@drawable/ic_info"
+                    app:tint="@color/kyron_primary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/alerts_sources_title"
+                    android:textColor="@color/ink"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/sources_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/ink_soft"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/alerts_sources_note"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
         </LinearLayout>

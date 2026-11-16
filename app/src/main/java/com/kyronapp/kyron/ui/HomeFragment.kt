@@ -62,6 +62,8 @@ class HomeFragment : Fragment() {
         val act = activity as? MainActivity
         v.findViewById<View>(R.id.action_browse).setOnClickListener { openBrowse("") }
         v.findViewById<View>(R.id.action_map).setOnClickListener { act?.selectTab(2) }
+        // The watch list lives on this screen now; this card routes to
+        // the alert rules + inbox tab.
         v.findViewById<View>(R.id.action_watch).setOnClickListener { act?.selectTab(3) }
         v.findViewById<View>(R.id.action_regions).setOnClickListener {
             startActivity(Intent(requireContext(), CoverageActivity::class.java))
@@ -114,6 +116,13 @@ class HomeFragment : Fragment() {
             statPlaces.text = "%,d".format(places)
         }
 
+        // "Watching": the integrated Favorites surface — starred places
+        // with their current result, worst-looking first.
+        val watched = app.repository.places.value
+            .filter { app.prefs.favorites.contains(it.id) }
+            .sortedWith(compareBy { if (it.hasNumericScore) it.score else Int.MAX_VALUE })
+        bindWatch(watched, model)
+
         // "Needs attention": the region's worst current results, sorted
         // model-aware (highest demerits / lowest scores first).
         viewLifecycleOwner.lifecycleScope.launch {
@@ -124,6 +133,25 @@ class HomeFragment : Fragment() {
                 )
             }
             bindNeeds(worst, info.displayName, model)
+        }
+    }
+
+    private fun bindWatch(
+        places: List<com.kyronapp.kyron.data.Place>,
+        model: String
+    ) {
+        val block = view?.findViewById<View>(R.id.home_watch_block) ?: return
+        val list = view?.findViewById<android.widget.LinearLayout>(R.id.home_watch_list) ?: return
+        list.removeAllViews()
+        if (places.isEmpty()) {
+            block.visibility = View.GONE
+            return
+        }
+        block.visibility = View.VISIBLE
+        view?.findViewById<TextView>(R.id.home_watch_title)?.text =
+            getString(R.string.home_watch_title, places.size)
+        places.take(8).forEach { p ->
+            list.addView(placeRow(p, model))
         }
     }
 
@@ -142,10 +170,19 @@ class HomeFragment : Fragment() {
         block.visibility = View.VISIBLE
         view?.findViewById<TextView>(R.id.home_needs_title)?.text =
             getString(R.string.home_needs_title, regionName)
-
-        val dp = resources.displayMetrics.density
         places.forEach { p ->
-            val row = android.widget.LinearLayout(requireContext()).apply {
+            list.addView(placeRow(p, model))
+        }
+    }
+
+    /** Compact place row: colored status strip + name + result/date/city,
+     *  tap → Detail. Shared by the Watching and Needs-attention lists. */
+    private fun placeRow(
+        p: com.kyronapp.kyron.data.Place,
+        model: String
+    ): View {
+        val dp = resources.displayMetrics.density
+        val row = android.widget.LinearLayout(requireContext()).apply {
                 orientation = android.widget.LinearLayout.HORIZONTAL
                 gravity = android.view.Gravity.CENTER_VERTICAL
                 setBackgroundResource(R.drawable.card_bg)
@@ -189,12 +226,11 @@ class HomeFragment : Fragment() {
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
             })
-            row.addView(texts, android.widget.LinearLayout.LayoutParams(0, -2, 1f))
-            val lp = android.widget.LinearLayout.LayoutParams(-1, -2).apply {
-                bottomMargin = (8 * dp).toInt()
-            }
-            list.addView(row, lp)
+        row.addView(texts, android.widget.LinearLayout.LayoutParams(0, -2, 1f))
+        row.layoutParams = android.widget.LinearLayout.LayoutParams(-1, -2).apply {
+            bottomMargin = (8 * dp).toInt()
         }
+        return row
     }
 
     /** Worst-first strip color, model-aware (mirrors MapFragment's pin scale). */

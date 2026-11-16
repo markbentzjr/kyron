@@ -18,7 +18,6 @@ import com.kyronapp.kyron.ui.AlertsFragment
 import com.kyronapp.kyron.ui.BrowseFragment
 import com.kyronapp.kyron.ui.CoverageActivity
 import com.kyronapp.kyron.ui.DetailActivity
-import com.kyronapp.kyron.ui.FavoritesFragment
 import com.kyronapp.kyron.ui.HomeFragment
 import com.kyronapp.kyron.ui.MapFragment
 import com.kyronapp.kyron.worker.SyncEngine
@@ -42,12 +41,12 @@ class MainActivity : AppCompatActivity() {
     /** Classic tab bar (LF4FIX2): four labeled tabs, the pre-2.1
      *  navigation. Selection is rendered directly by [selectTab]. */
     private val tabIds = intArrayOf(
-        R.id.tab_home, R.id.tab_browse, R.id.tab_map, R.id.tab_favorites, R.id.tab_alerts
+        R.id.tab_home, R.id.tab_browse, R.id.tab_map, R.id.tab_alerts
     )
 
     /** Tab fragments are created once and kept alive, so switching tabs never
      *  loses Browse's search/scroll or other in-progress state. */
-    private val frags = arrayOfNulls<Fragment>(5)
+    private val frags = arrayOfNulls<Fragment>(4)
 
     var syncing: Boolean = false
         private set
@@ -154,7 +153,6 @@ class MainActivity : AppCompatActivity() {
                 0 -> HomeFragment()
                 1 -> BrowseFragment()
                 2 -> MapFragment()
-                3 -> FavoritesFragment()
                 else -> AlertsFragment()
             }
         frags[i] = target
@@ -235,7 +233,7 @@ class MainActivity : AppCompatActivity() {
                 lastReport = "Sync hit a problem (${e.message ?: "unknown"}). Your saved data is unchanged."
             } finally {
                 syncing = false
-                (frags.getOrNull(4) as? AlertsFragment)?.refresh()
+                (frags.getOrNull(3) as? AlertsFragment)?.refresh()
                 onDone?.invoke()
             }
         }
@@ -263,7 +261,7 @@ class MainActivity : AppCompatActivity() {
                 app.prefs.homeLng = loc.longitude
                 app.prefs.homeLabel = "My location"
                 Toast.makeText(this, "Area center set to your location", Toast.LENGTH_SHORT).show()
-                (frags.getOrNull(4) as? AlertsFragment)?.refresh()
+                (frags.getOrNull(3) as? AlertsFragment)?.refresh()
             } else {
                 Toast.makeText(this, "No location fix yet — try again outdoors or pick a preset", Toast.LENGTH_LONG).show()
             }

@@ -244,12 +244,22 @@ class AlertsFragment : Fragment() {
                 textOff = label
                 text = label
                 isChecked = prefs.homeLabel == label
+                setBackgroundResource(R.drawable.chip_toggle)
+                setTextColor(
+                    ContextCompat.getColorStateList(requireContext(), R.color.chip_text)
+                )
+                textSize = 12.5f
+                isAllCaps = false
                 setOnClickListener {
                     prefs.homeLat = la; prefs.homeLng = ln; prefs.homeLabel = label
                     bind()
                 }
             }
-            presetBox.addView(chip)
+            presetBox.addView(chip, GridLayout.LayoutParams().apply {
+                width = 0
+                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                setMargins(0, 0, 10, 8)
+            })
         }
         root.findViewById<Button>(R.id.use_location).setOnClickListener {
             (activity as? MainActivity)?.requestLocation()
@@ -384,6 +394,10 @@ class AlertsFragment : Fragment() {
         val inbox = app.prefs.inbox
         root.findViewById<TextView>(R.id.inbox_empty).visibility =
             if (inbox.isEmpty()) View.VISIBLE else View.GONE
+        root.findViewById<TextView>(R.id.inbox_count)?.let { badge ->
+            badge.visibility = if (inbox.isEmpty()) View.GONE else View.VISIBLE
+            badge.text = inbox.size.toString()
+        }
         val inboxBox = root.findViewById<LinearLayout>(R.id.inbox_box)
         inboxBox.removeAllViews()
         val density = resources.displayMetrics.density
