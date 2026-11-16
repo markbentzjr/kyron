@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Kyron</string>
+    <string name="nav_home">Home</string>
     <string name="nav_browse">Browse</string>
     <string name="nav_map">Map</string>
     <string name="nav_favorites">Favorites</string>
@@ -87,4 +88,34 @@ Tap the star on any place and Kyron will watch it for you — when it gets a new
     <string name="cd_backup">Backup and restore</string>
     <string name="alerts_backup_title">My data — backup &amp; restore</string>
     <string name="alerts_backup_desc">Your favorites, alert rules and inbox live only on this device (and in your phone\'s own Android backup when that\'s on). Export a backup file any time — it contains only your Kyron data, and importing it on another phone restores everything.</string>
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_region_sub">Showing %1$s inspection data</string>
+    <string name="home_search_hint">Search restaurants, cities, ZIP codes</string>
+    <string name="home_stat_places">Places</string>
+    <string name="home_stat_watched">Watching</string>
+    <string name="home_stat_sync">Last sync</string>
+    <string name="home_sync_never">Never</string>
+    <string name="home_sync_lt1h">&lt;1h ago</string>
+    <string name="home_sync_hours">%1$dh ago</string>
+    <string name="home_sync_days">%1$dd ago</string>
+    <string name="home_actions_title">Get started</string>
+    <string name="home_action_browse">Search &amp; browse</string>
+    <string name="home_action_browse_sub">Scores, filters, sort</string>
+    <string name="home_action_map">Map view</string>
+    <string name="home_action_map_sub">Verified addresses</string>
+    <string name="home_action_watch">Watch list</string>
+    <string name="home_action_watch_sub">Your starred places</string>
+    <string name="home_action_regions">Get a state</string>
+    <string name="home_action_regions_sub">Region packs</string>
+    <string name="home_model_title">How %1$s results read</string>
+    <string name="home_model_score">0–100 scores — higher is better. Every entry shows its official inspection date and the agency that published it.</string>
+    <string name="home_model_penalty">Demerit points — LOWER is better (0 = a perfect inspection). Every entry shows its official inspection date and the agency that published it.</string>
+    <string name="home_model_grade">Letter grades (A/B/C) from the official grading scale. Every entry shows its inspection date and the agency that published it.</string>
+    <string name="home_model_passfail">Pass / pass-with-conditions / fail outcomes. Every entry shows its inspection date and the agency that published it.</string>
+    <string name="home_model_disposition">This source publishes native inspection outcomes rather than a numeric score — read the result text on each entry. Every entry shows its inspection date and the agency that published it.</string>
+    <string name="home_model_violations">This source publishes violation records without an overall result. Every entry shows its inspection date and the agency that published it.</string>
+    <string name="home_model_unknown">Inspection results as published by the source agency. Every entry shows its inspection date and where the data came from.</string>
+    <string name="home_needs_title">Needs attention in %1$s</string>
 </resources>

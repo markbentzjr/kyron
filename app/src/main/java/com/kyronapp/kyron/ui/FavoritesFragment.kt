@@ -39,7 +39,7 @@ class FavoritesFragment : Fragment() {
         list.adapter = adapter
 
         root.findViewById<View>(R.id.fav_browse_btn).setOnClickListener {
-            (activity as? MainActivity)?.selectTab(0)
+            (activity as? MainActivity)?.selectTab(1)
         }
 
         scope.launch {

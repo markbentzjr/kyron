@@ -389,6 +389,12 @@ class BrowseFragment : Fragment() {
         // framework-restored view state.
         guideCard?.visibility =
             if (uiPrefs?.getBoolean("guide_dismissed", false) == true) View.GONE else View.VISIBLE
+        // Home's hero search stages text here; apply + clear it so the
+        // field and filters land on the staged query.
+        ExploreState.pendingSearch?.let { staged ->
+            ExploreState.pendingSearch = null
+            if (staged != searchField.text.toString()) searchField.setText(staged)
+        }
         if (dataLoaded) bindRegion()
         applyFilters()
     }

@@ -14,6 +14,11 @@ object ExploreState {
     private val _query = MutableStateFlow(PlaceQuery())
     val query: StateFlow<PlaceQuery> = _query
 
+    /** One-way handoff for the Home hero search: Home stages the text here,
+     *  switches to the Browse tab, and Browse applies + clears it on show.
+     *  Volatile (not part of the flow) — Browse remains the publisher. */
+    var pendingSearch: String? = null
+
     fun update(q: PlaceQuery) {
         _query.value = q
     }
