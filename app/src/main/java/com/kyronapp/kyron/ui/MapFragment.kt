@@ -84,12 +84,27 @@ class MapFragment : Fragment() {
         mapView = mv
         mv.setTileSource(TileSourceFactory.MAPNIK)
         mv.setMultiTouchControls(true)
+        // The dedicated +/− FABs replace osmdroid's transient built-ins.
+        mv.zoomController.setVisibility(
+            org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER
+        )
         mv.controller.setZoom(11.0)
         mv.controller.setCenter(GeoPoint(app.prefs.homeLat, app.prefs.homeLng))
         mv.addMapListener(DelayedMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean { refreshViewport(); return true }
             override fun onZoom(event: ZoomEvent?): Boolean { refreshViewport(); return true }
         }, 250L))
+
+        // Tap on empty map (not a pin) dismisses the place card.
+        mv.overlays.add(0, org.osmdroid.views.overlay.MapEventsOverlay(
+            object : org.osmdroid.events.MapEventsReceiver {
+                override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                    if (sheet?.visibility == View.VISIBLE) { hideSheet(); return true }
+                    return false
+                }
+                override fun longPressHelper(p: GeoPoint?): Boolean = false
+            }
+        ))
 
         v.findViewById<ImageButton>(R.id.sheet_close).setOnClickListener { hideSheet() }
         v.findViewById<View>(R.id.map_locate).setOnClickListener {
@@ -392,10 +407,11 @@ class MapFragment : Fragment() {
             textAlign = Paint.Align.CENTER
             typeface = Typeface.DEFAULT_BOLD
         }
-        tp.textSize = when {
-            text.length <= 3 -> if (big) 40f else 34f
-            text.length <= 7 -> 24f
-            else -> 19f
+        // Shrink-to-fit: numbers stay big, long word badges (native
+        // results like "Out of Business") shrink until they fit.
+        tp.textSize = if (big) 40f else 34f
+        while (tp.textSize > 15f && tp.measureText(text) > w - 30f) {
+            tp.textSize -= 2f
         }
         val ty = h / 2f - (tp.descent() + tp.ascent()) / 2f
         c.drawText(text, cx, ty, tp)
@@ -471,6 +487,22 @@ class MapFragment : Fragment() {
         )
         mapView?.invalidate()
         showSheet(p)
+        // If the pin now sits behind the sheet, nudge the camera so it
+        // lands in the middle of the still-visible strip.
+        val s = sheet ?: return
+        s.post {
+            val mv = mapView ?: return@post
+            val pinPx = android.graphics.Point()
+            mv.projection.toPixels(m.position, pinPx)
+            val visibleH = mv.height - s.height
+            val targetY = visibleH * 0.45f
+            if (pinPx.y > targetY) {
+                val newCenter = mv.projection.fromPixels(
+                    mv.width / 2, (mv.height / 2f + (pinPx.y - targetY)).toInt()
+                ) as GeoPoint
+                mv.controller.animateTo(newCenter)
+            }
+        }
     }
 
     private fun clusterMarker(cluster: Cluster): Marker {
@@ -591,7 +623,8 @@ class MapFragment : Fragment() {
         // replacement): filled star while watching, outline otherwise.
         val icon = ContextCompat.getDrawable(
             fav.context, if (watching) R.drawable.ic_star else R.drawable.ic_star_border
-        )
+        )?.mutate()
+        icon?.setTint(ContextCompat.getColor(fav.context, R.color.white))
         fav.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
     }
 
@@ -607,6 +640,7 @@ class MapFragment : Fragment() {
         }
         selectedMarker = null
         selected = null
+        mapView?.invalidate()
         val s = sheet ?: return
         if (s.visibility == View.VISIBLE) {
             s.animate().translationY(80f).alpha(0f).setDuration(180)

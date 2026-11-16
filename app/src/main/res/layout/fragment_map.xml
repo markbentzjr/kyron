@@ -53,7 +53,8 @@
             android:contentDescription="@string/cd_zoom_in"
             android:elevation="6dp"
             android:padding="10dp"
-            android:src="@drawable/ic_add" />
+            android:src="@drawable/ic_add"
+            android:stateListAnimator="@animator/press_scale" />
 
         <ImageButton
             android:id="@+id/map_zoom_out"
@@ -64,7 +65,8 @@
             android:contentDescription="@string/cd_zoom_out"
             android:elevation="6dp"
             android:padding="10dp"
-            android:src="@drawable/ic_remove" />
+            android:src="@drawable/ic_remove"
+            android:stateListAnimator="@animator/press_scale" />
 
         <ImageButton
             android:id="@+id/map_locate"
@@ -75,7 +77,8 @@
             android:contentDescription="@string/cd_my_location"
             android:elevation="8dp"
             android:padding="12dp"
-            android:src="@drawable/ic_crosshair" />
+            android:src="@drawable/ic_crosshair"
+            android:stateListAnimator="@animator/press_scale" />
     </LinearLayout>
 
     <!-- Bottom-sheet place card (Presentation Spec 4.1, Peek state).
@@ -175,8 +178,10 @@
                 android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sheet_open"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_weight="1"
+                android:background="@drawable/btn_ghost"
+                android:textColor="@color/kyron_primary"
                 android:text="@string/action_full_details" />
 
             <Button
@@ -184,10 +189,12 @@
                 android:stateListAnimator="@animator/press_scale"
                 android:id="@+id/sheet_fav"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:drawablePadding="4dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/btn_primary"
+                android:textColor="@color/white"
+                android:drawablePadding="6dp"
                 android:text="@string/action_watch" />
         </LinearLayout>
     </LinearLayout>
