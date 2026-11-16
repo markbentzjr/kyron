@@ -35,7 +35,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Alert inbox"
+                    android:text="@string/alerts_inbox_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -45,7 +45,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="No alerts yet. When a place you watch gets a new inspection — or a score drops below your threshold in a county you watch — it lands here and as a notification. Set up your rules below."
+                android:text="@string/alerts_inbox_empty"
                 android:textColor="@color/muted"
                 android:textSize="13sp" />
 
@@ -82,7 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Alerts for my favorites"
+                    android:text="@string/alerts_favorites_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -98,14 +98,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Alert me when a place I watch gets a new score or inspection result — favorites always alert, on any new result. Tap the star on any restaurant to watch it. (The score threshold in the area rule below applies to area alerts.)"
+                    android:text="@string/alerts_favorites_desc"
                     android:textSize="13.5sp" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/sw_fav_alerts"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="Alert me about my favorites" />
+                    android:contentDescription="@string/cd_alert_favorites" />
             </LinearLayout>
         </LinearLayout>
 
@@ -127,7 +127,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Area alerts"
+                    android:contentDescription="@string/cd_area_alerts"
                     android:src="@drawable/ic_place"
                     app:tint="@color/kyron_primary" />
 
@@ -135,7 +135,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Alerts for my areas"
+                    android:text="@string/alerts_areas_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -152,14 +152,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Off"
+                    android:text="@string/alerts_off"
                     android:textSize="13.5sp" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/sw_area_alerts"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="Alert me about bad scores in my areas" />
+                    android:contentDescription="@string/cd_alert_areas" />
             </LinearLayout>
 
             <LinearLayout
@@ -169,21 +169,23 @@
                 android:orientation="horizontal">
 
                 <Button
+                    android:textAllCaps="false"
                     android:id="@+id/area_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableStart="@drawable/ic_edit"
                     android:drawablePadding="4dp"
-                    android:text="Edit area alerts" />
+                    android:text="@string/action_edit_area_alerts" />
 
                 <Button
+                    android:textAllCaps="false"
                     android:id="@+id/area_remove"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
                     android:drawableStart="@drawable/ic_delete"
                     android:drawablePadding="4dp"
-                    android:text="Remove this rule" />
+                    android:text="@string/action_remove_rule" />
             </LinearLayout>
 
             <!-- Editor (hidden until Edit is tapped) -->
@@ -204,7 +206,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Counties I watch"
+                    android:text="@string/alerts_counties_label"
                     android:textStyle="bold" />
 
                 <TextView
@@ -216,13 +218,14 @@
                     android:textSize="13sp" />
 
                 <Button
+                    android:textAllCaps="false"
                     android:id="@+id/choose_counties"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:drawableStart="@drawable/ic_search"
                     android:drawablePadding="4dp"
-                    android:text="Choose counties" />
+                    android:text="@string/action_choose_counties" />
 
                 <TextView
                     android:id="@+id/threshold_label"
@@ -235,6 +238,7 @@
                     android:id="@+id/threshold_slider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/cd_score_threshold"
                     android:max="99"
                     android:min="60" />
 
@@ -242,7 +246,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="My area center"
+                    android:text="@string/alerts_area_center_label"
                     android:textStyle="bold" />
 
                 <TextView
@@ -261,13 +265,14 @@
                     android:columnCount="2" />
 
                 <Button
+                    android:textAllCaps="false"
                     android:id="@+id/use_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:drawableStart="@drawable/ic_my_location"
                     android:drawablePadding="4dp"
-                    android:text="Use my current location" />
+                    android:text="@string/action_use_current_location" />
 
                 <TextView
                     android:id="@+id/radius_label"
@@ -280,6 +285,7 @@
                     android:id="@+id/radius_slider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/cd_area_radius"
                     android:max="50"
                     android:min="1" />
 
@@ -287,7 +293,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="County score checks run against Alabama's state and county health departments. Watched places in other states alert on their new results through your favorites."
+                    android:text="@string/alerts_area_note"
                     android:textColor="@color/muted"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -311,7 +317,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Data sync"
+                    android:contentDescription="@string/alerts_sync_title"
                     android:src="@drawable/ic_sync"
                     app:tint="@color/kyron_primary" />
 
@@ -319,7 +325,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Data sync"
+                    android:text="@string/alerts_sync_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -333,13 +339,14 @@
                 android:textSize="13sp" />
 
             <Button
+                android:textAllCaps="false"
                 android:id="@+id/sync_now"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:drawableStart="@drawable/ic_sync"
                 android:drawablePadding="4dp"
-                android:text="Sync now" />
+                android:text="@string/action_sync_now" />
 
             <TextView
                 android:id="@+id/sync_report"
@@ -352,7 +359,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Kyron also checks for new inspections automatically about every 12 hours in the background."
+                android:text="@string/alerts_sync_note"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -375,7 +382,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="My profile"
+                    android:contentDescription="@string/cd_profile"
                     android:src="@drawable/ic_person"
                     app:tint="@color/kyron_primary" />
 
@@ -383,7 +390,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="My profile (on this device)"
+                    android:text="@string/alerts_profile_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -392,7 +399,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Your name"
+                android:text="@string/alerts_name_label"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
 
@@ -406,17 +413,18 @@
                 android:padding="10dp" />
 
             <Button
+                android:textAllCaps="false"
                 android:id="@+id/save_profile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Save profile" />
+                android:text="@string/action_save_profile" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="No sign-up needed — Kyron works fully without an account. Your profile, favorites and alert rules stay on this device only; nothing is uploaded. They ride along in your phone's own Android backup when that's enabled, and you can export them yourself below."
+                android:text="@string/alerts_profile_note"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -439,7 +447,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Data sources"
+                    android:contentDescription="@string/alerts_sources_title"
                     android:src="@drawable/ic_info"
                     app:tint="@color/kyron_primary" />
 
@@ -447,7 +455,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Data sources"
+                    android:text="@string/alerts_sources_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -463,7 +471,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="America has no single restaurant-inspection database — every state and county publishes its own. Kyron is built with one adapter per source, so new states plug into this list without changing the app."
+                android:text="@string/alerts_sources_note"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -486,7 +494,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Backup and restore"
+                    android:contentDescription="@string/cd_backup"
                     android:src="@drawable/ic_download"
                     app:tint="@color/kyron_primary" />
 
@@ -494,7 +502,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="My data — backup &amp; restore"
+                    android:text="@string/alerts_backup_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -503,7 +511,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Your favorites, alert rules and inbox live only on this device (and in your phone's own Android backup when that's on). Export a backup file any time — it contains only your Kyron data, and importing it on another phone restores everything."
+                android:text="@string/alerts_backup_desc"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
 
@@ -514,17 +522,19 @@
                 android:orientation="horizontal">
 
                 <Button
+                    android:textAllCaps="false"
                     android:id="@+id/export_backup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Export backup" />
+                    android:text="@string/action_export_backup" />
 
                 <Button
+                    android:textAllCaps="false"
                     android:id="@+id/import_backup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Import backup" />
+                    android:text="@string/action_import_backup" />
             </LinearLayout>
 
             <TextView

@@ -113,11 +113,14 @@ class MainActivity : AppCompatActivity() {
         tabIds.forEachIndexed { idx, id ->
             findViewById<TextView>(id)?.let { tv ->
                 val active = idx == i
-                tv.setTextColor(
-                    ContextCompat.getColor(
-                        this, if (active) R.color.kyron_primary else R.color.muted
-                    )
+                val color = ContextCompat.getColor(
+                    this, if (active) R.color.kyron_primary else R.color.muted
                 )
+                tv.setTextColor(color)
+                // Tint the tab icon to match — without this the black
+                // vector stays black on the active (green) tab.
+                tv.compoundDrawableTintList =
+                    android.content.res.ColorStateList.valueOf(color)
                 tv.setTypeface(
                     tv.typeface,
                     if (active) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL

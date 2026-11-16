@@ -239,7 +239,23 @@ class BrowseFragment : Fragment() {
     /** Radio behavior for the band toggle row. */
     private fun selectBand(selectedId: Int) {
         if (!::bandButtons.isInitialized) return
-        bandButtons.forEach { (id, btn) -> btn.isChecked = id == selectedId }
+        val off = androidx.core.content.ContextCompat.getColor(
+            requireContext(), R.color.ink)
+        val white = androidx.core.content.ContextCompat.getColor(
+            requireContext(), R.color.white)
+        bandButtons.forEach { (id, btn) ->
+            btn.isChecked = id == selectedId
+            // Make the active filter unmistakable: filled brand chip vs
+            // flat outlined chip. The default ToggleButton checked state
+            // is a barely-visible shade difference.
+            btn.setTextColor(if (btn.isChecked) white else off)
+            btn.setTypeface(
+                btn.typeface,
+                if (btn.isChecked) android.graphics.Typeface.BOLD
+                else android.graphics.Typeface.NORMAL)
+            btn.setBackgroundResource(
+                if (btn.isChecked) R.drawable.chip_on_bg else R.drawable.chip_off_bg)
+        }
     }
 
     private fun clearFilters() {

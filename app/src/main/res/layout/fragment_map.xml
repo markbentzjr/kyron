@@ -27,7 +27,7 @@
         android:layout_gravity="bottom|start"
         android:layout_margin="4dp"
         android:padding="2dp"
-        android:text="© OpenStreetMap contributors"
+        android:text="@string/map_attribution"
         android:textColor="@color/muted"
         android:textSize="10sp" />
 
@@ -66,7 +66,7 @@
                 android:layout_width="52dp"
                 android:layout_height="52dp"
                 android:gravity="center"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -124,18 +124,20 @@
             android:orientation="horizontal">
 
             <Button
+                android:textAllCaps="false"
                 android:id="@+id/sheet_open"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Full details" />
+                android:text="@string/action_full_details" />
 
             <Button
+                android:textAllCaps="false"
                 android:id="@+id/sheet_fav"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:drawablePadding="4dp"
-                android:text="Watch" />
+                android:text="@string/action_watch" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

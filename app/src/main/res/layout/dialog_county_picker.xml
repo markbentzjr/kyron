@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Choose counties to watch"
+        android:text="@string/picker_title"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
         android:background="@drawable/card_bg"
         android:drawableStart="@drawable/ic_search"
         android:drawablePadding="8dp"
-        android:hint="Type to filter counties"
+        android:hint="@string/picker_hint"
         android:inputType="text"
         android:maxLines="1"
         android:padding="10dp" />
@@ -39,16 +39,18 @@
         android:orientation="horizontal">
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/picker_all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select all counties" />
+            android:text="@string/action_select_all_counties" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/picker_clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Clear all" />
+            android:text="@string/action_clear_all" />
     </LinearLayout>
 
     <ListView
@@ -66,16 +68,18 @@
         android:orientation="horizontal">
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/picker_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cancel" />
+            android:text="@string/action_cancel" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/picker_done"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Done" />
+            android:text="@string/action_done" />
     </LinearLayout>
 </LinearLayout>

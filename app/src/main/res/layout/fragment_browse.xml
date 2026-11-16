@@ -20,15 +20,16 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Find a place, then tap its star to watch it. Kyron alerts you when a watched place gets a new inspection — set up area alerts in the Alerts tab below."
+            android:text="@string/browse_guide"
             android:textSize="13.5sp" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/guide_dismiss"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:text="Got it" />
+            android:text="@string/action_got_it" />
     </LinearLayout>
 
     <EditText
@@ -41,7 +42,7 @@
         android:background="@drawable/card_bg"
         android:drawableStart="@drawable/ic_search"
         android:drawablePadding="8dp"
-        android:hint="Search restaurants, cities, ZIP codes"
+        android:hint="@string/hint_search_places"
         android:imeOptions="actionSearch"
         android:inputType="text"
         android:maxLines="1"
@@ -71,8 +72,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
-                android:textOff="All scores"
-                android:textOn="All scores" />
+                android:textOff="@string/filter_all_scores"
+                android:textOn="@string/filter_all_scores" />
 
             <ToggleButton
                 android:id="@+id/band_low"
@@ -80,8 +81,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:minHeight="48dp"
-                android:textOff="Below 85"
-                android:textOn="Below 85" />
+                android:textOff="@string/filter_below_85"
+                android:textOn="@string/filter_below_85" />
 
             <ToggleButton
                 android:id="@+id/band_mid"
@@ -89,8 +90,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:minHeight="48dp"
-                android:textOff="85–94"
-                android:textOn="85–94" />
+                android:textOff="@string/filter_85_94"
+                android:textOn="@string/filter_85_94" />
 
             <ToggleButton
                 android:id="@+id/band_high"
@@ -98,8 +99,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:minHeight="48dp"
-                android:textOff="95+"
-                android:textOn="95+" />
+                android:textOff="@string/filter_95_plus"
+                android:textOn="@string/filter_95_plus" />
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -120,7 +121,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="County"
+                android:text="@string/label_county"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
 
@@ -141,7 +142,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sort by"
+                android:text="@string/label_sort_by"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
 
@@ -178,7 +179,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Refresh"
+            android:text="@string/action_refresh"
             android:textAllCaps="false" />
     </LinearLayout>
 
@@ -201,7 +202,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="Loading restaurants…"
+            android:text="@string/loading_places"
             android:textColor="@color/muted"
             android:textSize="14sp" />
     </LinearLayout>
@@ -228,16 +229,17 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:gravity="center"
-            android:text="No places match. Try a different search or county."
+            android:text="@string/empty_no_places"
             android:textColor="@color/muted"
             android:textSize="14sp" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/empty_clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Clear search and filters" />
+            android:text="@string/action_clear_filters" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

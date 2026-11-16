@@ -24,8 +24,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Restaurant details"
-            android:textColor="#FFFFFF"
+            android:text="@string/detail_title"
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -58,7 +58,7 @@
                         android:layout_width="64dp"
                         android:layout_height="64dp"
                         android:gravity="center"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/white"
                         android:textSize="26sp"
                         android:textStyle="bold" />
 
@@ -106,29 +106,32 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:textAllCaps="false"
                         android:id="@+id/d_fav"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:drawablePadding="4dp"
-                        android:text="Watch" />
+                        android:text="@string/action_watch" />
 
                     <Button
+                        android:textAllCaps="false"
                         android:id="@+id/d_directions"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:drawableStart="@drawable/ic_directions"
                         android:drawablePadding="4dp"
-                        android:text="Directions" />
+                        android:text="@string/action_directions" />
 
                     <Button
+                        android:textAllCaps="false"
                         android:id="@+id/d_share"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:drawableStart="@drawable/ic_share"
                         android:drawablePadding="4dp"
-                        android:text="Share" />
+                        android:text="@string/action_share" />
                 </LinearLayout>
 
                 <TextView
@@ -154,7 +157,7 @@
                     android:id="@+id/d_history_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Inspection history"
+                    android:text="@string/detail_history_title"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:visibility="gone" />
@@ -220,7 +223,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="What the inspector found"
+                    android:text="@string/detail_violations_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -232,11 +235,12 @@
             </LinearLayout>
 
             <Button
+                android:textAllCaps="false"
                 android:id="@+id/d_load"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Load full inspection details"
+                android:text="@string/action_load_full_details"
                 android:visibility="gone" />
 
             <TextView
@@ -251,7 +255,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Scores are public health-department records, shown as published. Alabama requires reinspection within 60 days for scores below 85."
+                android:text="@string/detail_scores_note"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
         </LinearLayout>

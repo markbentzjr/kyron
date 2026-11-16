@@ -27,16 +27,17 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:gravity="center"
-            android:text="No favorites yet.\n\nTap the star on any place and Kyron will watch it for you — when it gets a new inspection, you'll get an alert here."
+            android:text="@string/fav_empty"
             android:textColor="@color/muted"
             android:textSize="14sp" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/fav_browse_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:text="Browse restaurants" />
+            android:text="@string/action_browse_restaurants" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

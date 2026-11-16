@@ -16,7 +16,7 @@
         android:layout_width="52dp"
         android:layout_height="52dp"
         android:gravity="center"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/white"
         android:textSize="19sp"
         android:textStyle="bold" />
 
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:maxLines="3"
-            android:textColor="#33424F"
+            android:textColor="@color/ink_soft"
             android:textSize="13sp"
             android:visibility="gone" />
     </LinearLayout>

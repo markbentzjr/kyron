@@ -10,8 +10,12 @@
     <color name="tone_gray">#8A97A5</color>
     <color name="star_on">#F2B01E</color>
     <color name="ink">#1D2733</color>
-    <color name="muted">#6B7885</color>
+    <color name="muted">#5B6874</color>
     <color name="line">#E3E8EE</color>
     <color name="bg">#F4F6F8</color>
     <color name="card_green_bg">#F2F8F4</color>
+    <color name="white">#FFFFFF</color>
+    <color name="ink_soft">#33424F</color>
+    <color name="card_green_line">#CFE5D6</color>
+    <color name="pts_bg">#FDECEC</color>
 </resources>
