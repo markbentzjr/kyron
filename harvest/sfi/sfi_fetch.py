@@ -143,14 +143,22 @@ def mdy(d):
 
 
 def windows_for(cfg, date_from):
-    """1-year windows from date_from to today (single window when the
-    span fits — the proof path)."""
+    """Windows from date_from to today. Default 1 year; cfg
+    ['window_months'] shortens it for portals that 500 on large
+    result sets (WDA cannot render a Wyoming year)."""
+    months = cfg.get("window_months", 12)
     today = datetime.date.today()
     out = []
     cur = date_from
     while cur <= today:
-        end = min(cur.replace(year=cur.year + 1) -
-                  datetime.timedelta(days=1), today)
+        ny, nm = divmod(cur.month - 1 + months, 12)
+        ny += cur.year
+        nm += 1
+        last = (datetime.date(ny + (nm == 12), nm % 12 + 1, 1)
+                - datetime.timedelta(days=1)).day
+        end = min(cur.replace(year=ny, month=nm,
+                              day=min(cur.day, last))
+                  - datetime.timedelta(days=1), today)
         out.append((cur, end))
         cur = end + datetime.timedelta(days=1)
     return out
@@ -174,6 +182,17 @@ def detail_targets(page):
     return targets
 
 
+RECORDS_FOUND = re.compile(r"(\d+)\s+record\(s\)\s+found", re.I)
+SERVER_CAP = 500
+
+
+class WindowOverflow(Exception):
+    """The portal hard-caps every query at 500 records (verified
+    2026-11-17 across five states). A capped window must be split —
+    shipping it as-is would silently drop every establishment past
+    the cap."""
+
+
 def fetch_window(sess, cfg, raw, work, log_path, wfrom, wto, do_details):
     wkey = f"{wfrom.isoformat()}_{wto.isoformat()}"
     wdir = os.path.join(raw, "search", wkey)
@@ -184,6 +203,10 @@ def fetch_window(sess, cfg, raw, work, log_path, wfrom, wto, do_details):
         "ctl00$MainContent$dteInspectionEndDate$txtDate": mdy(wto),
         "ctl00$MainContent$btnSearch": "Search"})
     page_html = sess.post(f)
+    found = RECORDS_FOUND.search(page_html)
+    if found and int(found.group(1)) >= SERVER_CAP and wto > wfrom:
+        raise WindowOverflow(
+            f"{wkey}: {found.group(1)} records hits the 500 cap")
     log_fetch(log_path, f"search/{wkey}/p001.html", sess.base,
               page_html.encode())
     with open(os.path.join(wdir, "p001.html"), "w",
@@ -331,19 +354,29 @@ def main():
         sess.last_html = landing.decode("utf-8", "replace")
         d0 = date_from or datetime.date(cfg["start_year"], 1, 1)
         wstats = []
-        for wfrom, wto in windows_for(cfg, d0):
-            done_mark = os.path.join(work, f"window_{wfrom}_{wto}.done")
+        queue = list(windows_for(cfg, d0))
+        while queue:
+            wfrom, wto = queue.pop(0)
+            wkey = f"{wfrom.isoformat()}_{wto.isoformat()}"
+            done_mark = os.path.join(work, f"window_{wkey}.done")
             if os.path.exists(done_mark):
                 continue
             try:
                 st = fetch_window(sess, cfg, raw, work, log_path,
                                   wfrom, wto, not nodetails)
+            except WindowOverflow:
+                mid = wfrom + (wto - wfrom) / 2
+                queue.insert(0, (mid + datetime.timedelta(days=1), wto))
+                queue.insert(0, (wfrom, mid))
+                st = {"window": wkey, "split": True}
+                print(f"[{key}] {wkey} hit 500-cap -> splitting",
+                      flush=True)
             except Exception as e:  # noqa: BLE001
-                st = {"window": f"{wfrom}_{wto}",
-                      "error": str(e)[:200]}
+                st = {"window": wkey, "error": str(e)[:200]}
             wstats.append(st)
-            with open(done_mark, "w", encoding="utf-8") as f:
-                json.dump(st, f, indent=1)
+            if not st.get("split"):
+                with open(done_mark, "w", encoding="utf-8") as f:
+                    json.dump(st, f, indent=1)
             print(f"[{key}] {st}", flush=True)
         with open(os.path.join(work, "fetch_done.json"), "w",
                   encoding="utf-8") as f:

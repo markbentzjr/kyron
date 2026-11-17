@@ -57,6 +57,20 @@ STATES = {
         ],
         "enabled": True,
     },
+    "la": {
+        "host": "https://la.healthinspections.us",
+        "path": "",  # root deployment — API at /API/index.cfm
+        "state": "LA", "name": "Louisiana",
+        "region": "us-la", "jur": "LA-LDH", "source_id": "la-ldh",
+        "agency": "Louisiana Department of Health — Retail Food "
+                  "Inspections (la.healthinspections.us)",
+        "model": "VIOLATIONS_ONLY",
+        "partitions": "statewide",  # 'county' (parish) filter ignored
+                                    # server-side — verified 2026-11-17
+        "permit_type": "",
+        "cities": [],  # stubs carry structured "City:"/"Parish:" columns
+        "enabled": True,
+    },
     "dc": {
         "host": "https://dc.healthinspections.us",
         "path": "dc",

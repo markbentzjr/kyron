@@ -138,9 +138,14 @@ def fetch_partition_search(cfg, raw, log_path, fail_path, part,
             try:
                 status, body = http_get(url)
             except Exception as e:  # noqa: BLE001
+                # persistent page failure (e.g. a row that 500s the
+                # server-side serializer on every attempt) — log the
+                # gap and continue; the facilities on this page are
+                # a declared loss, not a silent truncation.
                 log_failure(fail_path, "search", f"{part}/p{page}",
                             url, e)
-                break
+                page += 1
+                continue
             os.makedirs(pdir, exist_ok=True)
             with open(path, "wb") as f:
                 f.write(body)

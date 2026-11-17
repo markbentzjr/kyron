@@ -54,7 +54,7 @@ UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
       "KyronResearch/0.1 (MHD generic adapter)")
 PAGE_SIZE = 25
 MAX_START = 200
-DELAY = 0.25
+DELAY = 1.5  # raised from 0.25 — inspections.myhealthdepartment.com 403s under ~4 req/s bursts (2026-11-17)
 WORKERS = 6
 
 _log_lock = threading.Lock()

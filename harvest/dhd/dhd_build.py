@@ -48,6 +48,19 @@ def mdy_dash(s):
                               int(m.group(2)))) if m else ""
 
 
+def inspection_date(columns):
+    """RI labels it 'Inspection Date: MM-DD-YYYY'; LA ships the bare
+    date in column 0. Prefer the label, else any bare-date cell."""
+    labeled = col_val(columns, "Inspection Date")
+    if labeled:
+        return labeled
+    for v in (columns or {}).values():
+        if isinstance(v, str) and \
+                re.match(r"^\d{1,2}-\d{1,2}-\d{4}$", v.strip()):
+            return v.strip()
+    return ""
+
+
 def col_val(columns, prefix):
     for v in (columns or {}).values():
         if isinstance(v, str) and v.lower().startswith(
@@ -56,14 +69,22 @@ def col_val(columns, prefix):
     return ""
 
 
-def split_address(cfg, raw_addr):
-    """'STREET  CITY ST ZIP' -> (street, city, zip) via longest city
-    suffix from cfg['cities']. Returns ('','','') pieces honestly."""
+def split_address(cfg, raw_addr, city_hint=""):
+    """'STREET  CITY ST ZIP' -> (street, city, zip). When the stub
+    carries a structured City column (LA), city_hint decides the
+    suffix; otherwise longest city suffix from cfg['cities'].
+    Returns ('','','') pieces honestly."""
     a = re.sub(r"\s+", " ", (raw_addr or "").strip())
     m = re.match(r"^(.*?)\s+([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\s*$", a)
     if not m:
         return a, "", ""
     rest, st, zipc = m.group(1), m.group(2), m.group(3)
+    if city_hint:
+        for suf in (" " + city_hint.casefold() + ",",
+                    " " + city_hint.casefold()):
+            if rest.casefold().endswith(suf):
+                return rest[:-len(suf)].strip(), city_hint, zipc
+        return rest, city_hint, zipc
     best = ""
     for c in cfg.get("cities") or []:
         if rest.casefold().endswith(" " + c.casefold()) and \
@@ -112,7 +133,10 @@ def build_state(key, cfg):
         name = (rec.get("name") or "").strip()
         addr_raw = rec.get("mapAddress") or \
             col_val(rec.get("columns"), "")
-        street, city, zipc = split_address(cfg, addr_raw)
+        street, city, zipc = split_address(
+            cfg, addr_raw, col_val(rec.get("columns"), "City"))
+        county = col_val(rec.get("columns"), "Parish") or \
+            col_val(rec.get("columns"), "County")
         lic = col_val(rec.get("columns"), "License #")
         ltype = col_val(rec.get("columns"), "License Type")
         reason = None
@@ -145,16 +169,32 @@ def build_state(key, cfg):
             if not entries:
                 qa["detail_empty"] += 1
             for ent in entries:
-                d_iso = mdy_dash(col_val(ent.get("columns"),
-                                         "Inspection Date"))
+                d_iso = mdy_dash(inspection_date(
+                    ent.get("columns")))
                 purpose = col_val(ent.get("columns"),
                                   "Inspection Purpose")
                 qa["purpose_values"][purpose] += 1
                 viol = []
                 for group in (ent.get("violations") or {}).values():
+                    if not isinstance(group, list):
+                        group = [group]
+                    if len(group) >= 2:
+                        # [category, narrative, flag] shape (LA)
+                        cat, txt, flag = group[0], group[1], \
+                            (group[2] if len(group) > 2 else None)
+                        if not txt:
+                            continue
+                        crit = cat and "critical" in \
+                            str(cat).lower() and "non" not in \
+                            str(cat).lower()
+                        viol.append({
+                            "p": 0, "c": bool(crit),
+                            "r": (str(txt) + (flag or "")).strip()})
+                        continue
                     for vtxt in group:
-                        viol.append({"p": 0, "c": False,
-                                     "r": vtxt.strip()})
+                        if vtxt:
+                            viol.append({"p": 0, "c": False,
+                                         "r": str(vtxt).strip()})
                 qa["violations"] += len(viol)
                 qa["inspections_emitted"] += 1
                 insp_out.append({
@@ -169,14 +209,14 @@ def build_state(key, cfg):
             "id": f"{cfg['source_id'].replace('-', '')}_"
                   f"{base64.urlsafe_b64encode(fid_num.encode()).decode()[:12]}",
             "n": name, "a": street, "c": city, "z": zipc,
-            "ct": "", "st": cfg["state"], "jur": cfg["jur"],
+            "ct": county, "st": cfg["state"], "jur": cfg["jur"],
             "src": cfg["source_id"],
             "du": newest["du"] if newest else report_url(cfg, None),
             "lat": None, "lng": None,
             "gs": "UNRESOLVED", "ga": "NONE", "gp": "", "gm": "",
             "s": NO_SCORE, "d": newest["d"] if newest else "",
             "disp": newest["disp"] if newest else "",
-            "origin": f"dhd-{cfg['path']}",
+            "origin": f"dhd-{cfg['path'] or cfg['host'].split('//')[1].split('.')[0]}",
             "insp": insp_out,
             "license_no": lic, "license_type": ltype,
         })

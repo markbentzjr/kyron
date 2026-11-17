@@ -89,7 +89,12 @@ STATES = {
                   "Health Services (excl. 5 local jurisdictions)",
         "model": "PASS_FAIL",
         "score_col": "auto", "viols": "auto",
-        "start_year": 2015, "enabled": True,
+        "start_year": 2015, "window_months": 1, "enabled": False,
+        # 2026-11-17: WDA search POST 500s on ANY query
+        # returning rows — year/month/week/day spans and
+        # both MM/DD/YYYY + ISO formats verified; only an
+        # empty-result query ever returned 200. Source
+        # reachable but non-functional for search.
     },
     "ak": {
         "url": "https://adec.safefoodinspection.com/Inspection/"

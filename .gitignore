@@ -46,3 +46,6 @@ dist/
 *.db.gz
 /kyron-keys/
 .kotlin/
+harvest/ms/raw/
+harvest/ms/out/
+harvest/ms/work/

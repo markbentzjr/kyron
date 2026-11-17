@@ -27,6 +27,7 @@ Usage: python sfi_build.py vt [sd wy ...]
 
 import base64
 import glob
+import hashlib
 import json
 import os
 import re
@@ -190,6 +191,7 @@ def build_state(key, cfg):
         places.append({
             "id": f"{cfg['source_id'].replace('-', '')}_"
                   f"{base64.urlsafe_b64encode(ekey.encode()).decode()[:12]}",
+            "_ekey": ekey,
             "n": name, "a": e["address"].strip(),
             "c": (e["city"] or "").strip(), "z": (e["zip"] or "")[:5],
             "ct": (newest_e.get("jurisdiction") or "").strip(),
@@ -200,6 +202,20 @@ def build_state(key, cfg):
             "s": newest["s"], "d": newest["d"],
             "disp": newest["disp"], "origin": "sfi",
             "insp": insp_out})
+    # different ekeys can truncate to the same 12-char b64 id prefix
+    # (nok: fallbacks share name prefixes — PA canteen trucks).
+    # Disambiguate collisions with a digest of the full ekey; unique
+    # ids keep their stable short form.
+    by_id = {}
+    for p in places:
+        by_id.setdefault(p["id"], []).append(p)
+    for pid, group in by_id.items():
+        if len(group) > 1:
+            for p in group:
+                p["id"] = pid + "_" + hashlib.sha256(
+                    p["_ekey"].encode()).hexdigest()[:8]
+    for p in places:
+        p.pop("_ekey", None)
     places.sort(key=lambda p: p["id"])
     dates = [i["d"] for p in places for i in p["insp"]]
     manifest = {
