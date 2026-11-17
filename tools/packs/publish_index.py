@@ -18,7 +18,8 @@ DIST = os.path.join(REPO, "dist")
 def main():
     os.makedirs(DIST, exist_ok=True)
     entries = {}
-    for man in sorted(glob.glob(os.path.join(REPO, "harvest", "**", "*.manifest.json"),
+    root = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "harvest")
+    for man in sorted(glob.glob(os.path.join(root, "**", "*.manifest.json"),
                                 recursive=True)):
         m = json.load(open(man, encoding="utf-8"))
         pack = os.path.join(os.path.dirname(man), m["full"]["file"])
