@@ -336,6 +336,16 @@ class PlaceRepository(private val context: Context) {
         db.beginTransaction()
         try {
             for (f in fresh) {
+                // Live harvests can emit fused/fragmented rows too (the
+                // JCDH pager rows came in through this path): a record
+                // that can't identify a place is skipped, never merged.
+                if (!catalog.isPlausibleRecord(f)) {
+                    android.util.Log.w(
+                        "PlaceRepository",
+                        "mergeFresh: skipped implausible record id=${f.id} name=${f.name}"
+                    )
+                    continue
+                }
                 val existing = catalog.placeById(db, f.id)
                     ?: findByMatchKey(db, f)
                 if (existing == null) {

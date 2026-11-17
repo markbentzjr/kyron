@@ -345,6 +345,19 @@ class CatalogDb(context: Context) :
         try {
             for (i in 0 until arr.length()) {
                 val p = Place.fromJson(arr.getJSONObject(i))
+                // Fused/fragmented harvest rows must never reach the
+                // catalog: JCDH enumeration once scraped pager links
+                // ("1 2 3 … 10") as permits, yielding name='2', date='3'
+                // records. A row that can't identify a place — no letters
+                // in the name AND no city/address — or carries a date with
+                // no year is seed garbage, not data.
+                if (!isPlausibleRecord(p)) {
+                    android.util.Log.w(
+                        "CatalogDb",
+                        "importSeed: rejected implausible record id=${p.id} name=${p.name}"
+                    )
+                    continue
+                }
                 val hasCoords = p.lat != null && p.lng != null
                 val status = when {
                     p.geoStatus != Place.STATUS_LEGACY -> p.geoStatus
@@ -394,6 +407,14 @@ class CatalogDb(context: Context) :
             db.endTransaction()
         }
     }
+
+    /** A catalog-bound row must plausibly identify an establishment: a
+     *  name with at least one letter (or a real address/city when the
+     *  name is non-alphabetic), and any date present must carry a 4-digit
+     *  year. Applied at both import and live-sync boundaries. */
+    fun isPlausibleRecord(p: Place): Boolean =
+        (p.name.any { it.isLetter() } || p.address.isNotBlank() || p.city.isNotBlank()) &&
+            (p.date.isBlank() || p.date.contains(Regex("\\d{4}")))
 
     // ----------------------------------------------------------------- reads
 
