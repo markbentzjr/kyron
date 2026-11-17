@@ -49,3 +49,4 @@ dist/
 harvest/ms/raw/
 harvest/ms/out/
 harvest/ms/work/
+*.crash.log

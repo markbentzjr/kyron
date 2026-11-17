@@ -17,6 +17,7 @@ numeric score. Grade -> disp verbatim, s = NO_SCORE.
 Usage: python ms_build.py
 """
 
+import datetime
 import glob
 import html as htmllib
 import json
@@ -120,7 +121,15 @@ def main():
             exclusions.append({"pimsid": pid, "name": name or None,
                                "reason": reason})
             continue
-        rows = sorted(insp.values(),
+        today = datetime.date.today().isoformat()
+        future = [i for i in insp.values() if i["d"] > today]
+        for f in future:
+            exclusions.append({"pimsid": pid, "name": name,
+                               "reason": "future-dated %s row "
+                               "(portal placeholder, not a "
+                               "completed inspection): %s"
+                               % (f["t"], f["d"])})
+        rows = sorted((i for i in insp.values() if i["d"] <= today),
                       key=lambda i: i["d"], reverse=True)
         for r in rows:
             qa["grades"][r["disp"]] += 1
