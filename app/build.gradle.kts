@@ -14,8 +14,8 @@ android {
         applicationId = "com.kyronapp.kyron"
         minSdk = 29
         targetSdk = 34
-        versionCode = 10
-        versionName = "2.1"
+        versionCode = 11
+        versionName = "2.2.2"
     }
     signingConfigs {
         if (ks != null) create("release") {
