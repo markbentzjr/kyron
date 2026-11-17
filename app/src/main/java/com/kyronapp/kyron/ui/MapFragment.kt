@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +36,6 @@ import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -61,6 +61,7 @@ class MapFragment : Fragment() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var mapView: MapView? = null
     private var statusView: TextView? = null
+    private var viewportEmpty = false
     private var sheet: View? = null
     private var selected: Place? = null
     private var viewportJob: Job? = null
@@ -82,7 +83,17 @@ class MapFragment : Fragment() {
         sheet = v.findViewById(R.id.place_sheet)
         val mv = v.findViewById<MapView>(R.id.map)
         mapView = mv
-        mv.setTileSource(TileSourceFactory.MAPNIK)
+        // Esri World Light Gray Canvas — flat, desaturated basemap that
+        // keeps score-colored pills as the visual focus (MAPNIK's dense
+        // colors fight the markers). Free, key-free; Esri orders tile
+        // URLs z/y/x unlike osmdroid's z/x/y, hence YXTileSource.
+        mv.setTileSource(YXTileSource(
+            "Esri.LightGrayCanvas", 0, 19, 256, "",
+            arrayOf(
+                "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/"
+            ),
+            "Esri, HERE, Garmin, © OpenStreetMap contributors"
+        ))
         mv.setMultiTouchControls(true)
         // The dedicated +/− FABs replace osmdroid's transient built-ins.
         mv.zoomController.setVisibility(
@@ -99,6 +110,9 @@ class MapFragment : Fragment() {
             if (homeInInit) GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
             else GeoPoint(initInfo.centerLat, initInfo.centerLng)
         )
+        mv.overlays.add(0, PulseOverlay(mv) {
+            GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
+        })
         mv.addMapListener(DelayedMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean { refreshViewport(); return true }
             override fun onZoom(event: ZoomEvent?): Boolean { refreshViewport(); return true }
@@ -146,6 +160,37 @@ class MapFragment : Fragment() {
             ).show()
         }
 
+        // FAB column + status pill entrance — staggered rise so the
+        // controls feel like they arrive, not pop.
+        listOf(R.id.map_zoom_in, R.id.map_zoom_out, R.id.map_locate)
+            .forEachIndexed { i, id ->
+                v.findViewById<View>(id)?.let { fab ->
+                    fab.alpha = 0f
+                    fab.translationY = 40f
+                    fab.scaleX = 0.6f; fab.scaleY = 0.6f
+                    fab.animate().alpha(1f).translationY(0f)
+                        .scaleX(1f).scaleY(1f)
+                        .setStartDelay(120L + i * 70L)
+                        .setDuration(340)
+                        .setInterpolator(
+                            android.view.animation.OvershootInterpolator(1.8f)
+                        ).start()
+                }
+            }
+        statusView?.let { sv ->
+            // Empty state → the pill is a door into Browse, where the same
+            // places are always listed even without mappable coordinates.
+            sv.setOnClickListener {
+                if (viewportEmpty) (activity as? MainActivity)?.selectTab(1)
+            }
+            sv.translationY = -sv.height.toFloat() - 24f
+            sv.alpha = 0f
+            sv.animate().translationY(0f).alpha(1f)
+                .setStartDelay(80).setDuration(300)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
+        }
+
         scope.launch {
             ExploreState.query.collect { q ->
                 currentFilter = q
@@ -162,17 +207,22 @@ class MapFragment : Fragment() {
                     val info = app.regions.activeInfo()
                     val c = mv.controller
                     val center = mv.mapCenter
-                    val inRegion = center.latitude in (info.centerLat - 6)..(info.centerLat + 6) &&
-                        center.longitude in (info.centerLng - 7)..(info.centerLng + 7)
+                    // Recentre unless the camera already sits inside the new
+                    // region. The box must be tight — ~1 viewport at zoom 8 —
+                    // because neighbouring regions' centres are only ~3° apart;
+                    // the old ±6/±7 box let a Mississippi view pass as "in
+                    // Alabama", leaving the map on the wrong state entirely.
+                    val inRegion = center.latitude in (info.centerLat - 1.5)..(info.centerLat + 1.5) &&
+                        center.longitude in (info.centerLng - 1.5)..(info.centerLng + 1.5)
                     if (!inRegion) {
                         val homeInRegion = app.prefs.homeLat in (info.centerLat - 6)..(info.centerLat + 6) &&
                             app.prefs.homeLng in (info.centerLng - 7)..(info.centerLng + 7)
-                        if (homeInRegion) {
-                            c.setCenter(GeoPoint(app.prefs.homeLat, app.prefs.homeLng))
-                        } else {
-                            c.setCenter(GeoPoint(info.centerLat, info.centerLng))
-                        }
+                        val target = if (homeInRegion)
+                            GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
+                        else
+                            GeoPoint(info.centerLat, info.centerLng)
                         c.setZoom(8.0)
+                        c.animateTo(target)
                     }
                     hideSheet()
                 }
@@ -288,7 +338,8 @@ class MapFragment : Fragment() {
         }
 
         // Home marker sits at the BOTTOM of the overlay stack (index 0)
-        // so place pins always draw above it.
+        // so place pins always draw above it; its pulse ring is drawn
+        // beneath everything by PulseOverlay (index 0 of the stack).
         val home = Marker(mv)
         home.id = "__home__"
         home.position = GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
@@ -296,6 +347,10 @@ class MapFragment : Fragment() {
         home.icon = homeDotIcon()
         home.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         mv.overlays.add(0, home)
+
+        // Pop-in: pins/clusters stagger-fade in so fresh renders read
+        // as alive rather than appearing all at once.
+        animateMarkersIn(mv)
 
         // Re-highlight the selected place if its pin survived the re-render.
         selected?.let { sel ->
@@ -316,7 +371,7 @@ class MapFragment : Fragment() {
         val filtered = currentFilter.text.isNotBlank() || currentFilter.county != null ||
             currentFilter.band != "All scores"
         val region = app.regions.activeInfo()
-        statusView?.text = buildString {
+        val newStatus = buildString {
             if (places.isEmpty()) {
                 append("No verified locations in this view of ${region.displayName}")
                 if (region.regionId == "us-fl") {
@@ -333,6 +388,19 @@ class MapFragment : Fragment() {
                 }
             }
             if (filtered) append(" · filtered")
+        }
+        viewportEmpty = places.isEmpty()
+        statusView?.let { sv ->
+            if (sv.text.toString() != newStatus) {
+                sv.text = newStatus
+                sv.animate().cancel()
+                sv.translationY = -14f
+                sv.alpha = 0.4f
+                sv.animate().translationY(0f).alpha(1f)
+                    .setDuration(220)
+                    .setInterpolator(android.view.animation.DecelerateInterpolator())
+                    .start()
+            }
         }
     }
 
@@ -669,6 +737,81 @@ class MapFragment : Fragment() {
                 }.start()
         } else {
             s.visibility = View.GONE
+        }
+    }
+
+    /** Stagger-fade pin/cluster markers in after a render — the
+     *  "alive" entrance the map was missing. Cap at ~40 items so a
+     *  dense city re-render doesn't queue hundreds of animators. */
+    private fun animateMarkersIn(mv: MapView) {
+        val pins = mv.overlays.filterIsInstance<Marker>()
+            .filter { it.id != "__home__" }
+        if (pins.size > 80) return  // too dense — instant is kinder
+        pins.forEachIndexed { i, m ->
+            m.alpha = 0f
+            m.infoWindow = null
+        }
+        pins.take(40).forEachIndexed { i, m ->
+            m.alpha = 0f
+            val startAt = i * 14L
+            android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+                startDelay = startAt
+                duration = 240
+                addUpdateListener {
+                    m.alpha = it.animatedValue as Float
+                    mv.postInvalidate()
+                }
+                start()
+            }
+        }
+        pins.drop(40).forEach { it.alpha = 1f }
+    }
+
+    /** Esri's tile service orders paths z/y/x; osmdroid's XYTileSource
+     *  emits z/x/y. This subclass just reorders the two indices. */
+    private class YXTileSource(
+        name: String, zoomMin: Int, zoomMax: Int, tileSize: Int,
+        ext: String, urls: Array<String>, copyright: String
+    ) : org.osmdroid.tileprovider.tilesource.XYTileSource(
+        name, zoomMin, zoomMax, tileSize, ext, urls, copyright
+    ) {
+        override fun getTileURLString(pMapTileIndex: Long): String =
+            baseUrl +
+                org.osmdroid.util.MapTileIndex.getZoom(pMapTileIndex) + "/" +
+                org.osmdroid.util.MapTileIndex.getY(pMapTileIndex) + "/" +
+                org.osmdroid.util.MapTileIndex.getX(pMapTileIndex) +
+                mImageFilenameEnding
+    }
+
+    /** Expanding "radar" ring around the area-center dot — drawn in the
+     *  overlay pass and driven by invalidateOnAnimation, so it pulses
+     *  continuously without a thread of its own. */
+    private inner class PulseOverlay(
+        private val mv: MapView,
+        private val point: () -> GeoPoint
+    ) : org.osmdroid.views.overlay.Overlay() {
+        private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF1E6B38.toInt()
+            style = Paint.Style.STROKE
+            strokeWidth = 3f
+        }
+        private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF1E6B38.toInt()
+            style = Paint.Style.FILL
+        }
+        private val t0 = SystemClock.uptimeMillis()
+        private val px = android.graphics.Point()
+
+        override fun draw(canvas: Canvas, map: MapView, shadow: Boolean) {
+            if (shadow) return
+            val frac = ((SystemClock.uptimeMillis() - t0) % 2200L) / 2200f
+            mv.projection.toPixels(point(), px)
+            val r = 14f + frac * 46f
+            fill.alpha = ((1f - frac) * 40).toInt()
+            ring.alpha = ((1f - frac) * 110).toInt()
+            canvas.drawCircle(px.x.toFloat(), px.y.toFloat(), r, fill)
+            canvas.drawCircle(px.x.toFloat(), px.y.toFloat(), r, ring)
+            mv.postInvalidateOnAnimation()
         }
     }
 

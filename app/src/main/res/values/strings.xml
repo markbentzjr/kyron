@@ -53,7 +53,7 @@
     <string name="fav_empty">No favorites yet.
 
 Tap the star on any place and Kyron will watch it for you — when it gets a new inspection, you\'ll get an alert here.</string>
-    <string name="map_attribution">© OpenStreetMap contributors</string>
+    <string name="map_attribution">Esri, HERE, Garmin, © OpenStreetMap contributors</string>
     <string name="detail_title">Restaurant details</string>
     <string name="detail_history_title">Inspection history</string>
     <string name="detail_violations_title">What the inspector found</string>

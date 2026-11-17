@@ -139,9 +139,11 @@ class MainActivity : AppCompatActivity() {
                 }
                 if (active) {
                     tv.animate().cancel()
-                    tv.scaleX = 0.88f; tv.scaleY = 0.88f
-                    tv.animate().scaleX(1f).scaleY(1f).setDuration(220)
-                        .setInterpolator(android.view.animation.OvershootInterpolator(2f))
+                    tv.scaleX = 0.6f; tv.scaleY = 0.6f
+                    tv.translationY = 10f
+                    tv.animate().scaleX(1f).scaleY(1f).translationY(0f)
+                        .setDuration(340)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(3.2f))
                         .start()
                 }
             }
