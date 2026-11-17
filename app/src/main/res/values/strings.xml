@@ -6,6 +6,14 @@
     <string name="nav_map">Map</string>
     <string name="nav_favorites">Favorites</string>
     <string name="nav_alerts">Alerts</string>
+    <string name="nav_account">Account</string>
+    <string name="notif_title">Notifications</string>
+    <string name="notif_inbox_title">Inbox</string>
+    <string name="notif_delivery_title">Alerts on this device</string>
+    <string name="notif_on">Notifications are on — new scores reach you even when Kyron is closed.</string>
+    <string name="notif_off">Notifications are off — turn them on so new scores reach you when Kyron is closed.</string>
+    <string name="notif_enable">Turn on notifications</string>
+    <string name="notif_delivery_note">Kyron checks for new inspections about every 12 hours in the background. The rules below decide which results alert you.</string>
     <string name="cd_watch">Watch this place (add to favorites)</string>
     <string name="cd_watching">Watching this place (tap to stop)</string>
     <string name="cd_my_location">Center the map on my area</string>
@@ -105,8 +113,8 @@ Tap the star on any place and Kyron will watch it for you — when it gets a new
     <string name="home_action_browse_sub">Scores, filters, sort</string>
     <string name="home_action_map">Map view</string>
     <string name="home_action_map_sub">Verified addresses</string>
-    <string name="home_action_watch">Alerts</string>
-    <string name="home_action_watch_sub">Rules &amp; inbox</string>
+    <string name="home_action_watch">Notifications</string>
+    <string name="home_action_watch_sub">Inbox &amp; rules</string>
     <string name="home_action_regions">Get a state</string>
     <string name="home_action_regions_sub">Region packs</string>
     <string name="home_model_title">How %1$s results read</string>
@@ -119,6 +127,6 @@ Tap the star on any place and Kyron will watch it for you — when it gets a new
     <string name="home_model_unknown">Inspection results as published by the source agency. Every entry shows its inspection date and where the data came from.</string>
     <string name="home_needs_title">Needs attention in %1$s</string>
     <string name="home_watch_title">Watching (%1$d)</string>
-    <string name="alerts_section_rules">ALERT RULES</string>
+    <string name="alerts_section_rules">NOTIFICATION RULES</string>
     <string name="alerts_section_device">DEVICE &amp; DATA</string>
 </resources>

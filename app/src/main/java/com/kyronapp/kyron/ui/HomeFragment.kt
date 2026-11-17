@@ -62,9 +62,11 @@ class HomeFragment : Fragment() {
         val act = activity as? MainActivity
         v.findViewById<View>(R.id.action_browse).setOnClickListener { openBrowse("") }
         v.findViewById<View>(R.id.action_map).setOnClickListener { act?.selectTab(2) }
-        // The watch list lives on this screen now; this card routes to
-        // the alert rules + inbox tab.
-        v.findViewById<View>(R.id.action_watch).setOnClickListener { act?.selectTab(3) }
+        // Notification rules + inbox live on their own screen — the
+        // fourth tab is Account now.
+        v.findViewById<View>(R.id.action_watch).setOnClickListener {
+            startActivity(Intent(requireContext(), AlertsActivity::class.java))
+        }
         v.findViewById<View>(R.id.action_regions).setOnClickListener {
             startActivity(Intent(requireContext(), CoverageActivity::class.java))
         }

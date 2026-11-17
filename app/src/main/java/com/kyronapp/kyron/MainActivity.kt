@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
-import com.kyronapp.kyron.ui.AlertsFragment
+import com.kyronapp.kyron.ui.AccountFragment
 import com.kyronapp.kyron.ui.BrowseFragment
 import com.kyronapp.kyron.ui.CoverageActivity
 import com.kyronapp.kyron.ui.DetailActivity
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
                 0 -> HomeFragment()
                 1 -> BrowseFragment()
                 2 -> MapFragment()
-                else -> AlertsFragment()
+                else -> AccountFragment()
             }
         frags[i] = target
         val tx = supportFragmentManager.beginTransaction()
@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity() {
                 lastReport = "Sync hit a problem (${e.message ?: "unknown"}). Your saved data is unchanged."
             } finally {
                 syncing = false
-                (frags.getOrNull(3) as? AlertsFragment)?.refresh()
+                (frags.getOrNull(3) as? AccountFragment)?.refresh()
                 onDone?.invoke()
             }
         }
@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity() {
                 app.prefs.homeLng = loc.longitude
                 app.prefs.homeLabel = "My location"
                 Toast.makeText(this, "Area center set to your location", Toast.LENGTH_SHORT).show()
-                (frags.getOrNull(3) as? AlertsFragment)?.refresh()
+                (frags.getOrNull(3) as? AccountFragment)?.refresh()
             } else {
                 Toast.makeText(this, "No location fix yet — try again outdoors or pick a preset", Toast.LENGTH_LONG).show()
             }
