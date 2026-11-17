@@ -98,6 +98,7 @@ class HomeFragment : Fragment() {
                 else -> R.string.home_model_unknown
             }
         )
+        bindModelKey(model)
 
         statWatched.text = "%,d".format(app.prefs.favorites.size)
         val syncMs = app.prefs.lastSyncMs
@@ -230,9 +231,57 @@ class HomeFragment : Fragment() {
             })
         row.addView(texts, android.widget.LinearLayout.LayoutParams(0, -2, 1f))
         row.layoutParams = android.widget.LinearLayout.LayoutParams(-1, -2).apply {
-            bottomMargin = (8 * dp).toInt()
+            bottomMargin = (10 * dp).toInt()
         }
         return row
+    }
+
+    /** Visual score key under the explainer — colored dots + labels so the
+     *  scale is seen, not decoded. Hidden for models with no fixed key. */
+    private fun bindModelKey(model: String) {
+        val row = view?.findViewById<android.widget.LinearLayout>(R.id.home_model_key) ?: return
+        row.removeAllViews()
+        val green = 0xFF2E9E4F.toInt()
+        val lime = 0xFF7AB648.toInt()
+        val amber = 0xFFE8A13A.toInt()
+        val red = 0xFFD9534F.toInt()
+        val chips: List<Pair<String, Int>> = when (model) {
+            NationalCoverage.MODEL_SCORE_100_HIGH ->
+                listOf("95+ Excellent" to green, "85–94 Okay" to lime, "<85 Needs work" to red)
+            NationalCoverage.MODEL_PENALTY_LOW ->
+                listOf("0–13 Low" to green, "14–27 Watch" to amber, "28+ High" to red)
+            NationalCoverage.MODEL_LETTER_GRADE ->
+                listOf("A Pass" to green, "B Follow-up" to amber, "C Fail" to red)
+            NationalCoverage.MODEL_PASS_FAIL ->
+                listOf("Pass" to green, "Conditional" to amber, "Fail" to red)
+            else -> emptyList()
+        }
+        if (chips.isEmpty()) {
+            row.visibility = View.GONE
+            return
+        }
+        row.visibility = View.VISIBLE
+        val dp = resources.displayMetrics.density
+        chips.forEach { (label, color) ->
+            val chip = TextView(requireContext()).apply {
+                text = label
+                textSize = 12f
+                setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.ink))
+                setBackgroundResource(R.drawable.chip_off_bg)
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                setPadding((10 * dp).toInt(), (6 * dp).toInt(), (10 * dp).toInt(), (6 * dp).toInt())
+                val dot = androidx.core.content.ContextCompat.getDrawable(
+                    context, R.drawable.ic_dot
+                )?.mutate()
+                dot?.setTint(color)
+                setCompoundDrawablesWithIntrinsicBounds(dot, null, null, null)
+                compoundDrawablePadding = (6 * dp).toInt()
+            }
+            row.addView(chip, android.widget.LinearLayout.LayoutParams(-2, -2).apply {
+                marginEnd = (8 * dp).toInt()
+            })
+        }
     }
 
     /** Worst-first strip color, model-aware (mirrors MapFragment's pin scale). */

@@ -85,7 +85,7 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:background="@drawable/card_bg"
                 android:gravity="center"
@@ -112,7 +112,7 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:background="@drawable/card_bg"
                 android:gravity="center"
@@ -141,7 +141,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="26dp"
             android:text="@string/home_actions_title"
             android:textColor="@color/ink"
             android:textSize="16sp"
@@ -150,7 +150,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -195,7 +195,7 @@
                 android:id="@+id/action_map"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:background="@drawable/card_bg"
                 android:clickable="true"
@@ -234,7 +234,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -279,7 +279,7 @@
                 android:id="@+id/action_regions"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:background="@drawable/card_bg"
                 android:clickable="true"
@@ -315,14 +315,16 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- How the active region's results read — model-aware and honest. -->
+        <!-- How the active region's results read — model-aware and honest.
+             A colored key row sits under the text: users see the scale
+             (good/warn/bad) instead of decoding a paragraph. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="26dp"
             android:background="@drawable/card_bg"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/home_model_title"
@@ -332,13 +334,22 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
+            <LinearLayout
+                android:id="@+id/home_model_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/home_model_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:textColor="@color/muted"
-                android:textSize="13sp" />
+                android:lineSpacingExtra="2dp"
+                android:textSize="12.5sp" />
         </LinearLayout>
 
         <!-- Watched places: the integrated Favorites surface. Shows the
@@ -348,7 +359,7 @@
             android:id="@+id/home_watch_block"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="26dp"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -364,7 +375,7 @@
                 android:id="@+id/home_watch_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:orientation="vertical" />
         </LinearLayout>
 
@@ -374,7 +385,7 @@
             android:id="@+id/home_needs_block"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="26dp"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -390,7 +401,7 @@
                 android:id="@+id/home_needs_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:orientation="vertical" />
         </LinearLayout>
     </LinearLayout>

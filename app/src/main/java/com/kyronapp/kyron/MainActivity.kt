@@ -78,7 +78,8 @@ class MainActivity : AppCompatActivity() {
         }
         scope.launch {
             app.regions.activeRegion.collect {
-                chip.text = app.regions.activeInfo().displayName
+                // ▾ signals the chip is tappable — it opens Coverage.
+                chip.text = "${app.regions.activeInfo().displayName} ▾"
             }
         }
         selectTab(0)

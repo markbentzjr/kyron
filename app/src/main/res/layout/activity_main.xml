@@ -34,11 +34,13 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:background="@drawable/status_pill"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:text="@string/region_chip_default"
             android:textAllCaps="false"
-            android:textColor="@color/kyron_dark" />
+            android:textColor="@color/kyron_dark"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <FrameLayout
@@ -47,18 +49,19 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/line" />
-
-    <!-- Tab bar (classic): the pre-2.1 navigation — four labeled tabs.
-         Selected state (bold + brand color) is applied by MainActivity. -->
+    <!-- Floating dock: the four tabs float above the content on a
+         rounded, elevated pill instead of a full-width bar. Selection
+         state (bold + brand color) is applied by MainActivity. -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/white"
-        android:orientation="horizontal">
+        android:layout_height="62dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="14dp"
+        android:background="@drawable/dock_bg"
+        android:elevation="12dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="6dp">
 
         <TextView
             android:id="@+id/tab_home"
