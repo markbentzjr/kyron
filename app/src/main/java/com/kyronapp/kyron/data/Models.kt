@@ -197,6 +197,12 @@ data class Place(
             val r = nativeResult.trim()
             return when {
                 r.isEmpty() -> 0
+                // Letter grades (e.g. Mississippi A/B/C) and pass/fail —
+                // exact matches, checked before substring rules.
+                r.equals("A", true) || r.equals("Pass", true) || r.equals("Passed", true) -> 1
+                r.equals("B", true) -> 2
+                r.equals("C", true) || r.equals("D", true) || r.equals("F", true) ||
+                    r.equals("Fail", true) || r.equals("Failed", true) -> 3
                 r.contains("No Further Action", true) -> 1
                 r.contains("Not Complied", true) -> 3
                 r.contains("Complied", true) -> 1

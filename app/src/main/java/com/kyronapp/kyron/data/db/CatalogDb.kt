@@ -39,6 +39,14 @@ import org.json.JSONObject
  * repository contract above it are the architecture; the library is an
  * implementation detail (Free/LocalFirst plan section 1.3).
  */
+/** Region-wide pin summary: extent of mappable (ACCEPTED) pins — null
+ *  when none — plus mapped/total place counts for honest empty states. */
+data class RegionPinInfo(
+    val bounds: android.graphics.RectF?,
+    val mapped: Int,
+    val total: Int
+)
+
 class CatalogDb(context: Context) :
     SQLiteOpenHelper(context.applicationContext, "kyron_catalog.db", null, 2) {
 
@@ -262,6 +270,34 @@ class CatalogDb(context: Context) :
             val out = HashMap<String, Pair<Double, Double>>()
             while (c.moveToNext()) out[c.getString(0)] = c.getDouble(1) to c.getDouble(2)
             out
+        }
+
+    /** Aggregate bounds over a region's ACCEPTED pins — one indexed
+     *  scan used by the map to fit the data extent and to say honestly
+     *  "the mapped places are over there". `bounds` is null when the
+     *  region has no mappable places; `total` is all places either way. */
+    fun regionBounds(
+        db: SQLiteDatabase, regionId: String
+    ): RegionPinInfo =
+        db.rawQuery(
+            "SELECT MIN(lat), MAX(lat), MIN(lng), MAX(lng), COUNT(*) " +
+                "FROM places WHERE region_id=? AND geo_status='ACCEPTED' " +
+                "AND lat IS NOT NULL AND lng IS NOT NULL",
+            arrayOf(regionId)
+        ).use { c ->
+            c.moveToFirst()
+            val mapped = c.getInt(4)
+            RegionPinInfo(
+                if (mapped == 0) null else android.graphics.RectF(
+                    c.getDouble(2).toFloat(), c.getDouble(1).toFloat(),
+                    c.getDouble(3).toFloat(), c.getDouble(0).toFloat()
+                ),
+                mapped,
+                db.rawQuery(
+                    "SELECT COUNT(*) FROM places WHERE region_id=?",
+                    arrayOf(regionId)
+                ).use { it.moveToFirst(); it.getInt(0) }
+            )
         }
 
     // ---------------------------------------------------------------- writes

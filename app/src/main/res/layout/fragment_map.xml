@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -26,6 +27,51 @@
         android:textAlignment="center"
         android:textColor="@color/ink_soft"
         android:textSize="12sp" />
+
+    <!-- Empty-state card: only appears when the viewport truly has zero
+         pins. It either flies you to where the region's data is, or
+         honestly offers the Browse list for unmapped regions. -->
+    <LinearLayout
+        android:id="@+id/map_empty_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="48dp"
+        android:background="@drawable/card_bg"
+        android:elevation="8dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/chip_off_bg"
+            android:padding="9dp"
+            android:src="@drawable/ic_map"
+            app:tint="@color/kyron_primary" />
+
+        <TextView
+            android:id="@+id/map_empty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:lineSpacingExtra="3dp"
+            android:textColor="@color/ink_soft"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/map_empty_action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/btn_primary"
+            android:stateListAnimator="@animator/press_scale"
+            android:textAllCaps="false"
+            android:textColor="@color/white" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/map_attribution"
@@ -99,13 +145,20 @@
         android:paddingTop="8dp"
         android:visibility="gone">
 
-        <View
-            android:layout_width="36dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/score_chip"
-            android:backgroundTint="@color/line" />
+        <!-- Wide invisible drag target wrapping the visible pill handle. -->
+        <FrameLayout
+            android:id="@+id/sheet_handle"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginBottom="4dp">
+
+            <View
+                android:layout_width="42dp"
+                android:layout_height="5dp"
+                android:layout_gravity="center"
+                android:background="@drawable/score_chip"
+                android:backgroundTint="@color/line" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -159,15 +212,27 @@
             android:id="@+id/sheet_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="2dp"
+            android:drawableStart="@drawable/ic_pin_small"
+            android:drawablePadding="6dp"
+            android:drawableTint="@color/muted"
+            android:gravity="center_vertical"
+            android:textColor="@color/ink_soft"
             android:textSize="13sp" />
 
         <TextView
             android:id="@+id/sheet_why"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="13sp" />
+            android:layout_marginTop="6dp"
+            android:background="@drawable/chip_off_bg"
+            android:drawableStart="@drawable/ic_info_small"
+            android:drawablePadding="6dp"
+            android:drawableTint="@color/muted"
+            android:gravity="center_vertical"
+            android:padding="8dp"
+            android:textColor="@color/ink_soft"
+            android:textSize="12.5sp" />
 
         <LinearLayout
             android:layout_width="match_parent"

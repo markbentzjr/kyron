@@ -62,6 +62,9 @@ class MapFragment : Fragment() {
     private var mapView: MapView? = null
     private var statusView: TextView? = null
     private var viewportEmpty = false
+    // Region-wide pin extent/count — cached per region switch for the
+    // fit-to-data flight and the empty-state card's honest messaging.
+    private var regionCache: com.kyronapp.kyron.data.db.RegionPinInfo? = null
     private var sheet: View? = null
     private var selected: Place? = null
     private var viewportJob: Job? = null
@@ -71,7 +74,8 @@ class MapFragment : Fragment() {
 
     companion object {
         /** Street-level zoom at which clusters always split into pins. */
-        private const val PIN_ZOOM = 14.5
+        private const val PIN_ZOOM = 10.0
+        private const val PIN_DENSITY_CAP = 120
         /** Hard overlay cap (Spec 3.1); clustering tightens before this bites. */
         private const val MAX_OVERLAYS = 400
     }
@@ -130,6 +134,40 @@ class MapFragment : Fragment() {
         ))
 
         v.findViewById<ImageButton>(R.id.sheet_close).setOnClickListener { hideSheet() }
+        // Drag the handle down to dismiss — springs back under the
+        // threshold, dismisses past it.
+        sheet?.findViewById<View>(R.id.sheet_handle)?.let { handle ->
+            var downY = 0f
+            var dragging = false
+            handle.setOnTouchListener { _, ev ->
+                val s = sheet ?: return@setOnTouchListener false
+                when (ev.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        downY = ev.rawY
+                        dragging = true
+                        s.animate().cancel()
+                        true
+                    }
+                    android.view.MotionEvent.ACTION_MOVE -> {
+                        if (dragging) {
+                            s.translationY = (ev.rawY - downY).coerceAtLeast(0f)
+                        }
+                        true
+                    }
+                    android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                        val dy = ev.rawY - downY
+                        dragging = false
+                        if (ev.action == android.view.MotionEvent.ACTION_UP && dy > 120f) {
+                            hideSheet()
+                        } else {
+                            s.animate().translationY(0f).setDuration(180).start()
+                        }
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }
         v.findViewById<View>(R.id.map_locate).setOnClickListener {
             val info = app.regions.activeInfo()
             val homeInRegion = app.prefs.homeLat in (info.centerLat - 6)..(info.centerLat + 6) &&
@@ -198,31 +236,50 @@ class MapFragment : Fragment() {
             }
         }
         // LF-4: the map is scoped to the active region. On a region
-        // switch, recenter when the old center is outside the new region
-        // (home presets stay valid data — they're just a point).
+        // switch, fly to where the region's pins actually are (fit the
+        // data extent) — falling back to the region center when it has
+        // no mappable places.
         scope.launch {
             var lastRegion: String? = null
             app.regions.activeRegion.collect { regionId ->
                 if (lastRegion != null && lastRegion != regionId) {
-                    val info = app.regions.activeInfo()
+                    regionCache = null
+                    val pinInfo = app.repository.regionBounds(regionId)
+                    regionCache = pinInfo
                     val c = mv.controller
-                    val center = mv.mapCenter
-                    // Recentre unless the camera already sits inside the new
-                    // region. The box must be tight — ~1 viewport at zoom 8 —
-                    // because neighbouring regions' centres are only ~3° apart;
-                    // the old ±6/±7 box let a Mississippi view pass as "in
-                    // Alabama", leaving the map on the wrong state entirely.
-                    val inRegion = center.latitude in (info.centerLat - 1.5)..(info.centerLat + 1.5) &&
-                        center.longitude in (info.centerLng - 1.5)..(info.centerLng + 1.5)
-                    if (!inRegion) {
-                        val homeInRegion = app.prefs.homeLat in (info.centerLat - 6)..(info.centerLat + 6) &&
-                            app.prefs.homeLng in (info.centerLng - 7)..(info.centerLng + 7)
-                        val target = if (homeInRegion)
-                            GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
-                        else
-                            GeoPoint(info.centerLat, info.centerLng)
-                        c.setZoom(8.0)
-                        c.animateTo(target)
+                    val ext = pinInfo.bounds
+                    if (ext != null) {
+                        val r = ext
+                        val center = mv.mapCenter
+                        val inData = center.latitude in r.bottom.toDouble()..r.top.toDouble() &&
+                            center.longitude in r.left.toDouble()..r.right.toDouble()
+                        if (!inData) {
+                            // ±1.5° around the pin extent, not the region
+                            // centroid — neighbouring regions' centres are
+                            // only ~3° apart, so a coarse box can strand
+                            // the camera on the wrong state entirely.
+                            val pad = 1.5f
+                            val bb = org.osmdroid.util.BoundingBox(
+                                (r.top + pad).toDouble(), (r.right + pad).toDouble(),
+                                (r.bottom - pad).toDouble(), (r.left - pad).toDouble()
+                            )
+                            c.setZoom(7.0)
+                            mv.post { mv.zoomToBoundingBox(bb, true) }
+                        }
+                    } else {
+                        val info = app.regions.activeInfo()
+                        val center = mv.mapCenter
+                        val inRegion = center.latitude in (info.centerLat - 1.5)..(info.centerLat + 1.5) &&
+                            center.longitude in (info.centerLng - 1.5)..(info.centerLng + 1.5)
+                        if (!inRegion) {
+                            val homeInRegion = app.prefs.homeLat in (info.centerLat - 6)..(info.centerLat + 6) &&
+                                app.prefs.homeLng in (info.centerLng - 7)..(info.centerLng + 7)
+                            c.setZoom(8.0)
+                            c.animateTo(
+                                if (homeInRegion) GeoPoint(app.prefs.homeLat, app.prefs.homeLng)
+                                else GeoPoint(info.centerLat, info.centerLng)
+                            )
+                        }
                     }
                     hideSheet()
                 }
@@ -258,8 +315,90 @@ class MapFragment : Fragment() {
                 filterRegionId = rid
                 currentFilter = currentFilter.copy(county = null, band = "All scores")
             }
+            if (regionCache == null) regionCache = app.repository.regionBounds(rid)
             val filtered = applyFilter(places)
             render(filtered, zoom)
+            // If the camera is sitting somewhere with zero pins but the
+            // region DOES have mapped places, fly the camera to them once
+            // per region — this is what turns "empty map" into "data".
+            if (filtered.isEmpty() && (regionCache?.mapped ?: 0) > 0 &&
+                fittedRegions.add(rid)
+            ) {
+                val r = regionCache!!.bounds!!
+                val pad = 0.6f
+                mv.post {
+                    mv.zoomToBoundingBox(
+                        org.osmdroid.util.BoundingBox(
+                            (r.top + pad).toDouble(), (r.right + pad).toDouble(),
+                            (r.bottom - pad).toDouble(), (r.left - pad).toDouble()
+                        ),
+                        true
+                    )
+                }
+            }
+            updateEmptyCard(filtered.isEmpty() && regionCache != null)
+        }
+    }
+
+    private val fittedRegions = mutableSetOf<String>()
+
+    /**
+     * Center-stage empty state. Only appears when the viewport really has
+     * zero pins — two honest variants:
+     *  - region has pins elsewhere: offer a flight to the data extent
+     *  - region has no mappable places at all: route to Browse
+     */
+    private fun updateEmptyCard(show: Boolean) {
+        val card = view?.findViewById<View>(R.id.map_empty_card) ?: return
+        if (!show) {
+            card.visibility = View.GONE
+            return
+        }
+        // Don't fight the place sheet for the same visual space.
+        if (sheet?.visibility == View.VISIBLE) {
+            card.visibility = View.GONE
+            return
+        }
+        val info = app.regions.activeInfo()
+        val text = card.findViewById<TextView>(R.id.map_empty_text)
+        val action = card.findViewById<android.widget.Button>(R.id.map_empty_action)
+        val mapped = regionCache?.mapped ?: 0
+        val total = regionCache?.total ?: 0
+        if (mapped > 0) {
+            text.text = "${String.format("%,d", mapped)} verified places in ${info.displayName}\nThey're outside this view."
+            action.text = "Show me"
+            action.setOnClickListener {
+                regionCache?.bounds?.let { r ->
+                    val pad = 0.6f
+                    mapView?.zoomToBoundingBox(
+                        org.osmdroid.util.BoundingBox(
+                            (r.top + pad).toDouble(), (r.right + pad).toDouble(),
+                            (r.bottom - pad).toDouble(), (r.left - pad).toDouble()
+                        ), true
+                    )
+                }
+            }
+        } else {
+            text.text = if (total > 0) {
+                "${info.displayName} places aren't mapped yet\n${String.format("%,d", total)} stay listed in Browse."
+            } else {
+                "No places loaded for ${info.displayName} yet"
+            }
+            action.text = "Open Browse"
+            action.setOnClickListener {
+                // Browse is tab index 1 in MainActivity's tab bar.
+                (activity as? MainActivity)?.selectTab(1)
+            }
+        }
+        if (card.visibility != View.VISIBLE) {
+            card.alpha = 0f
+            card.scaleX = 0.9f
+            card.scaleY = 0.9f
+            card.visibility = View.VISIBLE
+            card.animate().alpha(1f).scaleX(1f).scaleY(1f)
+                .setDuration(300)
+                .setInterpolator(android.view.animation.OvershootInterpolator(0.8f))
+                .start()
         }
     }
 
@@ -301,7 +440,10 @@ class MapFragment : Fragment() {
         mv.overlays.removeAll(mv.overlays.filterIsInstance<Marker>())
         selectedMarker = null
 
-        val showPins = zoom >= PIN_ZOOM || places.size <= 60
+        // Individual pills only when they're legible: zoomed past state
+        // level AND few enough that they won't overlap into soup.
+        // Otherwise grid-cluster into count badges.
+        val showPins = zoom >= PIN_ZOOM && places.size <= PIN_DENSITY_CAP
         var clusterCount = 0
         if (showPins) {
             for (p in places.take(MAX_OVERLAYS)) {
@@ -373,11 +515,10 @@ class MapFragment : Fragment() {
         val region = app.regions.activeInfo()
         val newStatus = buildString {
             if (places.isEmpty()) {
-                append("No verified locations in this view of ${region.displayName}")
-                if (region.regionId == "us-fl") {
-                    append(" — Florida places are mostly Browse-only for now")
+                if ((regionCache?.mapped ?: 0) > 0) {
+                    append("No pins in this view — ${String.format("%,d", regionCache!!.mapped)} places mapped in ${region.displayName}")
                 } else {
-                    append(" — places stay listed in Browse")
+                    append("No verified locations in ${region.displayName} — places stay listed in Browse")
                 }
             } else {
                 if (showPins && places.size > MAX_OVERLAYS) {
@@ -430,20 +571,19 @@ class MapFragment : Fragment() {
      * HIGH is good; on a penalty scale HIGH is BAD. Non-numeric or
      * unknown-model scores stay neutral gray.
      */
-    private fun bandColor(score: Int, model: String): Int = when {
-        score < 0 -> toneColor(0)
-        model == com.kyronapp.kyron.data.NationalCoverage.MODEL_PENALTY_LOW -> when {
-            score <= 13 -> 0xFF2E9E4F.toInt()
-            score <= 27 -> 0xFFE8A13A.toInt()
-            else -> 0xFFD9534F.toInt()
+    /**
+     * Pin/cluster color for a numeric score under [model] — kept in
+     * lockstep with the sheet badge in showSheet (numericTone →
+     * green/lime|amber/red) so a pin and its card never disagree.
+     */
+    private fun bandColor(score: Int, model: String): Int =
+        when (com.kyronapp.kyron.data.NationalCoverage.numericTone(model, score)) {
+            1 -> 0xFF2E9E4F.toInt()
+            2 -> if (model == com.kyronapp.kyron.data.NationalCoverage.MODEL_SCORE_100_HIGH)
+                0xFF7AB648.toInt() else 0xFFE8A13A.toInt()
+            3 -> 0xFFD9534F.toInt()
+            else -> toneColor(0)
         }
-        model == com.kyronapp.kyron.data.NationalCoverage.MODEL_SCORE_100_HIGH -> when {
-            score >= 95 -> 0xFF2E9E4F.toInt()
-            score >= 85 -> 0xFF7AB648.toInt()
-            else -> 0xFFE8A13A.toInt()
-        }
-        else -> toneColor(0)
-    }
 
     /** Tone colors for native (non-numeric) results: good/warn/bad/neutral. */
     private fun toneColor(tone: Int): Int = when (tone) {
@@ -454,9 +594,10 @@ class MapFragment : Fragment() {
     }
 
     /**
-     * Modern pill marker: white rounded pill with a band-colored ring and
-     * text (Airbnb price-pill style). Selected pins invert to a filled
-     * colored pill with white text and render slightly larger.
+     * Filled score pill: band-colored rounded pill with white text and a
+     * soft grounding shadow — the color IS the information, readable at
+     * state zoom. Selected pins grow a white halo ring and a darker
+     * outline so they pop off a dense cluster of identical pills.
      */
     private fun pillIcon(
         key: String, text: String, band: Int, big: Boolean, selected: Boolean
@@ -465,30 +606,47 @@ class MapFragment : Fragment() {
         iconCache[cacheKey]?.let { return it }
         val w = if (big) 150 else 128
         val h = if (big) 84 else 72
-        val bmp = Bitmap.createBitmap(w, h + 14, Bitmap.Config.ARGB_8888)
+        val bmp = Bitmap.createBitmap(w, h + 16, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
         val cx = w / 2f
         // Soft grounding shadow under the pill.
         val shadow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = 0x33000000; style = Paint.Style.FILL
         }
-        c.drawOval(cx - w * 0.28f, h - 10f, cx + w * 0.28f, h + 10f, shadow)
-        val rect = android.graphics.RectF(4f, 2f, w - 4f, h.toFloat())
-        val radius = h / 2f - 2f
-        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = if (selected) band else 0xFFFFFFFF.toInt()
-            style = Paint.Style.FILL
-        }
-        c.drawRoundRect(rect, radius, radius, fillPaint)
-        val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = band; style = Paint.Style.STROKE
-            strokeWidth = if (selected) 0f else 5f
-        }
-        if (!selected) c.drawRoundRect(
-            android.graphics.RectF(6f, 4f, w - 6f, h - 2f), radius - 2f, radius - 2f, ring
+        c.drawOval(cx - w * 0.30f, h - 8f, cx + w * 0.30f, h + 10f, shadow)
+        val rect = android.graphics.RectF(6f, 4f, w - 6f, h - 2f)
+        val radius = h / 2f - 4f
+        // Subtle darker under-edge for depth (paint the pill offset down
+        // in a darkened band, then the face on top).
+        val dark = android.graphics.Color.rgb(
+            (android.graphics.Color.red(band) * 0.72f).toInt(),
+            (android.graphics.Color.green(band) * 0.72f).toInt(),
+            (android.graphics.Color.blue(band) * 0.72f).toInt()
         )
+        c.drawRoundRect(
+            android.graphics.RectF(6f, 7f, w - 6f, h + 1f), radius, radius,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply { color = dark; style = Paint.Style.FILL }
+        )
+        c.drawRoundRect(rect, radius, radius,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply { color = band; style = Paint.Style.FILL })
+        if (selected) {
+            // White halo + thin band outline so the selection reads at
+            // any zoom without changing the pin's silhouette.
+            c.drawRoundRect(
+                android.graphics.RectF(2f, 0f, w - 2f, h + 2f), radius + 3f, radius + 3f,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = 0xFFFFFFFF.toInt(); style = Paint.Style.STROKE; strokeWidth = 7f
+                }
+            )
+            c.drawRoundRect(
+                android.graphics.RectF(6f, 4f, w - 6f, h - 2f), radius, radius,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = dark; style = Paint.Style.STROKE; strokeWidth = 3f
+                }
+            )
+        }
         val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = if (selected) 0xFFFFFFFF.toInt() else band
+            color = 0xFFFFFFFF.toInt()
             textAlign = Paint.Align.CENTER
             typeface = Typeface.DEFAULT_BOLD
         }
@@ -498,7 +656,7 @@ class MapFragment : Fragment() {
         while (tp.textSize > 15f && tp.measureText(text) > w - 30f) {
             tp.textSize -= 2f
         }
-        val ty = h / 2f - (tp.descent() + tp.ascent()) / 2f
+        val ty = h / 2f - (tp.descent() + tp.ascent()) / 2f - 1f
         c.drawText(text, cx, ty, tp)
         val d = BitmapDrawable(resources, bmp)
         iconCache[cacheKey] = d
@@ -531,6 +689,48 @@ class MapFragment : Fragment() {
     }
 
     private var selectedMarker: Marker? = null
+
+    /** Cluster badge: filled dark pill-free circle, white count, ring in
+     *  the worst member's band color — "how many" and "how bad" at once. */
+    private fun clusterIcon(count: Int, band: Int): BitmapDrawable {
+        val key = "clu|$count|$band"
+        iconCache[key]?.let { return it }
+        val size = if (count >= 100) 104 else 92
+        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp)
+        val cx = size / 2f
+        // Grounding shadow.
+        c.drawOval(cx - size * 0.34f, size - 14f, cx + size * 0.34f, size + 2f,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = 0x33000000; style = Paint.Style.FILL
+            })
+        // Band-colored outer ring.
+        c.drawCircle(cx, cx - 4f, size / 2f - 6f,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = band; style = Paint.Style.FILL
+            })
+        // White gap ring.
+        c.drawCircle(cx, cx - 4f, size / 2f - 12f,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = 0xFFFFFFFF.toInt(); style = Paint.Style.FILL
+            })
+        // Ink center.
+        c.drawCircle(cx, cx - 4f, size / 2f - 18f,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = 0xFF16352A.toInt(); style = Paint.Style.FILL
+            })
+        val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFFFFFFF.toInt()
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.DEFAULT_BOLD
+            textSize = if (count >= 100) 30f else 34f
+        }
+        val ty = cx - 4f - (tp.descent() + tp.ascent()) / 2f
+        c.drawText(count.toString(), cx, ty, tp)
+        val d = BitmapDrawable(resources, bmp)
+        iconCache[key] = d
+        return d
+    }
 
     private fun pinMarker(p: Place): Marker {
         val mv = mapView!!
@@ -603,23 +803,19 @@ class MapFragment : Fragment() {
         val worst = worstMember?.score ?: Place.NO_SCORE
         val worstModel = worstMember?.let { modelFor(it) } ?: ""
         val penaltyScale = worstModel == com.kyronapp.kyron.data.NationalCoverage.MODEL_PENALTY_LOW
+        // Ring color: worst numeric band when any member is scored;
+        // otherwise the worst native-result tone (so a letter-grade
+        // cluster containing a "C" reads red, not neutral gray).
+        val ringColor = if (worst != Place.NO_SCORE) {
+            bandColor(worst, worstModel)
+        } else {
+            toneColor(cluster.members.maxOfOrNull { it.resultTone } ?: 0)
+        }
         val marker = Marker(mv)
         marker.id = "__cluster__"
         marker.position = GeoPoint(cluster.centerLat, cluster.centerLng)
-        marker.icon = if (worst != Place.NO_SCORE) {
-            pillIcon(
-                "clu", "${cluster.members.size} · $worst",
-                bandColor(worst, worstModel), big = true, selected = false
-            )
-        } else {
-            // No numeric scores in this cluster (disposition region):
-            // the badge is the count alone, in neutral gray.
-            pillIcon(
-                "clures", cluster.members.size.toString(),
-                toneColor(0), big = true, selected = false
-            )
-        }
-        marker.setAnchor(Marker.ANCHOR_CENTER, 0.44f)
+        marker.icon = clusterIcon(cluster.members.size, ringColor)
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         marker.title = if (worst != Place.NO_SCORE) {
             if (penaltyScale) "${cluster.members.size} places — highest penalty $worst"
             else "${cluster.members.size} places — lowest score $worst"
@@ -643,11 +839,13 @@ class MapFragment : Fragment() {
         val s = sheet ?: return
         s.visibility = View.VISIBLE
         if (wasHidden) {
-            s.translationY = 60f
+            // Spring up from below with a soft overshoot — the card should
+            // feel like it pops onto the map, not slides like a drawer.
+            s.translationY = 90f
             s.alpha = 0f
             s.animate().translationY(0f).alpha(1f)
-                .setDuration(280).setInterpolator(
-                    android.view.animation.DecelerateInterpolator(1.6f)
+                .setDuration(340).setInterpolator(
+                    android.view.animation.OvershootInterpolator(0.9f)
                 ).start()
         }
         val root = view ?: return
@@ -683,7 +881,8 @@ class MapFragment : Fragment() {
         root.findViewById<TextView>(R.id.sheet_meta).text = buildString {
             append(p.bandLabel)
             if (p.date.isNotBlank()) append(" · inspected ${p.date}")
-            append(" · ${sourceName}")
+            if (p.inspections.size > 1) append(" · ${p.inspections.size} inspections")
+            append("\n${sourceName}")
         }
         root.findViewById<TextView>(R.id.sheet_address).text = p.fullAddress()
         val why = p.inspections.firstOrNull()

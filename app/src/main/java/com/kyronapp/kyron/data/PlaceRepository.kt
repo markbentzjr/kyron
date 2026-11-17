@@ -288,6 +288,12 @@ class PlaceRepository(private val context: Context) {
         catalog.inBounds(catalog.readableDatabase, minLat, maxLat, minLng, maxLng, limit, regionId)
     }
 
+    /** Region-wide pin extent + mapped/total counts for map fit + status. */
+    suspend fun regionBounds(regionId: String): com.kyronapp.kyron.data.db.RegionPinInfo =
+        withContext(Dispatchers.IO) {
+            catalog.regionBounds(catalog.readableDatabase, regionId)
+        }
+
     // ------------------------------------------------------- region packs
 
     /** Install a full region pack (verified + atomic inside PackManager). */

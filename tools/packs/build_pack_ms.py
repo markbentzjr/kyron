@@ -45,6 +45,8 @@ def convert(raw):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--version", default=None,
+                    help="override datasetVersion (bump .N for same-day rebuilds)")
     a = ap.parse_args()
     out = os.path.join(REPO, "harvest", "ms", "out", "ms")
     places = [convert(p) for p in
@@ -70,6 +72,7 @@ def main():
         region="us-ms", state="MS", name="Mississippi",
         model="LETTER_GRADE", source_label=CFG["agency"],
         places=places, generated_at=src_m["generated_at"],
+        version=a.version,
         out_dir=out, limit=a.limit, attribution=CFG["agency"],
         jurisdictions=[{"jurisdictionId": "MS-MSDH",
                         "name": CFG["agency"]}])
