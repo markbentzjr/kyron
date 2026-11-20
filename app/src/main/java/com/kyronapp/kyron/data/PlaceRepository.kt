@@ -106,9 +106,9 @@ class PlaceRepository(private val context: Context) {
      * EVER reached a device that had installed an earlier build — its
      * catalog stayed at whatever its first install imported. When the
      * bundled seed's fingerprint differs from the one recorded on device,
-     * replace the bundled region's rows from the current seed (the same
-     * wholesale-swap semantics PackManager applies to downloaded packs),
-     * in one transaction. Device-produced coordinates (geo_prov='DEVICE')
+     * replace the bundled region's rows from the current seed in one
+     * transaction, provided the replacement retains the majority of the
+     * region's place count. Device-produced coordinates (geo_prov='DEVICE')
      * are preserved across the swap; downloaded regions and the user
      * store are untouched. Sync-merged freshness for Alabama places is
      * re-merged by the next scheduled sync, exactly as after a pack
@@ -129,11 +129,34 @@ class PlaceRepository(private val context: Context) {
         db: android.database.sqlite.SQLiteDatabase, seedText: String, seedSha: String
     ) {
         val regionId = Regions.ALABAMA.regionId
-        val deviceCoords = catalog.deviceCoords(db, regionId)
+        val seed = JSONArray(seedText)
         db.beginTransaction()
         try {
+            val previousCount = catalog.regionPlaceCount(db, regionId)
+            // Allow routine removals while protecting statewide catalogs
+            // against a starter seed containing only a small sample.
+            val minimumCount = if (previousCount > 0) previousCount / 2 + 1 else 0
+            if (seed.length() < minimumCount) {
+                android.util.Log.w(
+                    "PlaceRepository",
+                    "Skipped undersized Alabama seed (${seed.length()} rows for $previousCount places)"
+                )
+                return
+            }
+
+            val deviceCoords = catalog.deviceCoords(db, regionId)
             catalog.deleteRegionRows(db, regionId)
-            catalog.importSeed(db, JSONArray(seedText))
+            catalog.importSeed(db, seed)
+            // Invalid and duplicate rows can make the imported catalog
+            // smaller than the JSON array. Roll back the entire swap.
+            val importedCount = catalog.regionPlaceCount(db, regionId)
+            if (importedCount < minimumCount) {
+                android.util.Log.w(
+                    "PlaceRepository",
+                    "Rejected Alabama seed ($importedCount imported places, previously $previousCount)"
+                )
+                return
+            }
             for ((id, ll) in deviceCoords) {
                 if (catalog.exists(db, id)) {
                     catalog.setCoords(db, id, ll.first, ll.second, "DEVICE")
